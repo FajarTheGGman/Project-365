@@ -1,0 +1,61 @@
+const express = require('express');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const cors = require('cors');
+const db = require('mongoose');
+const chalk = require('chalk');
+const file = require('express-fileupload')
+
+const routeAuth = require('./routes/auth');
+const routeRelay = require('./routes/relay');
+const routeTensorflow = require('./routes/tensorflow');
+const routeSettings = require('./routes/settings');
+const routeBoard = require('./routes/board')
+
+require('dotenv').config();
+
+const api = require('./api');
+
+const app = express();
+
+// Mongodb connections
+try{
+    db.connect(process.env.DB, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+          useFindAndModify: false,
+          useCreateIndex: true
+    })
+}catch(err){
+    if(err){
+        console.log(chalk.bgRed("[!] Error Connecting to database"))
+    }
+}
+
+app.use(file())
+app.use(morgan())
+app.use(cors());
+app.use(express.json({ extended: true }));
+app.use(express.urlencoded({ extended: true }))
+
+app.use('/board', routeBoard);
+app.use('/auth', routeAuth)
+app.use('/relay', routeRelay)
+app.use('/ai', routeTensorflow)
+app.use('/settings', routeSettings)
+
+app.get('/', (req, res) => {
+  res.json({
+    sup: "Wellcome to smarthome 2.0 server"
+  });
+});
+
+app.use('/api/v1', api);
+
+app.use((req,res, next) => {
+    if(res.status(404)){
+        res.json({ nothing: "There's nothing in here"  })
+    }
+});
+
+module.exports = app;
