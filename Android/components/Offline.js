@@ -15,7 +15,7 @@ import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
 
 
-export default class Home extends Component{
+export default class Offline extends Component{
     render(){
         const Tabs = createBottomTabNavigator();
         return(
@@ -49,11 +49,7 @@ class Settings extends Component{
         super(props)
 
         this.state = {
-            settings_network: false,
-            connection: false,
-            connection_details: null,
-            connection_internet: null,
-            connection_type: null
+            settings_network: false
         }
     }
 
@@ -62,16 +58,6 @@ class Settings extends Component{
             this.props.navigation.dispatch(
                 StackActions.replace('Login')
             )
-        })
-    }
-
-    async componentDidMount(){
-        const network = await  Network.getNetworkStateAsync()
-        this.setState({ 
-            connection: network.isConnected, 
-            connection_details: network,
-            connection_internet: network.isInternetReachable,
-            connection_type: network.type
         })
     }
 
@@ -91,12 +77,6 @@ class Settings extends Component{
                                         <Icon name='close-outline' size={30} color='black'/>
                                     </TouchableOpacity>
                                 </View>
-                            </View>
-
-                            <View style={{ flexDirection: 'column', marginTop: 15, marginLeft: 5 }}>
-                                <Text>📶 Connection : {this.state.connection ? <Text>✅</Text> : <Text>🚫</Text>}</Text>
-                                <Text style={{ marginTop: 10 }}>📡Internet : {this.state.connection_internet ? <Text>✅</Text> : <Text>🚫</Text>}</Text>
-                                <Text style={{ marginTop: 10 }}>🌐Type Connection: {this.state.connection_type == 'NetworkStateType.CELLULAR' ? <Text>Cellular</Text> : <Text>WIFI</Text>}</Text>
                             </View>
                         </View>
                     </View>
