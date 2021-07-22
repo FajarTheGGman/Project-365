@@ -9,13 +9,14 @@ import Loading from 'react-native-loading-spinner-overlay'
 import konfigurasi from '../config'
 import { BarCodeScanner } from 'expo-barcode-scanner'
 import * as Network from 'expo-network'
+import * as Battery from 'expo-battery'
 import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
 
 
-export default class Offline extends Component{
+export default class Home extends Component{
     render(){
         const Tabs = createBottomTabNavigator();
         return(
@@ -49,7 +50,14 @@ class Settings extends Component{
         super(props)
 
         this.state = {
-            settings_network: false
+            settings_network: false,
+            phone_status: false,
+            connection: false,
+            connection_details: null,
+            connection_internet: null,
+            connection_type: null,
+            battery_level: "",
+            battery_charge: false
         }
     }
 
@@ -59,6 +67,37 @@ class Settings extends Component{
                 StackActions.replace('Login')
             )
         })
+    }
+
+    async componentDidMount(){
+        await this.Network()
+        await this.Battery()
+    }
+
+    async Network(){
+        const network = await Network.getNetworkStateAsync()
+        this.setState({ 
+            connection: network.isConnected, 
+            connection_details: network,
+            connection_internet: network.isInternetReachable,
+            connection_type: network.type
+        })
+    }
+
+    async Battery(){
+        const level = await Battery.getBatteryLevelAsync()
+        const charge = await Battery.getBatteryStateAsync()
+        let parseStr = level.toString()
+        this.setState({ 
+            battery_level: parseStr[2] + parseStr[3] + "%",
+            battery_charge: charge == 2 ? true : false
+        })
+    }
+
+    Online(){
+        this.props.navigation.dispatch(
+            StackActions.replace('Home')
+        )
     }
 
     render(){
@@ -78,6 +117,36 @@ class Settings extends Component{
                                     </TouchableOpacity>
                                 </View>
                             </View>
+
+                            <View style={{ flexDirection: 'column', marginTop: 15, marginLeft: 5 }}>
+                                <Text>📶 Connection : {this.state.connection ? <Text>✅</Text> : <Text>🚫</Text>}</Text>
+                                <Text style={{ marginTop: 10 }}>📡Internet : {this.state.connection_internet ? <Text>✅</Text> : <Text>🚫</Text>}</Text>
+                                <Text style={{ marginTop: 10 }}>🌐Type Connection: {this.state.connection_type == 'NetworkStateType.CELLULAR' ? <Text>Cellular</Text> : <Text>WIFI</Text>}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+
+                <Modal isVisible={this.state.phone_status}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Phone Status</Text>
+                                </View>
+
+                                <View>
+                                    <TouchableOpacity style={{ marginTop: -3, marginLeft: 15, marginRight: -3 }} onPress={() => this.setState({ phone_status: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'column', marginTop: 10, marginLeft: 3 }}>
+                                <Text>🔋Battery : {this.state.battery_level}</Text>
+                                <Text style={{ marginTop: 4 }}>⚡Charging: {this.state.battery_charge ? <Text style={{ color: 'green' }}>YES</Text> : <Text style={{ color: 'grey' }}>NO</Text>}</Text>
+                            </View>
                         </View>
                     </View>
                 </Modal>
@@ -88,11 +157,11 @@ class Settings extends Component{
 
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
-                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }}>
-                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'grey' }}> OFFLINE</Text></Text>
+                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
+                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }}>
+                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
                             <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
                         </TouchableOpacity>
 
@@ -158,6 +227,7 @@ class HomePage extends Component{
             relayEmpty: false,
             relayAlert: false,
             loading: false,
+            getcontent: false,
             type: '',
             type_button_type: false,
             relay_timeout: false,
@@ -176,7 +246,8 @@ class HomePage extends Component{
             weatherStatus: '',
             weatherCondition: 'No Internet !',
             weatherPallete: 'white',
-            weatherTemp: ''
+            weatherTemp: '',
+            error: false
         }
     }
 
@@ -197,7 +268,21 @@ class HomePage extends Component{
         })
     }
 
-    componentDidMount(){
+    async componentDidMount(){
+        const network = await Network.getNetworkStateAsync()
+
+        if(network.isConnected == true){
+            this.setState({ getcontent: true })
+            AsyncStorage.getItem('d').then(data => {
+                axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+                    
+                }).catch(err => {
+                
+                })
+            })
+            this.setState({ getcontent: false })
+        }
+
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
@@ -431,6 +516,39 @@ class HomePage extends Component{
             <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }}>
                 <Loading visible={this.state.loading} textContent={"Tunggu bentar"} textStyle={{ color: 'white' }} />
 
+                <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
+
+                <Modal isVisible={this.state.error}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15, alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15, marginRight: 15 }}>
+                                    <Text style={{ fontSize: 16, color: 'red', fontWeight: 'bold' }}>Download Error</Text>
+                                </View>
+
+                                <View style={{ marginTop: -3, marginLeft: 10, marginRight: -40 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ error: false })}>
+                                        <Icon name="close-outline" size={30} color="black"/>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                <Image source={require('../assets/illustrations/error.png')} style={{ width: 210, height: 120 }} />
+                                <Text>Error downloading relay data, </Text>
+                                <Text>You should connect to internet</Text>
+                                <Text>To get some relay data from</Text>
+                                <Text>Your account or</Text>
+                                <Text>You can continue offline</Text>
+
+                                <TouchableOpacity style={{ marginTop: 15, padding: 12, backgroundColor: '#c9c9c9', borderRadius: 15 }} onPress={() => this.setState({ error: false })}>
+                                    <Text style={{ color: 'white' }}>Continue</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 <SwipeUpDown modalVisible={this.state.swipeRelay} ContentModal={
                         <View style={{ flex: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15, paddingBottom: 10, elevation: 15 }}>
@@ -597,7 +715,7 @@ class HomePage extends Component{
                     </View>
 
                     <View style={{ marginLeft: 130, backgroundColor: 'black', elevation: 15, padding: 5, borderRadius: 10 }}>
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile')}>
+                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { status: 'offline' })}>
                             <Image source={require('../assets/icons/profile.png')} style={{ width: 50, height: 50 }} />
                         </TouchableOpacity>
                     </View>

@@ -21,7 +21,7 @@ export default class Home extends Component{
         const Tabs = createBottomTabNavigator();
         return(
             <View style={{ flex: 1, backgroundColor: '#292928' }}>
-                <Tabs.Navigator initialRouteName={"Settings"} tabBarOptions={{ style: { backgroundColor: '#171717', borderTop: '#171717', borderTopRightRadius: 15, borderTopLeftRadius: 15, borderTopWidth: -2, padding: 5, color: 'white', elevation: 25, }, activeTintColor: 'white', inactiveTintColor: 'grey' }} screenOptions={({route}) => ({
+                <Tabs.Navigator tabBarOptions={{ style: { backgroundColor: '#171717', borderTop: '#171717', borderTopRightRadius: 15, borderTopLeftRadius: 15, borderTopWidth: -2, padding: 5, color: 'white', elevation: 25, }, activeTintColor: 'white', inactiveTintColor: 'grey' }} screenOptions={({route}) => ({
                 tabBarIcon: ({ focus, color, size }) => {
                     let icons;
 
@@ -94,6 +94,12 @@ class Settings extends Component{
         })
     }
 
+    Offline(){
+        this.props.navigation.dispatch(
+            StackActions.replace('Offline')
+        )
+    }
+
     render(){
         return(
             <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', backgroundColor: '#292928' }}>
@@ -151,7 +157,7 @@ class Settings extends Component{
 
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
-                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }}>
+                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Offline()}>
                             <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'grey' }}> OFFLINE</Text></Text>
                         </TouchableOpacity>
 
