@@ -15,7 +15,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
 
-
 export default class Home extends Component{
     render(){
         const Tabs = createBottomTabNavigator();
@@ -57,7 +56,10 @@ class Settings extends Component{
             connection_internet: null,
             connection_type: null,
             battery_level: "",
-            battery_charge: false
+            battery_charge: false,
+            iot_board: false,
+            ip: null,
+            localip: null
         }
     }
 
@@ -72,6 +74,23 @@ class Settings extends Component{
     async componentDidMount(){
         await this.Network()
         await this.Battery()
+
+        AsyncStorage.getItem('localip').then(data => {
+            this.setState({ localip: data })
+        }).catch(err => {
+
+        })
+    }
+
+    async refresh(){
+        await this.Network()
+        await this.Battery()
+
+        AsyncStorage.getItem('localip').then(data => {
+            this.setState({ localip: data })
+        }).catch(err => {
+
+        })
     }
 
     async Network(){
@@ -92,6 +111,11 @@ class Settings extends Component{
             battery_level: parseStr[2] + parseStr[3] + "%",
             battery_charge: charge == 2 ? true : false
         })
+    }
+
+    SetIP(ip){
+        AsyncStorage.setItem('localip', ip)
+        this.refresh()
     }
 
     Online(){
@@ -151,6 +175,36 @@ class Settings extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.iot_board}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>IOT Board IP</Text>
+                                </View>
+
+                                <View style={{ marginTop: -4, marginLeft: 15, marginRight: -3 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ iot_board: false })}>
+                                        <Icon name="close-outline" size={30} color='black'/>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'column', marginLeft: 7, marginTop: 10 }}>
+                                <Text style={{ textAlign: 'center' }}>{this.state.localip == null ? <Text style={{ color: 'red' }}>IP Doesn't set</Text> : <Text style={{ color: 'green' }}>{this.state.localip}</Text>}</Text>
+
+                                <View style={{ marginTop: 20 }}>
+                                    <TextInput style={{ textAlign: 'center' }} placeholder="Change IP" onChangeText={(val) => this.setState({ ip: val })} />
+                                    <TouchableOpacity style={{ backgroundColor: 'black', padding: 5, borderRadius: 10, elevation: 15 }} onPress={() => this.SetIP(this.state.ip)}>
+                                        <Text style={{ color: 'white', textAlign: 'center' }}>Change IT!</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 <View style={{ backgroundColor: 'black', padding: 15, textAlign: 'center', borderBottomLeftRadius: 15, borderBottomRightRadius: 15, elevation: 15 }}>
                     <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, textAlign: 'center', marginTop: 15 }}>Settings</Text>
                 </View>
@@ -169,8 +223,12 @@ class Settings extends Component{
                             <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ marginTop: 220, marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'red' }} onPress={() => this.logout()}>
-                            <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
+                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
+                            <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -281,6 +339,8 @@ class HomePage extends Component{
                 })
             })
             this.setState({ getcontent: false })
+        }else{
+            
         }
 
         AsyncStorage.getItem('token').then(data => {
@@ -743,6 +803,7 @@ class HomePage extends Component{
                        </TouchableOpacity>
                    </View>
                 </View>
+                <Text style={{ color: 'orange', marginTop: 10 }}>You're in offline mode</Text>
             </View>
         )
     }
