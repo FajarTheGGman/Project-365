@@ -9,6 +9,7 @@ import Loading from 'react-native-loading-spinner-overlay'
 import konfigurasi from '../config'
 import { BarCodeScanner } from 'expo-barcode-scanner'
 import * as Network from 'expo-network'
+import * as Battery from 'expo-battery'
 import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
@@ -20,7 +21,7 @@ export default class Home extends Component{
         const Tabs = createBottomTabNavigator();
         return(
             <View style={{ flex: 1, backgroundColor: '#292928' }}>
-                <Tabs.Navigator tabBarOptions={{ style: { backgroundColor: '#171717', borderTop: '#171717', borderTopRightRadius: 15, borderTopLeftRadius: 15, borderTopWidth: -2, padding: 5, color: 'white', elevation: 25, }, activeTintColor: 'white', inactiveTintColor: 'grey' }} screenOptions={({route}) => ({
+                <Tabs.Navigator initialRouteName={"Settings"} tabBarOptions={{ style: { backgroundColor: '#171717', borderTop: '#171717', borderTopRightRadius: 15, borderTopLeftRadius: 15, borderTopWidth: -2, padding: 5, color: 'white', elevation: 25, }, activeTintColor: 'white', inactiveTintColor: 'grey' }} screenOptions={({route}) => ({
                 tabBarIcon: ({ focus, color, size }) => {
                     let icons;
 
@@ -50,10 +51,13 @@ class Settings extends Component{
 
         this.state = {
             settings_network: false,
+            phone_status: false,
             connection: false,
             connection_details: null,
             connection_internet: null,
-            connection_type: null
+            connection_type: null,
+            battery_level: "",
+            battery_charge: false
         }
     }
 
@@ -66,12 +70,27 @@ class Settings extends Component{
     }
 
     async componentDidMount(){
-        const network = await  Network.getNetworkStateAsync()
+        await this.Network()
+        await this.Battery()
+    }
+
+    async Network(){
+        const network = await Network.getNetworkStateAsync()
         this.setState({ 
             connection: network.isConnected, 
             connection_details: network,
             connection_internet: network.isInternetReachable,
             connection_type: network.type
+        })
+    }
+
+    async Battery(){
+        const level = await Battery.getBatteryLevelAsync()
+        const charge = await Battery.getBatteryStateAsync()
+        let parseStr = level.toString()
+        this.setState({ 
+            battery_level: parseStr[2] + parseStr[3] + "%",
+            battery_charge: charge == 2 ? true : false
         })
     }
 
@@ -102,6 +121,30 @@ class Settings extends Component{
                     </View>
                 </Modal>
 
+
+                <Modal isVisible={this.state.phone_status}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Phone Status</Text>
+                                </View>
+
+                                <View>
+                                    <TouchableOpacity style={{ marginTop: -3, marginLeft: 15, marginRight: -3 }} onPress={() => this.setState({ phone_status: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'column', marginTop: 10, marginLeft: 3 }}>
+                                <Text>🔋Battery : {this.state.battery_level}</Text>
+                                <Text style={{ marginTop: 4 }}>⚡Charging: {this.state.battery_charge ? <Text style={{ color: 'green' }}>YES</Text> : <Text style={{ color: 'grey' }}>NO</Text>}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 <View style={{ backgroundColor: 'black', padding: 15, textAlign: 'center', borderBottomLeftRadius: 15, borderBottomRightRadius: 15, elevation: 15 }}>
                     <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, textAlign: 'center', marginTop: 15 }}>Settings</Text>
                 </View>
@@ -112,7 +155,7 @@ class Settings extends Component{
                             <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'grey' }}> OFFLINE</Text></Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }}>
+                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
                             <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
                         </TouchableOpacity>
 
