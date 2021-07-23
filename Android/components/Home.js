@@ -17,10 +17,50 @@ import * as Animasi from 'react-native-animatable'
 
 
 export default class Home extends Component{
+    constructor(props){
+        super(props)
+
+        this.state = {
+            offline: false
+        }
+    }
+
+    async componentDidMount(){
+        const network = await Network.getNetworkStateAsync()
+
+        if(!network.isConnected){
+            this.setState({ offline: true })
+        }else{
+            this.setState({ offline: false })
+        }
+    }
+
+    offline(){
+        this.props.navigation.dispatch(
+            StackActions.replace('offline')
+        )
+    }
+
     render(){
         const Tabs = createBottomTabNavigator();
         return(
             <View style={{ flex: 1, backgroundColor: '#292928' }}>
+                <Modal isVisible={this.state.offline}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15, alignItems: 'center' }}>
+                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'red' }}>Error Connection</Text>
+                            <Image source={require('../assets/illustrations/offline.png')} style={{ width: 170, height: 150 }} />
+                            <Text>Can't connect to server</Text>
+                            <Text>Please Check your connections</Text>
+                            <Text>Or switch to offline mode</Text>
+
+                            <TouchableOpacity style={{ padding: 5, backgroundColor: '#c4c4c4', borderRadius: 10, marginTop: 15 }} onPress={() => this.offline()}>
+                                <Text style={{ color: 'white' }}>Offline</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
                 <Tabs.Navigator tabBarOptions={{ style: { backgroundColor: '#171717', borderTop: '#171717', borderTopRightRadius: 15, borderTopLeftRadius: 15, borderTopWidth: -2, padding: 5, color: 'white', elevation: 25, }, activeTintColor: 'white', inactiveTintColor: 'grey' }} screenOptions={({route}) => ({
                 tabBarIcon: ({ focus, color, size }) => {
                     let icons;
@@ -169,8 +209,8 @@ class Settings extends Component{
                             <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ marginTop: 220, marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'red' }} onPress={() => this.logout()}>
-                            <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
+                        <TouchableOpacity style={{ marginTop: 220, marginLeft: -2, backgroundColor: 'red' }} onPress={() => this.logout()}>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

@@ -2,30 +2,39 @@ import React, { Component } from 'react'
 import { View, Text, TextInput, Image, TouchableOpacity, AsyncStorage } from 'react-native'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
+import { StackActions } from '@react-navigation/native'
 
 export default class Guide extends Component{
     constructor(props){
         super(props)
 
         this.state = {
-            localip: ''
+            localip: '',
+            ip: '',
+            name: ''
         }
     }
 
-    componentDidMount(){
-        AsyncStorage.getItem('username').then(data => {
-            console.log(data)
-        })
-    }
-
     connection(){
-        axios.get(this.state.localip).then(res => {
+        AsyncStorage.setItem('localip', this.state.ip)
+        axios.get(this.state.ip).then(res => {
             if(res.status == 200){
                 alert('Connected Successfully')
             }else{
                 alert("Can't connect to your local network")
             }
         })
+    }
+
+    offline(){
+        this.props.navigation.dispatch(
+            StackActions.replace('Offline', { type: 'offline' })
+        )
+    }
+
+    name(){
+        AsyncStorage.setItem('name', this.state.name)
+        alert('Done!')
     }
 
     render(){
@@ -55,9 +64,24 @@ export default class Guide extends Component{
                         <Text style={{ color: 'white' }}>if your're using offline mode</Text>
 
 
-                        <TextInput style={{ backgroundColor: "white", marginTop: 10, borderRadius: 10, elevation: 15, padding: 8 }} placeholder="Input IP Server" keyboardType={'numeric'} />
-                        <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, padding: 12, elevation: 15 }}>
+                        <TextInput style={{ backgroundColor: "white", marginTop: 10, borderRadius: 10, elevation: 15, padding: 8 }} placeholder="Input IP Server" keyboardType={'numeric'} onChangeText={(val) => this.setState({ ip: val })} />
+                        <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, padding: 12, elevation: 15 }} onPress={() => this.connection()}>
                             <Text style={{ color: 'white' }}>Test Connection</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 150 }}>
+                        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>By The Way</Text>
+                        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>What's Your Name ?</Text>
+
+                        <Image source={require('../assets/illustrations/name.png')} style={{ width: 300, height: 220, marginTop: 15 }} />
+                        
+                        <Text style={{ color: 'white', marginTop: 5 }}>This name gonna appear in</Text>
+                        <Text style={{ color: 'white' }}>Offline mode</Text>
+
+                        <TextInput style={{ padding: 5, backgroundColor: 'white', borderRadius: 10, width: 150, marginTop: 10 }} onChangeText={(val) => this.setState({ name: val })} placeholder="Input Your Name" />
+                        <TouchableOpacity style={{ backgroundColor: 'black', borderRadius: 10, padding: 10, marginTop: 10 }} onPress={() => this.name()}>
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Submit</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -70,7 +94,7 @@ export default class Guide extends Component{
                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 17 }}>Online Mode</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', padding: 10, borderRadius: 15, elevation: 15, marginTop: 10 }}>
+                        <TouchableOpacity style={{ backgroundColor: 'black', padding: 10, borderRadius: 15, elevation: 15, marginTop: 10 }} onPress={() => this.offline()}>
                             <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold' }}>Offline Mode</Text>
                         </TouchableOpacity>
                     </View>
