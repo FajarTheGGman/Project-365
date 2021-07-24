@@ -8,10 +8,10 @@
 ![](https://img.shields.io/badge/expressjs-4.17.1-white)
 
 
-<center>
+<div align='center'>
 <img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
 <h3>Project 360%</h3>
-</center>
+</div>
 
 <p>Installations</p>
 <pre>
