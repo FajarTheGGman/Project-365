@@ -13,6 +13,9 @@
 <h3>Project 365%</h3>
 </div>
 
+# How to install ?
+<img src="https://media.giphy.com/media/kQOxxwjjuTB7O/giphy.gif" width="100" />
+
 <i>Installations</i>
 <pre>
 Linux : bash install.sh
