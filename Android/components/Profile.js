@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
-import { View, Image, AsyncStorage, Text } from 'react-native'
+import { View, ScrollView, Image, AsyncStorage, Text, TouchableOpacity } from 'react-native'
 //import Timeline from 'react-native-timeline-flatlist'
 import axios from 'axios'
 import konfigurasi from '../config'
 import MapView, { Marker } from 'react-native-maps'
+import Modal from 'react-native-modal'
+import * as Network from 'expo-network'
 
 
 export default class Profile extends Component{
@@ -13,7 +15,8 @@ export default class Profile extends Component{
         this.state = {
             username: '',
             devices: null,
-            since: ''
+            since: '',
+            connection: false
         }
 
         this.data = [
@@ -21,7 +24,14 @@ export default class Profile extends Component{
         ]
     }
 
-    componentDidMount(){
+    async componentDidMount(){
+/*        const network = await Network.getNetworkStateAsync()
+        if(!network.isConnected){
+            this.setState({ connection: true })
+        }else if(this.props.route.params.status == 'offline'){
+            this.setState({ connection: true })
+        }*/
+
         AsyncStorage.getItem('token').then(res => {
             axios.post(konfigurasi.server + 'auth/getall', { token: res, secret: 'Important' }).then(data => {
                 this.setState({ username: data.data.result.username, since: data.data.result.since })
@@ -36,7 +46,20 @@ export default class Profile extends Component{
 
     render(){
         return(
-            <View style={{ flex: 1, backgroundColor: '#292928', alignItems: 'center' }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', backgroundColor: '#292928', alignItems: 'center' }}>
+                <Modal isVisible={this.state.connection}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', alignItems: 'center', padding: 15, borderRadius: 15, elevation: 15 }}>
+                            <Image source={require('../assets/illustrations/offline.png')} style={{ width: 170, height: 150 }} />
+                            <Text>I'm Sorry but, Profile Information</Text>
+                            <Text>Does'nt appear in offline mode</Text>
+                            <TouchableOpacity style={{ marginTop: 15, backgroundColor: '#d9d9d9', padding: 7, borderRadius: 10 }} onPress={() => this.props.navigation.goBack()}>
+                                <Text style={{ color: 'white' }}>Going back</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
                 <View style={{ alignItems: 'center' }}>
                     <View style={{ flexDirection: 'column', marginTop: 25, backgroundColor: 'black', padding: 10, borderRadius: 15, elevation: 15 }}>
                         <Image source={require('../assets/icons/profile.png')} style={{ width: 60, height: 60 }} />
@@ -70,7 +93,7 @@ export default class Profile extends Component{
                         <Marker coordinate={{ longitude: 106.789, latitude: -6.5945 }} title="Nodemcu" description="Notes: The GPS Not 100% Accurate"/>
                     </MapView>
                 </View>
-            </View>
+            </ScrollView>
         )
     }
 }

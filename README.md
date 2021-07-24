@@ -1,45 +1,35 @@
-# Express API Starter
+# Project 350%
+<p>Simple Project For Home Automation</p>
 
-Includes API Server utilities:
+![](https://img.shields.io/badge/react-native-blue)
+![](https://img.shields.io/badge/nodejs-14.6.1-lime) 
+![](https://img.shields.io/badge/expo-4.5.2-white)
+![](https://img.shields.io/badge/mongo-4.0.19-green)
+![](https://img.shields.io/badge/expressjs-4.17.1-white)
 
-* [morgan](https://www.npmjs.com/package/morgan)
-  * HTTP request logger middleware for node.js
-* [helmet](https://www.npmjs.com/package/helmet)
-  * Helmet helps you secure your Express apps by setting various HTTP headers. It's not a silver bullet, but it can help!
-* [dotenv](https://www.npmjs.com/package/dotenv)
-  * Dotenv is a zero-dependency module that loads environment variables from a `.env` file into `process.env`
 
-Development utilities:
+<div align='center'>
+<img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
+<h3>Project 360%</h3>
+</div>
 
-* [nodemon](https://www.npmjs.com/package/nodemon)
-  * nodemon is a tool that helps develop node.js based applications by automatically restarting the node application when file changes in the directory are detected.
-* [eslint](https://www.npmjs.com/package/eslint)
-  * ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code.
-* [mocha](https://www.npmjs.com/package/mocha)
-  * ☕️ Simple, flexible, fun JavaScript test framework for Node.js & The Browser ☕️
-* [supertest](https://www.npmjs.com/package/supertest)
-  * HTTP assertions made easy via superagent.
+<i>Installations</i>
+<pre>
+Linux : bash install.sh
+Windows: "click install.bat"
+</pre>
 
-## Setup
+<i>How to run ?</i>
+<pre>
+Linux: "bash run.sh"
+Windows: "click run.bat"
+</pre>
 
-```
-npm install
-```
 
-## Lint
 
-```
-npm run lint
-```
-
-## Test
-
-```
-npm run test
-```
-
-## Development
-
-```
-npm run dev
-```
+<div>
+<b>Special Thanks!</b><br>
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Stack_Overflow_icon.svg" width="50" /> 
+<img src="https://image.flaticon.com/icons/png/512/2702/2702602.png"  width="40" /> 
+<img src="https://upload.wikimedia.org/wikipedia/commons/d/db/Npm-logo.svg" bottom=15 width="40"  />
+</div>

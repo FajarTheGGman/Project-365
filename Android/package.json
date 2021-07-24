@@ -8,6 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@react-native-community/datetimepicker": "^3.5.2",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-navigation/bottom-tabs": "^5.11.11",
     "@react-navigation/native": "^5.9.4",
@@ -15,6 +16,9 @@
     "axios": "^0.21.1",
     "expo": "~41.0.1",
     "expo-barcode-scanner": "^10.1.2",
+    "expo-battery": "^5.0.0",
+    "expo-device": "^3.3.0",
+    "expo-file-system": "^11.0.2",
     "expo-linear-gradient": "~9.1.0",
     "expo-network": "^3.2.0",
     "expo-notifications": "^0.12.2",
@@ -23,6 +27,7 @@
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-41.0.0.tar.gz",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-grid-list": "^1.1.0",
     "react-native-loading-spinner-overlay": "^2.0.0",
     "react-native-maps": "^0.28.0",
     "react-native-modal": "^12.0.2",
