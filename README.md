@@ -13,13 +13,13 @@
 <h3>Project 360%</h3>
 </div>
 
-<p>Installations</p>
+<i>Installations</i>
 <pre>
 Linux : bash install.sh
 Windows: "click install.bat"
 </pre>
 
-<p>How to run ?</p>
+<i>How to run ?</i>
 <pre>
 Linux: "bash run.sh"
 Windows: "click run.bat"
