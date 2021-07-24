@@ -14,7 +14,7 @@
 </div>
 
 # How to install ?
-<img src="https://media.giphy.com/media/kQOxxwjjuTB7O/giphy.gif" width="100" />
+<img src="https://media.giphy.com/media/kQOxxwjjuTB7O/giphy.gif" width="180" />
 
 <i>Installations</i>
 <pre>
