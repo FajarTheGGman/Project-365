@@ -26,9 +26,8 @@ Windows: "click run.bat"
 </pre>
 
 <div>
-<b>Special Thanks!</b>
+<b>Special Thanks!</b><br>
 <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Stack_Overflow_icon.svg" width="50" /> 
-<img src="https://image.flaticon.com/icons/png/512/2702/2702602.png" width="40"  /> 
+<img src="https://image.flaticon.com/icons/png/512/2702/2702602.png" width="40" /> 
 <img src="https://upload.wikimedia.org/wikipedia/commons/d/db/Npm-logo.svg" width="40"  />
-
 </div>
