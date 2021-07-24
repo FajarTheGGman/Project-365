@@ -1,4 +1,4 @@
-# Project 350%
+# Project 365%
 <p>Simple Project For Home Automation</p>
 
 ![](https://img.shields.io/badge/react-native-blue)
@@ -10,7 +10,7 @@
 
 <div align='center'>
 <img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
-<h3>Project 360%</h3>
+<h3>Project 365%</h3>
 </div>
 
 <i>Installations</i>
