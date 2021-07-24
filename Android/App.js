@@ -17,7 +17,7 @@ export default class App extends Component{
         let Stack = createStackNavigator();
         return(
             <NavigationContainer>
-                <Stack.Navigator initialRouteName={'Offline'}>
+                <Stack.Navigator>
                     <Stack.Screen name="Banner" component={Banner} options={{ headerShown: false }} />
                     <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}/>
                     <Stack.Screen name='Register' component={Register} options={{ headerStyle: { backgroundColor: '#292928' }, headerTitleStyle: { color: 'white' } }}/>

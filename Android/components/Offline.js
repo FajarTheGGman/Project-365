@@ -347,6 +347,7 @@ class HomePage extends Component{
             relayEmpty: false,
             relayAlert: false,
             loading: false,
+            refresh: false,
             getcontent: false,
             type: '',
             menu: false,
@@ -523,8 +524,7 @@ class HomePage extends Component{
     }
 
     refresh(){
-        this.setState({ loading: true })
-        this.setState({ data: [] })
+        this.setState({ loading: true, refresh: true, data: [] })
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
@@ -623,7 +623,7 @@ class HomePage extends Component{
         }else if(jam == 23){
             this.setState({ waktu: 'Good Night' })
         }
-        this.setState({ loading: false })
+        this.setState({ loading: false, refresh: false })
     }
 
     input_date(){
@@ -657,7 +657,7 @@ class HomePage extends Component{
 
     render(){
         return(
-            <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }} refreshControl={<RefreshControl refreshing={this.state.refresh} onRefresh={() => this.refresh()}/>}>
                 <Loading visible={this.state.loading} textContent={"Tunggu bentar"} textStyle={{ color: 'white' }} />
 
                 <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
@@ -763,7 +763,10 @@ class HomePage extends Component{
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ paddingLeft: 15 }}>
-                                    <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 17 }}>Schedule Relay</Text>
+                                    <View style={{ alignItems: 'center', marginTop: 15, marginLeft: 25}}>
+                                        <Image source={require('../assets/icons/clock.png')} style={{ width: 50, height: 50 }} />
+                                        <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 17 }}>Schedule Relay</Text>
+                                    </View>
                                 </View>
 
                                 <View style={{ marginLeft: 15, marginTop: -3, marginRight: -5 }}>
@@ -892,7 +895,7 @@ class HomePage extends Component{
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 45 }}>
                     <View style={{ flexDirection: 'column' }}>
                         <TouchableOpacity onPress={() => this.refresh()}>
-                            <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Project 80%</Text>
+                            <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Project 365%</Text>
                         </TouchableOpacity>
                         <Text style={{ color: '#ededed' }}>{this.state.waktu} {this.state.username}</Text>
 
@@ -928,7 +931,7 @@ class HomePage extends Component{
                    </View>
                 </View>
                 <Text style={{ color: 'orange', marginTop: 10 }}>You're in offline mode</Text>
-            </View>
+            </ScrollView>
         )
     }
 }

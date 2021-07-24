@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Image, AsyncStorage, Text, TouchableOpacity } from 'react-native'
+import { View, ScrollView, Image, AsyncStorage, Text, TouchableOpacity } from 'react-native'
 //import Timeline from 'react-native-timeline-flatlist'
 import axios from 'axios'
 import konfigurasi from '../config'
@@ -25,12 +25,12 @@ export default class Profile extends Component{
     }
 
     async componentDidMount(){
-        const network = await Network.getNetworkStateAsync()
+/*        const network = await Network.getNetworkStateAsync()
         if(!network.isConnected){
             this.setState({ connection: true })
         }else if(this.props.route.params.status == 'offline'){
             this.setState({ connection: true })
-        }
+        }*/
 
         AsyncStorage.getItem('token').then(res => {
             axios.post(konfigurasi.server + 'auth/getall', { token: res, secret: 'Important' }).then(data => {
@@ -46,7 +46,7 @@ export default class Profile extends Component{
 
     render(){
         return(
-            <View style={{ flex: 1, backgroundColor: '#292928', alignItems: 'center' }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', backgroundColor: '#292928', alignItems: 'center' }}>
                 <Modal isVisible={this.state.connection}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', alignItems: 'center', padding: 15, borderRadius: 15, elevation: 15 }}>
@@ -93,7 +93,7 @@ export default class Profile extends Component{
                         <Marker coordinate={{ longitude: 106.789, latitude: -6.5945 }} title="Nodemcu" description="Notes: The GPS Not 100% Accurate"/>
                     </MapView>
                 </View>
-            </View>
+            </ScrollView>
         )
     }
 }

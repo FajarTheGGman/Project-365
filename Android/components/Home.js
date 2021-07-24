@@ -6,6 +6,7 @@ import axios from 'axios'
 import Modal from 'react-native-modal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Loading from 'react-native-loading-spinner-overlay'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import konfigurasi from '../config'
 import { BarCodeScanner } from 'expo-barcode-scanner'
 import * as Network from 'expo-network'
@@ -14,48 +15,69 @@ import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
-
+import GridList from 'react-native-grid-list'
 
 export default class Home extends Component{
     constructor(props){
         super(props)
 
         this.state = {
-            offline: false
+            wellcome: false,
+            low: false
         }
     }
 
     async componentDidMount(){
-        const network = await Network.getNetworkStateAsync()
-
-        if(!network.isConnected){
-            this.setState({ offline: true })
-        }else{
-            this.setState({ offline: false })
+        try{
+            await this.battery()
+            if(this.props.route.params.type == 'offline'){
+                AsyncStorage.setItem('offline', true)
+                this.setState({ wellcome: true })
+            }
+        }catch(e){
+            this.setState({ wellcome: false })
         }
     }
 
-    offline(){
-        this.props.navigation.dispatch(
-            StackActions.replace('offline')
-        )
+    async battery(){
+        let init = await Battery.getBatteryLevelAsync()
+        let parse = level.toString()
+        let level = parse[2] + parse[3]
+
+        if(level == 19){
+            this.setState({ low: true })
+        }
     }
 
     render(){
         const Tabs = createBottomTabNavigator();
         return(
             <View style={{ flex: 1, backgroundColor: '#292928' }}>
-                <Modal isVisible={this.state.offline}>
+                <Modal isVisible={this.state.low}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15, alignItems: 'center' }}>
-                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'red' }}>Error Connection</Text>
-                            <Image source={require('../assets/illustrations/offline.png')} style={{ width: 170, height: 150 }} />
-                            <Text>Can't connect to server</Text>
-                            <Text>Please Check your connections</Text>
-                            <Text>Or switch to offline mode</Text>
+                            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Low Level Battery</Text>
+                            <Image source={require('../assets/icons/low-battery.png')} style={{ width: 90, height: 80 }} />
+                            <Text>Hey mate, your battery level is 19%</Text>
+                            <Text>Please charge your phone</Text>
 
-                            <TouchableOpacity style={{ padding: 5, backgroundColor: '#c4c4c4', borderRadius: 10, marginTop: 15 }} onPress={() => this.offline()}>
-                                <Text style={{ color: 'white' }}>Offline</Text>
+                            <TouchableOpacity style={{ backgroundColor: '#c4c4c4', padding: 5, marginTop: 12, borderRadius: 10 }} onPress={() => this.setState({ low: false })}>
+                                <Text style={{ color: 'white' }}>Okay</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.wellcome}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 17, borderRadius: 15, alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Wellcome to offline mode !</Text>
+                            <Image source={require('../assets/illustrations/wellcome.png')} style={{ width: 240, height: 150, marginTop: 15}} />
+                            <Text>In here you can only access</Text>
+                            <Text>your iot board from your router</Text>
+
+                            <TouchableOpacity style={{ marginTop: 15, backgroundColor: '#c4c4c4', padding: 8, borderRadius: 10 }} onPress={() => this.setState({ wellcome: false })}>
+                                <Text style={{ color: 'white' }}>Close</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -97,7 +119,10 @@ class Settings extends Component{
             connection_internet: null,
             connection_type: null,
             battery_level: "",
-            battery_charge: false
+            battery_charge: false,
+            iot_board: false,
+            ip: null,
+            localip: null
         }
     }
 
@@ -112,6 +137,23 @@ class Settings extends Component{
     async componentDidMount(){
         await this.Network()
         await this.Battery()
+
+        AsyncStorage.getItem('localip').then(data => {
+            this.setState({ localip: data })
+        }).catch(err => {
+
+        })
+    }
+
+    async refresh(){
+        await this.Network()
+        await this.Battery()
+
+        AsyncStorage.getItem('localip').then(data => {
+            this.setState({ localip: data })
+        }).catch(err => {
+
+        })
     }
 
     async Network(){
@@ -132,6 +174,11 @@ class Settings extends Component{
             battery_level: parseStr[2] + parseStr[3] + "%",
             battery_charge: charge == 2 ? true : false
         })
+    }
+
+    SetIP(ip){
+        AsyncStorage.setItem('localip', ip)
+        this.refresh()
     }
 
     Offline(){
@@ -191,6 +238,36 @@ class Settings extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.iot_board}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>IOT Board IP</Text>
+                                </View>
+
+                                <View style={{ marginTop: -4, marginLeft: 15, marginRight: -3 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ iot_board: false })}>
+                                        <Icon name="close-outline" size={30} color='black'/>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'column', marginLeft: 7, marginTop: 10 }}>
+                                <Text style={{ textAlign: 'center' }}>{this.state.localip == null ? <Text style={{ color: 'red' }}>IP Doesn't set</Text> : <Text style={{ color: 'green' }}>{this.state.localip}</Text>}</Text>
+
+                                <View style={{ marginTop: 20 }}>
+                                    <TextInput style={{ textAlign: 'center' }} placeholder="Change IP" onChangeText={(val) => this.setState({ ip: val })} />
+                                    <TouchableOpacity style={{ backgroundColor: 'black', padding: 5, borderRadius: 10, elevation: 15 }} onPress={() => this.SetIP(this.state.ip)}>
+                                        <Text style={{ color: 'white', textAlign: 'center' }}>Change IT!</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 <View style={{ backgroundColor: 'black', padding: 15, textAlign: 'center', borderBottomLeftRadius: 15, borderBottomRightRadius: 15, elevation: 15 }}>
                     <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, textAlign: 'center', marginTop: 15 }}>Settings</Text>
                 </View>
@@ -209,7 +286,11 @@ class Settings extends Component{
                             <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ marginTop: 220, marginLeft: -2, backgroundColor: 'red' }} onPress={() => this.logout()}>
+                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
+                            <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
                             <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
                         </TouchableOpacity>
                     </View>
@@ -267,7 +348,11 @@ class HomePage extends Component{
             relayEmpty: false,
             relayAlert: false,
             loading: false,
+            refresh: false,
+            getcontent: false,
             type: '',
+            menu: false,
+            schedule: false,
             type_button_type: false,
             relay_timeout: false,
             status: false,
@@ -285,7 +370,10 @@ class HomePage extends Component{
             weatherStatus: '',
             weatherCondition: 'No Internet !',
             weatherPallete: 'white',
-            weatherTemp: ''
+            weatherTemp: '',
+            error: false,
+            date: false,
+            input_date: new Date()
         }
     }
 
@@ -306,7 +394,37 @@ class HomePage extends Component{
         })
     }
 
-    componentDidMount(){
+    addRelayOffline(){
+        const data_offline = {
+            name: this.state.relay_name,
+            url: this.state.relay_url,
+            type: this.state.relay_category,
+            type_button: this.state.relay_button_type
+        }
+
+        this.setState({ data: this.state.data.concat(data_offline) })
+//        AsyncStorage.setItem("relay_offline", this.state.data)
+//        console.log(this.state.data)
+    }
+
+
+    async componentDidMount(){
+        const network = await Network.getNetworkStateAsync()
+
+        if(network.isConnected == true){
+            this.setState({ getcontent: true })
+            AsyncStorage.getItem('d').then(data => {
+                axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+                    
+                }).catch(err => {
+                
+                })
+            })
+            this.setState({ getcontent: false })
+        }else{
+            
+        }
+
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
@@ -407,8 +525,7 @@ class HomePage extends Component{
     }
 
     refresh(){
-        this.setState({ loading: true })
-        this.setState({ data: [] })
+        this.setState({ loading: true, refresh: true, data: [] })
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
@@ -507,7 +624,12 @@ class HomePage extends Component{
         }else if(jam == 23){
             this.setState({ waktu: 'Good Night' })
         }
-        this.setState({ loading: false })
+        this.setState({ loading: false, refresh: false })
+    }
+
+    input_date(){
+        this.setState({ date: false })
+        this.setState({ date: true })
     }
 
     switch(nama, status){
@@ -523,7 +645,6 @@ class HomePage extends Component{
     }
 
     clicker(nama, status){
-        
         AsyncStorage.getItem('token').then(token_user => {
             axios.post(konfigurasi.server + "relay/update?type=status", { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
                 if(result.status == 200){
@@ -537,8 +658,41 @@ class HomePage extends Component{
 
     render(){
         return(
-            <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }} refreshControl={<RefreshControl refreshing={this.state.refresh} onRefresh={() => this.refresh()}/>}>
                 <Loading visible={this.state.loading} textContent={"Tunggu bentar"} textStyle={{ color: 'white' }} />
+
+                <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
+
+                <Modal isVisible={this.state.error}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15, alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15, marginRight: 15 }}>
+                                    <Text style={{ fontSize: 16, color: 'red', fontWeight: 'bold' }}>Download Error</Text>
+                                </View>
+
+                                <View style={{ marginTop: -3, marginLeft: 10, marginRight: -40 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ error: false })}>
+                                        <Icon name="close-outline" size={30} color="black"/>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                <Image source={require('../assets/illustrations/error.png')} style={{ width: 210, height: 120 }} />
+                                <Text>Error downloading relay data, </Text>
+                                <Text>You should connect to internet</Text>
+                                <Text>To get some relay data from</Text>
+                                <Text>Your account or</Text>
+                                <Text>You can continue offline</Text>
+
+                                <TouchableOpacity style={{ marginTop: 15, padding: 12, backgroundColor: '#c9c9c9', borderRadius: 15 }} onPress={() => this.setState({ error: false })}>
+                                    <Text style={{ color: 'white' }}>Continue</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
 
                 <SwipeUpDown modalVisible={this.state.swipeRelay} ContentModal={
                         <View style={{ flex: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
@@ -547,8 +701,7 @@ class HomePage extends Component{
                                 <Text style={{ fontWeight: 'bold', marginTop: -5, fontSize: 17, color: 'white' }}>List Devices</Text>
                             </View>
 
-                            <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
-                                <ScrollView style={{ flexDirection: 'column'}}>
+                            <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                  { this.state.data.map((x, y) => {
                                     return <View style={{ flexDirection: "row", paddingBottom: 50 }}>
                                       <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15, padding: 15, borderRadius: 15, paddingLeft: 22, paddingRight: 22, elevaton: 15 }}>
@@ -566,30 +719,72 @@ class HomePage extends Component{
                                     </TouchableOpacity>
                                        </View>
                                    })}
-                                </ScrollView>
-                            </View>
+                            </ScrollView>
                         </View>
                     } onClose={() => this.setState({ swipeRelay: false })} />
 
-                <Modal isVisible={this.state.relayAlert}>
-                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-                        <View style={{ backgroundColor: 'white', flexDirection: 'column', padding: 15, borderRadius: 5 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ marginLeft: 50, fontWeight: 'bold', fontSize: 18 }}>Relay</Text>
-                                <TouchableOpacity style={{ marginLeft: 50, marginRight: -10, marginTop: -15 }} onPress={() => this.setState({ relayAlert: false })}>
-                                    <Icon name='close-outline' size={30} color='black'/>
-                                </TouchableOpacity>
+                <Modal isVisible={this.state.menu}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Choose One</Text>
+                                </View>
+
+                                <View style={{ marginLeft: 18, marginRight: -4.5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ menu: false })}>
+                                        <Icon name="close-outline" size={30} color="black" />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
 
-                            <View style={{ flexDirection: 'column', marginTop: 35 }}>
-                                {this.state.data.map((x, y) => {
-                                    return <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
-                                        <Text>{x.name}</Text>
-                                        { x.type ? 
-                                            <Button title="Press me" color="black" /> :
-                                        <Switch trackColor={{ false: 'grey', true: 'blue' }} value={this.state.relay} onValueChange={() => this.switch()} /> }
+                            <View style={{ flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' }}>
+                                <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 20 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ schedule: true, menu: false })}>
+                                        <Image source={require('../assets/icons/timer.png')} style={{ width: 70, height: 70 }} />
+                                        <Text style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>Schedule</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View style={{ marginLeft: 20 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ addRelay: true, menu: false })}>
+                                        <Image source={require('../assets/icons/touch.png')} style={{ width: 70, height: 70 }} />
+                                        <Text style={{ textAlign: 'center', color: 'green', fontWeight: 'bold' }}>Button</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.schedule}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <View style={{ paddingLeft: 15, marginTop: 10 }}>
+                                    <View style={{ alignItems: 'center', marginLeft: 20 }}>
+                                        <Image source={require('../assets/icons/clock.png')} style={{ width: 50, height: 50, alignItems: 'center' }} />
+                                        <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 17 }}>Schedule Relay</Text>
                                     </View>
-                                })}
+                                </View>
+
+                                <View style={{ marginLeft: 15, marginTop: -3, marginRight: -5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ schedule: false })}>
+                                        <Icon name="close-outline" size={30} color="black"/>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={{ marginTop: 15, alignItems: 'center' }}>
+                                <TextInput style={{ textAlign: 'center' }} placeholder="Name.." />
+                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url" />
+                                <TouchableOpacity style={{ marginTop: 8, backgroundColor: 'orange', padding: 10, borderRadius: 15, elevation: 15 }} onPress={() => this.input_date()}>
+                                    <Text style={{ fontWeight: 'bold' }}>Choose Date</Text>
+                                </TouchableOpacity>
+                                { this.state.date ? <DateTimePicker value={this.state.input_date} /> : <View></View> }
+                                <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }}>
+                                    <Text style={{ color: 'white', fontWeight: 'bold', padding: 2 }}>Add</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </View>
@@ -629,7 +824,7 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ alignItems: 'center', marginTop: 15 }}>
-                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelay()}>
+                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelayOffline()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -646,67 +841,17 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
-                <Modal isVisible={false}>
-                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <View style={{ backgroundColor: 'white', flexDirection: 'column', padding: 15, borderRadius: 15 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ fontWeight: 'bold', fontSize: 15, marginLeft: 50 }}>Add Some Relay</Text>
-                                <TouchableOpacity>
-                                    <Icon name="close-outline" size={34} color="black" style={{ marginLeft: 50 }}/>
-                                </TouchableOpacity>
-                            </View>
-
-                            <View style={{ flexDirection: "column", marginTop: 15 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    <TextInput placeholder="Name" onChangeText={(val) => this.setState({ relay_name: val })} style={{ marginLeft: 15 }} />
-                                    <View style={{ flexDirection: 'column', marginRight: 10 }}>
-                                        <Text>Buttons</Text>
-                                        <Radio radio_props={[{ label: 'Button', value: true }, { label: "Switch", value: false }]} formHorizontal={false} animation={true} onPress={(value) => value ? this.setState({ type: true }) : this.setState({ type: false }) } style={{ marginTop: 10 }} />
-                                    </View>
-
-                                </View>
-                            </View>
-
-                            <View style={{ flexDirection: "column", marginTop: 15 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    <TextInput placeholder="Time Interval" onChangeText={(val) => this.setState({ time_interval: val })} keyboardType="numeric" style={{ marginLeft: 15 }} />
-                                    <View style={{ flexDirection: 'column', marginRight: 35 }}>
-                                        <Text>Timeout</Text>
-                                        <Radio radio_props={[{ label: 'Yes', value: true }, { label: "No", value: false }]} formHorizontal={false} animation={true} onPress={(value) => value ? this.setState({ timeout: true }) : this.setState({ timeout: false }) } style={{ marginTop: 10 }} />
-                                    </View>
-                                </View>
-                            </View>
-
-                            <View style={{ flexDirection: "column", marginTop: 15 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    <TextInput placeholder="Url Machine" onChangeText={(val) => this.setState({ url_machine: val })} style={{ marginLeft: 15 }} />
-                                    <View style={{ flexDirection: 'column', marginRight: 35 }}>
-                                        <Text>Status</Text>
-                                        <Radio radio_props={[{ label: 'ON', value: true }, { label: "OFF", value: false }]} formHorizontal={false} animation={true} onPress={(value) => value ? this.setState({ status: true }) : this.setState({ status: false }) } style={{ marginTop: 10 }} />
-                                    </View>
-                                </View>
-                            </View>
-
-                            <View style={{ alignItems: 'center', marginTop: 15 }}>
-                                <TouchableOpacity onPress={() => this.addRelay()}>
-                                    <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5 }}>Add New Relay</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-                </Modal>
-
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 45 }}>
                     <View style={{ flexDirection: 'column' }}>
                         <TouchableOpacity onPress={() => this.refresh()}>
-                            <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Project 80%</Text>
+                            <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Project 365%</Text>
                         </TouchableOpacity>
                         <Text style={{ color: '#ededed' }}>{this.state.waktu} {this.state.username}</Text>
 
                     </View>
 
                     <View style={{ marginLeft: 130, backgroundColor: 'black', elevation: 15, padding: 5, borderRadius: 10 }}>
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile')}>
+                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { status: 'offline' })}>
                             <Image source={require('../assets/icons/profile.png')} style={{ width: 50, height: 50 }} />
                         </TouchableOpacity>
                     </View>
@@ -729,12 +874,12 @@ class HomePage extends Component{
                            <Image source={require('../assets/icons/box.png')} style={{ width: 60, height: 60 }} />
                        </TouchableOpacity>
 
-                       <TouchableOpacity onPress={() => this.setState({ addRelay: true })} style={{ marginTop: 5, marginLeft: 35 }} >
+                       <TouchableOpacity onPress={() => this.setState({ menu: true })} style={{ marginTop: 5, marginLeft: 35 }} >
                            <Image source={require('../assets/icons/addrelay.png')} style={{ width: 60, height: 60 }} />
                        </TouchableOpacity>
                    </View>
                 </View>
-            </View>
+            </ScrollView>
         )
     }
 }
