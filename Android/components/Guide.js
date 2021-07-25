@@ -52,10 +52,19 @@ export default class Guide extends Component{
                         <Text style={{ color: "white", fontSize: 20, fontWeight: 'bold' }}>Upload IT!</Text>
                         <Image source={require('../assets/illustrations/register/hosting.png')} style={{ width: 220, height: 180, marginTop: 15 }} />
                         <Text style={{ marginTop: 15, color: 'white' }}>To Control Your Board Online</Text>
-                        <Text style={{ color: "white" }}>You Should Upload it to your hosting</Text>
+                        <Text style={{ color: "white" }}>You Should Upload Nodejs Server to your hosting</Text>
                         <Text style={{ color: 'white' }}>Or You can use free nodejs hosting like</Text>
                         <Text style={{ color: 'white', fontWeight: 'bold' }}>Heroku, Vercel, Netlify</Text>
                     </View>
+
+                    <View style={{ marginTop: 170, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>Example Schematic</Text>
+                        <Image source={require('../assets/icons/schematic.png')} style={{ width: 220, height: 180, borderRadius: 10, marginTop: 10 }} />
+                        <Text style={{ color: 'white', marginTop: 10 }}>This is the minimum example of microcontroller </Text>
+                        <Text style={{ color: 'white' }}>Relay <Text style={{ fontWeight: 'bold' }}>Ground</Text> goes to Ground, Relay <Text>Vcc</Text> Goes to</Text>
+                        <Text style={{ color: 'white' }}>3.3v, And <Text style={{ fontWeight: "bold" }}>Signal</Text> pin goes to digital pin</Text>
+                    </View>
+
 
                     <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 150 }}>
                         <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>What's Your Local IP Server ?</Text>

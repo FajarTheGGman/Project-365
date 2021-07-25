@@ -90,6 +90,8 @@ export default class Home extends Component{
                         icons = 'home-outline'
                     }else if(route.name == 'Barcode'){
                         icons = 'qr-code-outline'
+                    }else if(route.name == 'Code'){
+                        icons = 'code-slash-outline'
                     }else if(route.name == 'Settings'){
                         icons = 'settings-outline'
                     }
@@ -99,8 +101,18 @@ export default class Home extends Component{
             })}>
                 <Tabs.Screen name='Home' component={HomePage} />
                 <Tabs.Screen name='Barcode' component={Barcode} />
+                <Tabs.Screen name="Code" component={Code }/>
                 <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
+            </View>
+        )
+    }
+}
+
+class Code extends Component{
+    render(){
+        return(
+            <View style={{ flex: 1, backgroundColor: '#292928' }}>
             </View>
         )
     }
@@ -346,6 +358,7 @@ class HomePage extends Component{
             data: [],
             relayEmpty: false,
             relayAlert: false,
+            serial_information: false,
             loading: false,
             refresh: false,
             getcontent: false,
@@ -727,12 +740,12 @@ class HomePage extends Component{
                 <Modal isVisible={this.state.menu}>
                     <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 85 }}>
                                 <View style={{ paddingLeft: 15 }}>
                                     <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Choose One</Text>
                                 </View>
 
-                                <View style={{ marginLeft: 18, marginRight: -4.5 }}>
+                                <View style={{ marginLeft: 58, marginRight: -4.5 }}>
                                     <TouchableOpacity onPress={() => this.setState({ menu: false })}>
                                         <Icon name="close-outline" size={30} color="black" />
                                     </TouchableOpacity>
@@ -740,11 +753,20 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 20 }}>
+                                <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 10 }}>
                                     <TouchableOpacity onPress={() => this.setState({ schedule: true, menu: false })}>
                                         <Image source={require('../assets/icons/timer.png')} style={{ width: 70, height: 70 }} />
                                         <Text style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>Schedule</Text>
                                     </TouchableOpacity>
+                                </View>
+
+                                <View style={{ marginLeft: 20 }}>
+                                    <View style={{ alignItems: 'center' }}>
+                                        <TouchableOpacity onPress={() => this.setState({ serial_information: true, menu: false })}>
+                                            <Image source={require('../assets/icons/resistor.png')} style={{ width: 70, height: 70 }} />
+                                            <Text style={{ fontWeight: 'bold', color: 'orange', textAlign: 'center' }}>Sensor Info</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
 
                                 <View style={{ marginLeft: 20 }}>
@@ -753,6 +775,35 @@ class HomePage extends Component{
                                         <Text style={{ textAlign: 'center', color: 'green', fontWeight: 'bold' }}>Button</Text>
                                     </TouchableOpacity>
                                 </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.serial_information}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
+                                        <Image source={require('../assets/icons/serial_information.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
+                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Serial Information</Text>
+                                    </View>
+                                </View>
+
+                                <View style={{ marginLeft: 15, marginRight: -5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ serial_information: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            
+                            <View style={{ marginTop: 15, alignItems: 'center' }}>
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Url Offline"/>
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </View>
