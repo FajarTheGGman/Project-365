@@ -4,6 +4,10 @@ const jwt = require('jsonwebtoken')
 const model = require('../models/Users');
 const bcrypt = require('bcrypt')
 
+route.get('/', (req,res) => {
+    res.json({ section: "auth" })
+})
+
 route.post('/login', (req,res) => {
     model.find({ username: req.body.username }, (err, done) => {
         if(err){

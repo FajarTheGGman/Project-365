@@ -6,7 +6,7 @@ let modelSettings = require('../models/Settings')
 
 route.get('/', (req,res) => {
 
-res.json({ hello: 'world' })
+res.json({ section: 'settings' })
 
 })
 
