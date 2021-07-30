@@ -25,12 +25,18 @@ export default class Profile extends Component{
     }
 
     async componentDidMount(){
-/*        const network = await Network.getNetworkStateAsync()
+        const network = await Network.getNetworkStateAsync()
         if(!network.isConnected){
             this.setState({ connection: true })
         }else if(this.props.route.params.status == 'offline'){
             this.setState({ connection: true })
-        }*/
+        }
+
+        AsyncStorage.getItem('offline').then(x => {
+            if(x == true){
+                this.setState({ connection: true })
+            }
+        })
 
         AsyncStorage.getItem('token').then(res => {
             axios.post(konfigurasi.server + 'auth/getall', { token: res, secret: 'Important' }).then(data => {

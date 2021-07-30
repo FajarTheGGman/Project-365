@@ -16,6 +16,7 @@ import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
+import* as FileSystem from 'expo-file-system'
 
 export default class Home extends Component{
     constructor(props){
@@ -226,9 +227,9 @@ class Settings extends Component{
         this.refresh()
     }
 
-    Online(){
+    Offline(){
         this.props.navigation.dispatch(
-            StackActions.replace('Home')
+            StackActions.replace('Offline', { type: 'offline' })
         )
     }
 
@@ -319,8 +320,8 @@ class Settings extends Component{
 
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
-                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
-                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
+                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Offline()}>
+                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'red' }}> OFFLINE </Text></Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
@@ -389,6 +390,10 @@ class HomePage extends Component{
 
         this.state = {
             relay: false,
+            data_offline: {
+                title: "Offline Relay Data",
+                value: []
+            },
             data: [],
             relayEmpty: false,
             relayAlert: false,
@@ -421,7 +426,8 @@ class HomePage extends Component{
             date: false,
             input_date: new Date(),
             schedule_date: null,
-            schedule_name_select: ""
+            schedule_name_select: "",
+            schedule_url: ""
         }
     }
 
@@ -443,16 +449,34 @@ class HomePage extends Component{
     }
 
     addRelayOffline(){
-        const data_offline = {
+        const actual_data = {
             name: this.state.relay_name,
             url: this.state.relay_url,
             type: this.state.relay_category,
             type_button: this.state.relay_button_type
         }
 
-        this.setState({ data: this.state.data.concat(data_offline) })
-//        AsyncStorage.setItem("relay_offline", this.state.data)
-//        console.log(this.state.data)
+        this.setState({ data_offline: this.state.data_offline.value.push(actual_data) })
+        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
+        AsyncStorage.getItem("relay_offline").then(x => {
+            console.log(x)
+        })
+    }
+
+    addSchedule(){
+        AsyncStorage.getItem('token').then(token_user => {
+            axios.post(konfigurasi.server + 'schedule/input', { 
+                token: token_user,
+                secret: konfigurasi.key,
+                name: this.state.schedule_name_select,
+                url: this.state.schedule_url,
+                schedule: this.state.schedule_date
+            }).then(res => {
+                if(res.status == 200){
+                    alert("done")
+                }
+            })
+        })
     }
 
 
@@ -516,6 +540,13 @@ class HomePage extends Component{
                     this.setState({ weather: require('../assets/weather/rain.png'), weatherCondition: 'Raining', weatherPallete: 'grey', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Cloudy/i)){
                     this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy', weatherPallete: 'white', weatherFont: 'black' })
+                }else{
+                    this.setState({
+                        weather: require('../assets/weather/cloudy.png'),
+                        weatherCondition: 'Cloudy',
+                        weatherPallete: 'white',
+                        weatherFont: 'black'
+                    })
                 }
             })
         })
@@ -880,18 +911,19 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
-                                {/*<TextInput style={{ textAlign: 'center' }} placeholder="Name.." />*/}
                                 <Picker selectedValue={this.state.schedule_name_select} onValueChange={(val) => this.setState({ schedule_name_select: val })} style={{ width: 100, height: 50 }}>
                                     {this.state.data.map((x,y) => {
                                         return <Picker.Item label={x.name} value={x.name} />
                                     })}
                                 </Picker>
-                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url" />
+                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url Offline" onChangeText={(val) => this.setState({ schedule_url: val })} />
                                 <TouchableOpacity style={{ marginTop: 8, backgroundColor: 'orange', padding: 10, borderRadius: 15, elevation: 15 }} onPress={() => this.input_date()}>
                                     <Text style={{ fontWeight: 'bold' }}>Choose Date</Text>
                                 </TouchableOpacity>
-                                { this.state.date ? <DateTimePicker value={this.state.input_date} display="default" mode={"date"} onChange={(e, date) => this.setState({ schedule_date: date, schedule_date: false })} /> : <View></View> }
-                                <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }}>
+                                { this.state.date && (<DateTimePicker value={this.state.input_date} is24Hour={false} display="default" mode={"date"} onChange={(e, x) => {
+                                    this.setState({ schedule_date: x, date: false })
+                                } } />)}
+                                <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }} onPress={() => this.addSchedule()}>
                                     <Text style={{ color: 'white', fontWeight: 'bold', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -1038,7 +1070,6 @@ class HomePage extends Component{
                        </TouchableOpacity>
                    </View>
                 </View>
-                <Text style={{ color: 'orange', marginTop: 10 }}>You're in offline mode</Text>
             </ScrollView>
         )
     }

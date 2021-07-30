@@ -16,6 +16,7 @@ import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
+import* as FileSystem from 'expo-file-system'
 
 export default class Home extends Component{
     constructor(props){
@@ -28,20 +29,16 @@ export default class Home extends Component{
     }
 
     async componentDidMount(){
-        try{
             await this.battery()
             if(this.props.route.params.type == 'offline'){
                 AsyncStorage.setItem('offline', true)
                 this.setState({ wellcome: true })
             }
-        }catch(e){
-            this.setState({ wellcome: false })
-        }
     }
 
     async battery(){
         let init = await Battery.getBatteryLevelAsync()
-        let parse = level.toString()
+        let parse = init.toString()
         let level = parse[2] + parse[3]
 
         if(level == 19){
@@ -389,6 +386,10 @@ class HomePage extends Component{
 
         this.state = {
             relay: false,
+            data_offline: {
+                title: "Offline Relay Data",
+                value: []
+            },
             data: [],
             relayEmpty: false,
             relayAlert: false,
@@ -443,16 +444,18 @@ class HomePage extends Component{
     }
 
     addRelayOffline(){
-        const data_offline = {
+        const actual_data = {
             name: this.state.relay_name,
             url: this.state.relay_url,
             type: this.state.relay_category,
             type_button: this.state.relay_button_type
         }
 
-        this.setState({ data: this.state.data.concat(data_offline) })
-//        AsyncStorage.setItem("relay_offline", this.state.data)
-//        console.log(this.state.data)
+        this.setState({ data_offline: this.state.data_offline.value.push(actual_data) })
+        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
+        AsyncStorage.getItem("relay_offline").then(x => {
+            console.log(x)
+        })
     }
 
 
@@ -887,17 +890,18 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
-                                {/*<TextInput style={{ textAlign: 'center' }} placeholder="Name.." />*/}
                                 <Picker selectedValue={this.state.schedule_name_select} onValueChange={(val) => this.setState({ schedule_name_select: val })} style={{ width: 100, height: 50 }}>
                                     {this.state.data.map((x,y) => {
                                         return <Picker.Item label={x.name} value={x.name} />
                                     })}
                                 </Picker>
-                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url" />
+                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url Offline" />
                                 <TouchableOpacity style={{ marginTop: 8, backgroundColor: 'orange', padding: 10, borderRadius: 15, elevation: 15 }} onPress={() => this.input_date()}>
                                     <Text style={{ fontWeight: 'bold' }}>Choose Date</Text>
                                 </TouchableOpacity>
-                                { this.state.date ? <DateTimePicker value={this.state.input_date} display="default" mode={"date"} onChange={(e, date) => this.setState({ schedule_date: date, schedule_date: false })} /> : <View></View> }
+                                { this.state.date && (<DateTimePicker value={this.state.input_date} is24Hour={false} display="default" mode={"date"} onChange={(e, x) => {
+                                    this.setState({ schedule_date: x, date: false })
+                                } } />)}
                                 <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }}>
                                     <Text style={{ color: 'white', fontWeight: 'bold', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>

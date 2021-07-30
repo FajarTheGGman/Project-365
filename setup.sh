@@ -44,6 +44,9 @@ elif [[ $1 == '--run' ]]; then
         x=$(hostname -I | awk '{print $1}')
         npm start $x
     fi
+elif [[ $1 == '--dev' ]]; then
+    ip=$(hostname -I | awk '{print $1}')
+    npm run dev $ip
 fi
 
 echo -e $yellow"[/] Checking some dependencies..."
