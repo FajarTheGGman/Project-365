@@ -10,7 +10,8 @@ const routeAuth = require('./routes/auth');
 const routeRelay = require('./routes/relay');
 const routeTensorflow = require('./routes/tensorflow');
 const routeSettings = require('./routes/settings');
-const routeBoard = require('./routes/board')
+const routeBoard = require('./routes/board');
+const routeRelaySchedule = require('./routes/relay_schedule');
 
 require('dotenv').config();
 
@@ -43,10 +44,11 @@ app.use('/auth', routeAuth)
 app.use('/relay', routeRelay)
 app.use('/ai', routeTensorflow)
 app.use('/settings', routeSettings)
+app.use('/schedule', routeRelaySchedule)
 
 app.get('/', (req, res) => {
   res.json({
-    sup: "Wellcome to smarthome 2.0 server"
+    sup: "Wellcome to Project - 365% server"
   });
 });
 

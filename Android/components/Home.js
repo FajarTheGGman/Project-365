@@ -7,6 +7,7 @@ import Modal from 'react-native-modal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Loading from 'react-native-loading-spinner-overlay'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import GridList from 'react-native-grid-list'
 import konfigurasi from '../config'
 import { BarCodeScanner } from 'expo-barcode-scanner'
 import * as Network from 'expo-network'
@@ -15,7 +16,7 @@ import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
-import GridList from 'react-native-grid-list'
+import* as FileSystem from 'expo-file-system'
 
 export default class Home extends Component{
     constructor(props){
@@ -91,6 +92,8 @@ export default class Home extends Component{
                         icons = 'home-outline'
                     }else if(route.name == 'Barcode'){
                         icons = 'qr-code-outline'
+                    }else if(route.name == 'Code'){
+                        icons = 'code-slash-outline'
                     }else if(route.name == 'Settings'){
                         icons = 'settings-outline'
                     }
@@ -100,8 +103,51 @@ export default class Home extends Component{
             })}>
                 <Tabs.Screen name='Home' component={HomePage} />
                 <Tabs.Screen name='Barcode' component={Barcode} />
+                <Tabs.Screen name="Code" component={Code }/>
                 <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
+            </View>
+        )
+    }
+}
+
+class Code extends Component{
+    constructor(props){
+        super(props)
+
+        this.state = {
+            example: 'void setup(){\n\tpinMode(D2, OUTPUT);\n}\n\nvoid loop(){\n\tdigitalWrite(D2, HIGH);\n\tdelay(200);\n\tdigitalWrite(D2, LOW);\n\tdelay(200);\n}'
+        }
+    }
+
+    render(){
+        return(
+            <View style={{ flex: 1, backgroundColor: '#292928' }}>
+                <View style={{ backgroundColor: 'black', padding: 17, alignItems: 'center', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}>
+                    <Text style={{ textAlign: 'center', textAlign: 'center', fontSize: 18, fontWeight: 'bold', color: 'white', marginTop: 5 }}>Code To Esp</Text>
+                </View>
+
+                <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: "column", justifyContent: 'center', alignItems: 'center', paddingBottom: 20 }}>
+                    <View style={{ marginTop: 85, backgroundColor: 'black', padding: 20, borderRadius: 15, width: 190, elevation: 15, paddingLeft: 15, paddingRight: 15, }}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ backgroundColor: 'red', padding: 8, borderRadius: 100 }}></View>
+                                <View style={{ backgroundColor: 'orange', padding: 8, borderRadius: 100, marginLeft: 8 }}></View>
+                                <View style={{ backgroundColor: 'green', padding: 8, borderRadius: 100, marginLeft: 8 }}></View>
+                            </View>
+
+                            <Text style={{ color: 'white', marginTop: -3, marginLeft: 15 }}>Code Here!</Text>
+                        </View>
+
+                        <View>
+                            <TextInput multiline={true} style={{ paddingBottom: 50, color: 'white', marginTop: 10 }} />
+                        </View>
+                    </View>
+
+                    <TouchableOpacity style={{ marginTop: 20, padding: 10, backgroundColor: 'black', borderRadius: 15 }}>
+                        <Text style={{ fontSize: 15, color: 'white', fontWeight: 'bold' }}>Upload IT!</Text>
+                    </TouchableOpacity>
+                </ScrollView>
             </View>
         )
     }
@@ -183,7 +229,7 @@ class Settings extends Component{
 
     Offline(){
         this.props.navigation.dispatch(
-            StackActions.replace('Offline')
+            StackActions.replace('Offline', { type: 'offline' })
         )
     }
 
@@ -275,7 +321,7 @@ class Settings extends Component{
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
                         <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Offline()}>
-                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'grey' }}> OFFLINE</Text></Text>
+                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'red' }}> OFFLINE </Text></Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
@@ -344,9 +390,14 @@ class HomePage extends Component{
 
         this.state = {
             relay: false,
+            data_offline: {
+                title: "Offline Relay Data",
+                value: []
+            },
             data: [],
             relayEmpty: false,
             relayAlert: false,
+            serial_information: false,
             loading: false,
             refresh: false,
             getcontent: false,
@@ -373,7 +424,10 @@ class HomePage extends Component{
             weatherTemp: '',
             error: false,
             date: false,
-            input_date: new Date()
+            input_date: new Date(),
+            schedule_date: null,
+            schedule_name_select: "",
+            schedule_url: ""
         }
     }
 
@@ -395,16 +449,34 @@ class HomePage extends Component{
     }
 
     addRelayOffline(){
-        const data_offline = {
+        const actual_data = {
             name: this.state.relay_name,
             url: this.state.relay_url,
             type: this.state.relay_category,
             type_button: this.state.relay_button_type
         }
 
-        this.setState({ data: this.state.data.concat(data_offline) })
-//        AsyncStorage.setItem("relay_offline", this.state.data)
-//        console.log(this.state.data)
+        this.setState({ data_offline: this.state.data_offline.value.push(actual_data) })
+        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
+        AsyncStorage.getItem("relay_offline").then(x => {
+            console.log(x)
+        })
+    }
+
+    addSchedule(){
+        AsyncStorage.getItem('token').then(token_user => {
+            axios.post(konfigurasi.server + 'schedule/input', { 
+                token: token_user,
+                secret: konfigurasi.key,
+                name: this.state.schedule_name_select,
+                url: this.state.schedule_url,
+                schedule: this.state.schedule_date
+            }).then(res => {
+                if(res.status == 200){
+                    alert("done")
+                }
+            })
+        })
     }
 
 
@@ -468,6 +540,13 @@ class HomePage extends Component{
                     this.setState({ weather: require('../assets/weather/rain.png'), weatherCondition: 'Raining', weatherPallete: 'grey', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Cloudy/i)){
                     this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy', weatherPallete: 'white', weatherFont: 'black' })
+                }else{
+                    this.setState({
+                        weather: require('../assets/weather/cloudy.png'),
+                        weatherCondition: 'Cloudy',
+                        weatherPallete: 'white',
+                        weatherFont: 'black'
+                    })
                 }
             })
         })
@@ -656,6 +735,18 @@ class HomePage extends Component{
         })
     }
 
+    relayData = ({ item, index }) => (
+          <View style={{ flexDirection: 'column', padding: 15, backgroundColor: 'black', borderRadius: 15, elevation: 15, marginTop: 15, paddingLeft: 18, paddingRight: 18 }}>
+             <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Relay</Text>
+          <View style={{ marginTop: 10, padding: 2, backgroundColor: 'orange', borderRadius: 10, alignItems: 'center' }}>
+              <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50 }} />
+          </View>
+          <TouchableOpacity style={{ marginTop: 10, padding: 5, backgroundColor: 'lime', borderRadius: 10 }}>
+             <Text>Turn ON</Text>
+          </TouchableOpacity>
+       </View>
+    )
+
     render(){
         return(
             <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }} refreshControl={<RefreshControl refreshing={this.state.refresh} onRefresh={() => this.refresh()}/>}>
@@ -701,7 +792,12 @@ class HomePage extends Component{
                                 <Text style={{ fontWeight: 'bold', marginTop: -5, fontSize: 17, color: 'white' }}>List Devices</Text>
                             </View>
 
-                            <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
+                                <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
+
+                                    <View>
+                                        <GridList data={this.state.data} numColumns={4} renderItem={this.relayData} />
+                                    </View>
                                  { this.state.data.map((x, y) => {
                                     return <View style={{ flexDirection: "row", paddingBottom: 50 }}>
                                       <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15, padding: 15, borderRadius: 15, paddingLeft: 22, paddingRight: 22, elevaton: 15 }}>
@@ -719,19 +815,20 @@ class HomePage extends Component{
                                     </TouchableOpacity>
                                        </View>
                                    })}
-                            </ScrollView>
+                                </ScrollView>
+                            </View>
                         </View>
                     } onClose={() => this.setState({ swipeRelay: false })} />
 
                 <Modal isVisible={this.state.menu}>
                     <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 85 }}>
                                 <View style={{ paddingLeft: 15 }}>
                                     <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Choose One</Text>
                                 </View>
 
-                                <View style={{ marginLeft: 18, marginRight: -4.5 }}>
+                                <View style={{ marginLeft: 58, marginRight: -4.5 }}>
                                     <TouchableOpacity onPress={() => this.setState({ menu: false })}>
                                         <Icon name="close-outline" size={30} color="black" />
                                     </TouchableOpacity>
@@ -739,11 +836,20 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 20 }}>
+                                <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 10 }}>
                                     <TouchableOpacity onPress={() => this.setState({ schedule: true, menu: false })}>
                                         <Image source={require('../assets/icons/timer.png')} style={{ width: 70, height: 70 }} />
                                         <Text style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>Schedule</Text>
                                     </TouchableOpacity>
+                                </View>
+
+                                <View style={{ marginLeft: 20 }}>
+                                    <View style={{ alignItems: 'center' }}>
+                                        <TouchableOpacity onPress={() => this.setState({ serial_information: true, menu: false })}>
+                                            <Image source={require('../assets/icons/resistor.png')} style={{ width: 70, height: 70 }} />
+                                            <Text style={{ fontWeight: 'bold', color: 'orange', textAlign: 'center' }}>Sensor Info</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
 
                                 <View style={{ marginLeft: 20 }}>
@@ -757,13 +863,42 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.serial_information}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
+                                        <Image source={require('../assets/icons/serial_information.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
+                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Serial Information</Text>
+                                    </View>
+                                </View>
+
+                                <View style={{ marginLeft: 15, marginRight: -5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ serial_information: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            
+                            <View style={{ marginTop: 15, alignItems: 'center' }}>
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Url Offline"/>
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 <Modal isVisible={this.state.schedule}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ paddingLeft: 15, marginTop: 10 }}>
-                                    <View style={{ alignItems: 'center', marginLeft: 20 }}>
-                                        <Image source={require('../assets/icons/clock.png')} style={{ width: 50, height: 50, alignItems: 'center' }} />
+                                <View style={{ paddingLeft: 15 }}>
+                                    <View style={{ alignItems: 'center', marginTop: 15, marginLeft: 25}}>
+                                        <Image source={require('../assets/icons/clock.png')} style={{ width: 50, height: 50 }} />
                                         <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 17 }}>Schedule Relay</Text>
                                     </View>
                                 </View>
@@ -776,13 +911,19 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
-                                <TextInput style={{ textAlign: 'center' }} placeholder="Name.." />
-                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url" />
+                                <Picker selectedValue={this.state.schedule_name_select} onValueChange={(val) => this.setState({ schedule_name_select: val })} style={{ width: 100, height: 50 }}>
+                                    {this.state.data.map((x,y) => {
+                                        return <Picker.Item label={x.name} value={x.name} />
+                                    })}
+                                </Picker>
+                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url Offline" onChangeText={(val) => this.setState({ schedule_url: val })} />
                                 <TouchableOpacity style={{ marginTop: 8, backgroundColor: 'orange', padding: 10, borderRadius: 15, elevation: 15 }} onPress={() => this.input_date()}>
                                     <Text style={{ fontWeight: 'bold' }}>Choose Date</Text>
                                 </TouchableOpacity>
-                                { this.state.date ? <DateTimePicker value={this.state.input_date} /> : <View></View> }
-                                <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }}>
+                                { this.state.date && (<DateTimePicker value={this.state.input_date} is24Hour={false} display="default" mode={"date"} onChange={(e, x) => {
+                                    this.setState({ schedule_date: x, date: false })
+                                } } />)}
+                                <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }} onPress={() => this.addSchedule()}>
                                     <Text style={{ color: 'white', fontWeight: 'bold', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -837,6 +978,56 @@ class HomePage extends Component{
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15, alignItems: 'center' }}>
                             <Text style={{ fontWeight: 'bold', color: 'red' }}>No Internet Connection !</Text>
                             <Image source={require('../assets/icons/nointernet.png')} style={{ width: 70, height: 70, marginTop: 15 }} />
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={false}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', flexDirection: 'column', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 15, marginLeft: 50 }}>Add Some Relay</Text>
+                                <TouchableOpacity>
+                                    <Icon name="close-outline" size={34} color="black" style={{ marginLeft: 50 }}/>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={{ flexDirection: "column", marginTop: 15 }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <TextInput placeholder="Name" onChangeText={(val) => this.setState({ relay_name: val })} style={{ marginLeft: 15 }} />
+                                    <View style={{ flexDirection: 'column', marginRight: 10 }}>
+                                        <Text>Buttons</Text>
+                                        <Radio radio_props={[{ label: 'Button', value: true }, { label: "Switch", value: false }]} formHorizontal={false} animation={true} onPress={(value) => value ? this.setState({ type: true }) : this.setState({ type: false }) } style={{ marginTop: 10 }} />
+                                    </View>
+
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: "column", marginTop: 15 }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <TextInput placeholder="Time Interval" onChangeText={(val) => this.setState({ time_interval: val })} keyboardType="numeric" style={{ marginLeft: 15 }} />
+                                    <View style={{ flexDirection: 'column', marginRight: 35 }}>
+                                        <Text>Timeout</Text>
+                                        <Radio radio_props={[{ label: 'Yes', value: true }, { label: "No", value: false }]} formHorizontal={false} animation={true} onPress={(value) => value ? this.setState({ timeout: true }) : this.setState({ timeout: false }) } style={{ marginTop: 10 }} />
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: "column", marginTop: 15 }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <TextInput placeholder="Url Machine" onChangeText={(val) => this.setState({ url_machine: val })} style={{ marginLeft: 15 }} />
+                                    <View style={{ flexDirection: 'column', marginRight: 35 }}>
+                                        <Text>Status</Text>
+                                        <Radio radio_props={[{ label: 'ON', value: true }, { label: "OFF", value: false }]} formHorizontal={false} animation={true} onPress={(value) => value ? this.setState({ status: true }) : this.setState({ status: false }) } style={{ marginTop: 10 }} />
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={{ alignItems: 'center', marginTop: 15 }}>
+                                <TouchableOpacity onPress={() => this.addRelay()}>
+                                    <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5 }}>Add New Relay</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </Modal>

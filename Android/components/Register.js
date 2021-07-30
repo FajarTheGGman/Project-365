@@ -41,8 +41,8 @@ export default class Register extends Component{
                     <View style={{ padding: 10, backgroundColor: 'white', borderRadius: 15, elevation: 15, paddingTop: 5 }}>
                         <Image source={require('../assets/icons/icon.png')} style={{ width: 100, height: 100, }}  />
                     </View>
-                    <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 10, color: 'white' }}>SmartHome 2.0</Text>
-                    <Text style={{ color: 'white' }}>Version: 2.1.0</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 10, color: 'white' }}>Project 365%</Text>
+                    <Text style={{ color: 'white' }}>Version: 1.0.0</Text>
 
                 </View>
                 <View style={{ backgroundColor: 'white', padding: 15, elevation: 15, marginTop: 20, borderRadius: 10, alignItems: 'center', paddingLeft: 35, paddingRight: 35 }}>

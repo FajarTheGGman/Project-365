@@ -6,6 +6,10 @@ const ch = require('cheerio')
 const modelRelay = require('../models/Relay');
 const modelUsers = require('../models/Users')
 
+route.get('/', (req,res) => {
+    res.json({ section: 'board' })
+})
+
 route.post('/relayStatus', (req,res) => {
     jwt.verify(req.body.token, req.body.key, (err, token) => {
         modelUsers.find({ username: token.username }, (err, data) => {
@@ -28,12 +32,15 @@ route.post('/weather', (req,res) => {
             res.json({ "[!] Error ": 'Wrong Credentials' })
         }
 
-        axios.get('https://weather.com/weather/today/l/1673678103f5ee4a01282fc6dc796d2d1502778e0383ced20aca25e9f51f651f').then(response => {
-            const parsing = ch.load(response.data)
+        let location;
 
-            res.json({ 
-                condition: parsing('.CurrentConditions--phraseValue--17s79').text(),
-                temp: parsing('.CurrentConditions--tempValue--1RYJJ').text()
+        axios.get('http://ip-api.com/json').then(x => {
+            axios.get('http://wttr.in/' + x.data.city + '?format=j1').then(response => {
+
+                res.json({ 
+                    condition: response.data.current_condition[0].weatherDesc[0].value,
+                    temp: response.data.current_condition[0].temp_C + "°"
+                })
             })
         })
     })
