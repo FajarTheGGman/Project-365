@@ -30,13 +30,9 @@ export default class Profile extends Component{
             this.setState({ connection: true })
         }else if(this.props.route.params.status == 'offline'){
             this.setState({ connection: true })
+        }else if(this.props.route.params.status == 'online'){
+            this.setState({ connection: false })
         }
-
-        AsyncStorage.getItem('offline').then(x => {
-            if(x == true){
-                this.setState({ connection: true })
-            }
-        })
 
         AsyncStorage.getItem('token').then(res => {
             axios.post(konfigurasi.server + 'auth/getall', { token: res, secret: 'Important' }).then(data => {

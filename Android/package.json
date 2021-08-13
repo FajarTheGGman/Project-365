@@ -39,7 +39,8 @@
     "react-native-swipe-modal-up-down": "^1.0.9",
     "react-native-swiper": "^1.6.0",
     "react-native-vector-icons": "^8.1.0",
-    "react-native-web": "~0.13.12"
+    "react-native-web": "~0.13.12",
+    "react-vector-icons": "^0.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
