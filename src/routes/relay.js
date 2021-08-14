@@ -9,8 +9,11 @@ route.get('/', (req,res) => {
     res.json({ section: 'relay' })
 })
 
-route.post('/get', (req,res) => {
-    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+route.get('/get', (req,res) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
+        if(err){
+            res.json({ error: "[!] Error Authorization" }).status(301)
+        }
         modelUsers.find({ username: token.username }, (err, done) => {
             if(done.length == 0 || done.length == null){
                 res.status(301)
@@ -99,7 +102,7 @@ route.post('/add', (req,res) => {
                 res.json({ warning: '[!] Username or password is wrong' })
             }
 
-            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, url_offline: req.body.url, timeout: req.body.timeout, type: req.body.relay_category }, (err, done) => {
+            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, url_offline: req.body.url, timeout: req.body.timeout, type: req.body.relay_category, type_button: req.body.type_button }, (err, done) => {
                 if(err){
                     res.status(301)
                     res.json({ error: '[!] Something Wrong in server :(' })
