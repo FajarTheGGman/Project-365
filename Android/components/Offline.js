@@ -448,7 +448,9 @@ class HomePage extends Component{
             schedule_date: null,
             schedule_name_select: "",
             schedule_offline: "",
-            scheduleDetail: false
+            scheduleDetail: false,
+            scheduleDetailName: '',
+            scheduleDetailDate: ''
         }
     }
 
@@ -728,7 +730,12 @@ class HomePage extends Component{
     schedule(x){
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'schedule/get', { token: data, secret: konfigurasi.key, name: x }).then(res => {
-                console.log(res.data)
+                try{
+                    this.setState({ scheduleDetailName: res.data.data[0].name, scheduleDetailDate: res.data.data[0].schedule, scheduleDetail: true })
+                    console.log(res.data)
+                }catch(e){
+                    
+                }
             })
         })
     }
@@ -1010,7 +1017,7 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ alignItems: 'center', marginTop: 15 }}>
-                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelayOffline()}>
+                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelay()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
