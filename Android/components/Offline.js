@@ -450,7 +450,10 @@ class HomePage extends Component{
             schedule_offline: "",
             scheduleDetail: false,
             scheduleDetailName: '',
-            scheduleDetailDate: ''
+            scheduleDetailDate: '',
+            moduleDetail: false,
+            moduleName: '',
+            moduleUrl: ''
         }
     }
 
@@ -727,6 +730,19 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
+    moduleDetail(ThisName, url){
+        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url })
+        AsyncStorage.getItem('token').then(data => {
+            axios.post(konfigurasi.server + 'relay/update', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName, url_offline: this.state.moduleUrl }).then(response => {
+                if(response.status == 200){
+                    alert('Successfully updated relay')
+                }else if(response.status == 301){
+                    alert('Something wrong in server!')
+                }
+            })
+        })
+    }
+
     schedule(x){
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'schedule/get', { token: data, secret: konfigurasi.key, name: x }).then(res => {
@@ -824,9 +840,41 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.moduleDetail}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
+                                        <Image source={require('../assets/icons/details.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
+                                        <Text style={{ fontWeight: 'bold', marginTop: 5, fontSize: 17 }} >Details Module</Text>
+                                    </View>
+                                </View>
+
+                                <View style={{ marginLeft: 15, marginRight: -5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ moduleDetail: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            
+                            <View style={{ marginTop: 15, alignItems: 'center' }}>
+                                <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>The URL : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrl}</Text></Text>
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL Offline ?" onChangeText={(val) => this.setState({ moduleUrl: val })} />
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+
                 <Modal isVisible={this.state.scheduleDetail}>
                     <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                        <View style={{ backgroundColor: 'white', padding: 10, backgroundColor: 'white', borderRadius: 10, paddingLeft: 27, paddingRight: 15 }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, backgroundColor: 'white', borderRadius: 10, paddingLeft: 27, paddingRight: 15, alignItems: 'center' }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ marginRight: 15 }}>
                                     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Scheduled Time</Text>
@@ -837,6 +885,9 @@ class HomePage extends Component{
                                     </TouchableOpacity>
                                 </View>
                             </View>
+                            <Text style={{ color: 'white', backgroundColor: 'black', padding: 7, fontWeight: 'bold', borderRadius: 10, marginTop: 5 }}>{this.state.scheduleDetailName}</Text>
+                            <Text style={{ marginTop: 5 }}>Turn on in</Text>
+                            <Text style={{ color: 'white', backgroundColor: 'black', padding: 7, fontWeight: 'bold', borderRadius: 10, marginTop: 5 }}>{this.state.scheduleDetailDate}</Text>
                         </View>
                     </View>
                 </Modal>
@@ -851,7 +902,7 @@ class HomePage extends Component{
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
                                   { this.state.data.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.schedule(x.name)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
