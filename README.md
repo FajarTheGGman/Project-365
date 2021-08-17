@@ -63,9 +63,6 @@ Windows: "click run.bat"
 - NodeJS
 </pre>
 
-<br>
-<br>
-
 
 <img src="https://media.giphy.com/media/8X2kIbRJZQkdXt46ur/giphy.gif" width="180" />
 <div>
