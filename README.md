@@ -28,6 +28,44 @@ Linux: "bash run.sh"
 Windows: "click run.bat"
 </pre>
 
+<br>
+<br>
+
+# How can i setup this things
+
+<b>Example Diagram</b>
+
+![]()
+
+<i>First things is setup your nodemcu wiring like this or any else</i>
+
+<b>Hardware</b>
+<pre>
+[ Minimal Requirements ]
+- Relays
+- Nodemcu esp8266 / Nodemcu esp32
+- or any sensors
+</pre>
+
+<b>Software</b>
+<pre>
+[ Arduino IDE ]
+- Nodemcu board library
+- ESPHTTPClient
+- ESPWebServer
+- Arduino JSON
+- Arduino OTA
+
+[ Server ]
+- MongoDB
+- ExpressJS
+- React Native
+- NodeJS
+</pre>
+
+<br>
+<br>
+
 
 <img src="https://media.giphy.com/media/8X2kIbRJZQkdXt46ur/giphy.gif" width="180" />
 <div>
