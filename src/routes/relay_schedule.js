@@ -64,12 +64,18 @@ route.post('/input', (req,res) => {
 
         modelUser.find({ username: token.username }, (err, user) => {
             if(user.length != 0){
-                modelRelay.insertMany({ username: token.username, name: req.body.name, url_offline: req.body.url, schedule: req.body.schedule }, (err, done) => {
-                    if(err){
-                        res.status(301)
-                        res.json({ error: "Server Error :(" })
+                modelRelay.findOne({ username: token.username, name: req.body.name }, (err, duplicate) => {
+                    if(duplicate.length == 0){
+                        modelRelay.insertMany({ username: token.username, name: req.body.name, url_offline: req.body.url, schedule: req.body.schedule }, (err, done) => {
+                            if(err){
+                                res.status(301)
+                                res.json({ error: "Server Error :(" })
+                            }else{
+                                res.json({ success: "[+] Successfully insert relay" })
+                            }
+                        })
                     }else{
-                        res.json({ success: "[+] Successfully insert relay" })
+                        res.json({ error: '[!] Relay already added' }).status(301)
                     }
                 })
             }
