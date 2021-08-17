@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker } from 'react-native'
+import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry } from 'react-native'
 import { StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import axios from 'axios'
@@ -30,10 +30,29 @@ export default class Home extends Component{
 
     async componentDidMount(){
             await this.battery()
-            if(this.props.route.params.type == 'offline'){
-                AsyncStorage.setItem('offline', true)
-                this.setState({ wellcome: true })
+            try{
+                if(this.props.route.params.type == 'offline'){
+                    AsyncStorage.setItem('offline', true)
+                    this.setState({ wellcome: true })
+                }else if(this.props.route.params.type == 'online'){
+                    AsyncStorage.setItem('online', true)
+                    this.setState({ wellcome: false })
+                }
+            }catch(e){
+            
             }
+
+        AsyncStorage.getItem('offline').then(res => {
+            try{
+                if(res){
+                    this.props.navigation.dispatch(
+                        StackActions.replace('offline')
+                    )
+                }
+            }catch(e){
+                
+            }
+        })
     }
 
     async battery(){
@@ -240,9 +259,9 @@ class Settings extends Component{
         this.refresh()
     }
 
-    Online(){
+    Offline(){
         this.props.navigation.dispatch(
-            StackActions.replace('Home')
+            StackActions.replace('Offline', { type: 'offline' })
         )
     }
 
@@ -333,8 +352,8 @@ class Settings extends Component{
 
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
-                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
-                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
+                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Offline()}>
+                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'red' }}> OFFLINE</Text></Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
@@ -439,7 +458,15 @@ class HomePage extends Component{
             date: false,
             input_date: new Date(),
             schedule_date: null,
-            schedule_name_select: ""
+            schedule_name_select: "",
+            schedule_offline: "",
+            scheduleDetail: false,
+            scheduleDetailName: '',
+            scheduleDetailDate: '',
+            scheduleButton: false,
+            moduleDetail: false,
+            moduleName: '',
+            moduleUrl: ''
         }
     }
 
@@ -478,10 +505,10 @@ class HomePage extends Component{
         }
 
         this.setState({ data_offline: this.state.data_offline.value.push(actual_data) })
-        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
-        AsyncStorage.getItem("relay_offline").then(x => {
-            console.log(x)
-        })
+//        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
+//        AsyncStorage.getItem("relay_offline").then(x => {
+//            console.log(x)
+//        })
     }
 
 
@@ -716,6 +743,59 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
+    delete(mod){
+        AsyncStorage.getItem('token').then(data => {
+            axios.post(konfigurasi.server + 'relay/delete', { token: data, secret: konfigurasi.key, name: mod }).then(response => {
+                if(response.status == 200){
+                    alert('Module deleted!')
+                    this.refresh()
+                }
+            })
+        })
+    }
+
+    moduleDetail(ThisName, url){
+        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url })
+        AsyncStorage.getItem('token').then(data => {
+            axios.post(konfigurasi.server + 'relay/update', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName, url_offline: this.state.moduleUrl }).then(response => {
+                if(response.status == 200){
+                    alert('Successfully updated relay')
+                }else if(response.status == 301){
+                    alert('Something wrong in server!')
+                }
+            })
+            
+            axios.post(konfigurasi.server + "schedule/get", { token: data, secret: konfigurasi.key, name: ThisName }).then(response => {
+                if(response.status == 200){
+                    this.setState({ scheduleButton: true })
+                }
+            })
+        })
+    }
+
+    schedule(x){
+        AsyncStorage.getItem('token').then(data => {
+            axios.post(konfigurasi.server + 'schedule/get', { token: data, secret: konfigurasi.key, name: x }).then(res => {
+                try{
+                    this.setState({ scheduleDetailName: res.data.data[0].name, scheduleDetailDate: res.data.data[0].schedule, scheduleDetail: true })
+                    console.log(res.data)
+                }catch(e){
+                    
+                }
+            })
+        })
+    }
+
+    addSchedule(){
+        AsyncStorage.getItem('token').then(data => {
+            axios.post(konfigurasi.server + 'schedule/input', { token: data, secret: konfigurasi.key, name: this.state.schedule_name_select, url_offline: this.state.schedule_offline, schedule: this.state.schedule_date}).then(res => {
+                if(res.status == 200){
+                    alert('Done')
+                }
+            })
+        })
+    }
+
     switch(nama, status){
         AsyncStorage.getItem('token').then(token_user => {
             axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
@@ -790,6 +870,64 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.moduleDetail}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
+                                        <Image source={require('../assets/icons/details.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
+                                        <Text style={{ fontWeight: 'bold', marginTop: 5, fontSize: 17 }} >Details Module</Text>
+                                        {this.state.scheduleButton ? <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 10, backgroundColor: 'green' }} onPress={() => this.schedule(this.state.moduleName)}>
+                                            <Text>Schedule</Text>
+                                        </TouchableOpacity>:<View></View>}
+                                    </View>
+                                </View>
+
+                                <View style={{ marginLeft: 15, marginRight: -5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ moduleDetail: false, scheduleButton: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            
+                            <View style={{ marginTop: 15, alignItems: 'center' }}>
+                                <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>The URL : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrl}</Text></Text>
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL Offline ?" onChangeText={(val) => this.setState({ moduleUrl: val })} />
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'red', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.delete(this.state.moduleName)}>
+                                    <Text>Delete</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+
+                <Modal isVisible={this.state.scheduleDetail}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, backgroundColor: 'white', borderRadius: 10, paddingLeft: 27, paddingRight: 15, alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <View style={{ marginRight: 15 }}>
+                                    <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Scheduled Time</Text>
+                                </View>
+                                <View style={{ marginLeft: 10, marginRight: -2 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ scheduleDetail: false })}>
+                                        <Icon name="close-outline" size={30} color={"black"} style={{ marginTop: -5, marginRight: -5 }} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            <Text style={{ color: 'white', backgroundColor: 'black', padding: 7, fontWeight: 'bold', borderRadius: 10, marginTop: 5 }}>{this.state.scheduleDetailName}</Text>
+                            <Text style={{ marginTop: 5 }}>Turn on in</Text>
+                            <Text style={{ color: 'white', backgroundColor: 'black', padding: 7, fontWeight: 'bold', borderRadius: 10, marginTop: 5 }}>{this.state.scheduleDetailDate}</Text>
+                        </View>
+                    </View>
+                </Modal>
+
                 <SwipeUpDown modalVisible={this.state.swipeRelay} ContentModal={
                         <View style={{ flex: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15, paddingBottom: 10, elevation: 15 }}>
@@ -800,7 +938,7 @@ class HomePage extends Component{
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
                                   { this.state.data.map((x, y) => {
-                                    return <View style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
@@ -814,7 +952,7 @@ class HomePage extends Component{
                                                 </TouchableOpacity>}
                                             </View>}
                                         </View>
-                                    </View>
+                                    </TouchableOpacity>
                                   })}
                                 </ScrollView>
                             </View>
@@ -917,14 +1055,14 @@ class HomePage extends Component{
                                         return <Picker.Item label={x.name} value={x.name} />
                                     })}
                                 </Picker>
-                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url Offline" />
+                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url Offline" onChangeText={(val) => this.setState({ schedule_offline: val })} />
                                 <TouchableOpacity style={{ marginTop: 8, backgroundColor: 'orange', padding: 10, borderRadius: 15, elevation: 15 }} onPress={() => this.input_date()}>
-                                    <Text style={{ fontWeight: 'bold' }}>Choose Date</Text>
+                                    <Text style={{ fontWeight: 'bold' }}>Choose Time</Text>
                                 </TouchableOpacity>
-                                { this.state.date && (<DateTimePicker value={this.state.input_date} is24Hour={false} display="default" mode={"date"} onChange={(e, x) => {
+                                { this.state.date && (<DateTimePicker value={this.state.input_date} is24Hour={false} display="default" mode="time" onChange={(e, x) => {
                                     this.setState({ schedule_date: x, date: false })
                                 } } />)}
-                                <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }}>
+                                <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }} onPress={() => this.addSchedule()}>
                                     <Text style={{ color: 'white', fontWeight: 'bold', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -957,10 +1095,9 @@ class HomePage extends Component{
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
-                                    <TextInput placeholder="Timeout" keyboardType='numeric' onChangeText={(value) => this.setState({ relay_time_interval: value })} />
                                     <View style={{ marginTop: 10 }}>
                                         <Text>Type Button</Text>
-                                        <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) /*? this.setState({ relay_button_type: true }) : this.setState({ relay_button_type: false }) */ } style={{ marginTop: 10, color: 'black' }} />
+                                        <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) } style={{ marginTop: 10, color: 'black' }} />
                                     </View>
                                 </View> 
                             </View>

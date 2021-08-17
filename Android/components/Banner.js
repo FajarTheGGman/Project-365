@@ -8,7 +8,8 @@ export default class Banner extends Component{
         super(props)
 
         this.state ={
-            dev: "{ Developer: Fajar Firdaus }"
+            dev: "{ Developer: Fajar Firdaus }",
+            version: "{ Version: 'development' }"
         }
     }
 
@@ -33,8 +34,9 @@ export default class Banner extends Component{
                         <Text style={{ fontSize: 19, color: 'white', fontWeight: 'normal', marginTop: 27  }}>Sup Mate, Wellcome To</Text>
                         <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Smart Room</Text>
                         <Text style={{ color: 'white', marginTop: 65 }}>{this.state.dev}</Text>
+                        <Text style={{ color: 'white', marginTop: 5 }}>{this.state.version}</Text>
 
-                        <Text style={{ marginTop: 70, fontSize: 17, color: 'white', fontWeight: 'bold' }}>Swipe To Right 👉</Text>
+                        <Text style={{ marginTop: 50, fontSize: 17, color: 'white', fontWeight: 'bold' }}>Swipe To Right 👉</Text>
                     </View>
 
                     <View style={{ alignItems: 'center', marginTop: 140}}>

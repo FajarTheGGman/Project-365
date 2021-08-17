@@ -29,9 +29,6 @@ export default class Home extends Component{
     }
 
     async componentDidMount(){
-        AppRegistry.registerHeadlessTask('test', () => {
-            alert('test')
-        })
             await this.battery()
             try{
                 if(this.props.route.params.type == 'offline'){
@@ -249,7 +246,7 @@ class Settings extends Component{
 
     Online(){
         this.props.navigation.dispatch(
-            StackActions.replace('Home')
+            StackActions.replace('Home', { type: 'online' })
         )
     }
 
@@ -410,10 +407,7 @@ class HomePage extends Component{
 
         this.state = {
             relay: false,
-            data_offline: {
-                title: "Offline Relay Data",
-                value: []
-            },
+            data_offline: [],
             data: [],
             relayEmpty: false,
             relayAlert: false,
@@ -451,6 +445,7 @@ class HomePage extends Component{
             scheduleDetail: false,
             scheduleDetailName: '',
             scheduleDetailDate: '',
+            scheduleButton: false,
             moduleDetail: false,
             moduleName: '',
             moduleUrl: ''
@@ -491,13 +486,20 @@ class HomePage extends Component{
             type_button: this.state.relay_button_type
         }
 
-        this.setState({ data_offline: this.state.data_offline.value.push(actual_data) })
-//        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
-//        AsyncStorage.getItem("relay_offline").then(x => {
-//            console.log(x)
-//        })
+        this.setState({ data_offline: this.state.data_offline.concat(actual_data) })
+        console.log(this.state.data_offline)
+        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
+        AsyncStorage.getItem("relay_offline").then(x => {
+            console.log(x)
+        })
     }
 
+    relay_offline(){
+        AsyncStorage.getItem('relay_offline').then(data => {
+            this.setState({ data_offline: data })
+            console.log(this.state.data_offline)
+        })
+    }
 
     async componentDidMount(){
         const network = await Network.getNetworkStateAsync()
@@ -740,6 +742,12 @@ class HomePage extends Component{
                     alert('Something wrong in server!')
                 }
             })
+            
+            axios.post(konfigurasi.server + "schedule/get", { token: data, secret: konfigurasi.key, name: ThisName }).then(response => {
+                if(response.status == 200){
+                    this.setState({ scheduleButton: true })
+                }
+            })
         })
     }
 
@@ -848,11 +856,14 @@ class HomePage extends Component{
                                     <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
                                         <Image source={require('../assets/icons/details.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
                                         <Text style={{ fontWeight: 'bold', marginTop: 5, fontSize: 17 }} >Details Module</Text>
+                                        {this.state.scheduleButton ? <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 10, backgroundColor: 'green' }} onPress={() => this.schedule(this.state.moduleName)}>
+                                            <Text>Schedule</Text>
+                                        </TouchableOpacity>:<View></View>}
                                     </View>
                                 </View>
 
                                 <View style={{ marginLeft: 15, marginRight: -5 }}>
-                                    <TouchableOpacity onPress={() => this.setState({ moduleDetail: false })}>
+                                    <TouchableOpacity onPress={() => this.setState({ moduleDetail: false, scheduleButton: false })}>
                                         <Icon name="close-outline" size={30} color='black' />
                                     </TouchableOpacity>
                                 </View>
@@ -901,7 +912,7 @@ class HomePage extends Component{
 
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
-                                  { this.state.data.map((x, y) => {
+                                  { this.state.data_offline.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
@@ -1021,9 +1032,9 @@ class HomePage extends Component{
                                 </Picker>
                                 <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url Offline" onChangeText={(val) => this.setState({ schedule_offline: val })} />
                                 <TouchableOpacity style={{ marginTop: 8, backgroundColor: 'orange', padding: 10, borderRadius: 15, elevation: 15 }} onPress={() => this.input_date()}>
-                                    <Text style={{ fontWeight: 'bold' }}>Choose Date</Text>
+                                    <Text style={{ fontWeight: 'bold' }}>Choose Time</Text>
                                 </TouchableOpacity>
-                                { this.state.date && (<DateTimePicker value={this.state.input_date} is24Hour={false} display="default" mode={"date"} onChange={(e, x) => {
+                                { this.state.date && (<DateTimePicker value={this.state.input_date} is24Hour={false} display="default" mode="time" onChange={(e, x) => {
                                     this.setState({ schedule_date: x, date: false })
                                 } } />)}
                                 <TouchableOpacity style={{ marginTop: 10, borderRadius: 10, padding: 5, backgroundColor: 'black', elevation: 15 }} onPress={() => this.addSchedule()}>
@@ -1059,16 +1070,15 @@ class HomePage extends Component{
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
-                                    <TextInput placeholder="Timeout" keyboardType='numeric' onChangeText={(value) => this.setState({ relay_time_interval: value })} />
                                     <View style={{ marginTop: 10 }}>
                                         <Text>Type Button</Text>
-                                        <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) /*? this.setState({ relay_button_type: true }) : this.setState({ relay_button_type: false }) */ } style={{ marginTop: 10, color: 'black' }} />
+                                        <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) } style={{ marginTop: 10, color: 'black' }} />
                                     </View>
                                 </View> 
                             </View>
 
                             <View style={{ alignItems: 'center', marginTop: 15 }}>
-                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelay()}>
+                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelayOffline()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -1173,7 +1183,7 @@ class HomePage extends Component{
                        </TouchableOpacity>
                    </View>
                 </View>
-                <Text style={{ color: 'orange', marginTop: 10 }}>You're in offline mode</Text>
+                <Text style={{ color: 'orange', marginTop: 5 }}>You're in offline mode</Text>
             </ScrollView>
         )
     }
