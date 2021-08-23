@@ -8,6 +8,28 @@ route.get('/', (req, res) => {
     res.json({ section: 'Relay Schedule' })
 })
 
+route.post('/get', (req,res) => {
+    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+        if(err){
+            res.json({ error: '[!] Error Authorization' }).status(301)
+        }
+
+        modelUser.findOne({ username: token.username }, (err, user) => {
+            if(err){
+                res.json({ error: '[!] User not found' })
+            }
+
+            modelRelay.find({ username: token.username, name: req.body.name }, (err, done) => {
+                if(err){
+                    res.json({ error: '[!] Data not found' }).status(404)
+                }else{
+                    res.json({ data: done })
+                }
+            })
+        })
+    })
+})
+
 route.post('/getall', (req, res) => {
     jwt.verify(req.body.token, req.body.secret, (err, token) => {
         if(err){
@@ -42,12 +64,18 @@ route.post('/input', (req,res) => {
 
         modelUser.find({ username: token.username }, (err, user) => {
             if(user.length != 0){
-                modelRelay.insertMany({ username: token.username, name: req.body.name, url_offline: req.body.url, schedule: req.body.schedule }, (err, done) => {
-                    if(err){
-                        res.status(301)
-                        res.json({ error: "Server Error :(" })
+                modelRelay.findOne({ username: token.username, name: req.body.name }, (err, duplicate) => {
+                    if(duplicate.length == 0){
+                        modelRelay.insertMany({ username: token.username, name: req.body.name, url_offline: req.body.url, schedule: req.body.schedule }, (err, done) => {
+                            if(err){
+                                res.status(301)
+                                res.json({ error: "Server Error :(" })
+                            }else{
+                                res.json({ success: "[+] Successfully insert relay" })
+                            }
+                        })
                     }else{
-                        res.json({ success: "[+] Successfully insert relay" })
+                        res.json({ error: '[!] Relay already added' }).status(301)
                     }
                 })
             }

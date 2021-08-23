@@ -9,8 +9,11 @@ route.get('/', (req,res) => {
     res.json({ section: 'relay' })
 })
 
-route.post('/get', (req,res) => {
-    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+route.get('/get', (req,res) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
+        if(err){
+            res.json({ error: "[!] Error Authorization" }).status(301)
+        }
         modelUsers.find({ username: token.username }, (err, done) => {
             if(done.length == 0 || done.length == null){
                 res.status(301)
@@ -35,6 +38,27 @@ route.post('/getall', (req,res) => {
             modelRelay.find({ username: token.username }, (err, data) => {
                 res.json(data)
             })
+        })
+    })
+})
+
+route.post('/updateMany', (req,res) => {
+    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+        if(err){
+            res.json({ error: "[!] Wrong Authorization" }).status(301)
+        }
+        modelRelay.updateOne({ 
+            username: token.username,
+            name: req.body.name
+        }, {
+            name: req.body.newName,
+            url_offline: req.body.url
+        }, (err, done) => {
+            if(err){
+                res.json({ error: '[!] Something Wrong in Server' }).status(301)
+            }else{
+                res.json({ success: "[+] Successfully updated the relay" })
+            }
         })
     })
 })
@@ -99,7 +123,7 @@ route.post('/add', (req,res) => {
                 res.json({ warning: '[!] Username or password is wrong' })
             }
 
-            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, url_offline: req.body.url, timeout: req.body.timeout, type: req.body.relay_category }, (err, done) => {
+            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, url_offline: req.body.url, timeout: req.body.timeout, type: req.body.relay_category, type_button: req.body.type_button }, (err, done) => {
                 if(err){
                     res.status(301)
                     res.json({ error: '[!] Something Wrong in server :(' })
@@ -119,7 +143,7 @@ route.post('/delete', (req,res) => {
                 res.json({ failed: '[!] Username or password is wrong' })
             }
 
-            modelRelay.deleteOne({ name: req.body.name }, (err, done) => {
+            modelRelay.deleteOne({ username: token.username, name: req.body.name }, (err, done) => {
                 if(err){
                     res.status(501)
                     res.json({ error: '[!] Something Wrong in server' })

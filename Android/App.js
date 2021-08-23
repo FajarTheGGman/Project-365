@@ -10,7 +10,7 @@ import Home from './components/Home'
 import Profile from './components/Profile'
 import Banner from './components/Banner'
 import Guide from './components/Guide'
-import Offline from './components/Offline'
+import Offline from './components/Offline' 
 
 export default class App extends Component{
     render(){

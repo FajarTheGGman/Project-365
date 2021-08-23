@@ -12,7 +12,14 @@ yellow='\033[33;1m'
 
 installing(){
     echo -e $yellow"[/] Installing Dependencies...."
-    npm install
+    npm install --legacy-peer-deps
+    echo -e $green"[+] node_modules successfully installed"
+}
+
+install_android(){
+    echo -e $yellow"[/] Installing dependencies for android...."
+    cd Android
+    npm install --legacy-peer-deps
     echo -e $green"[+] node_modules successfully installed"
 }
 
@@ -44,6 +51,8 @@ elif [[ $1 == '--run' ]]; then
         x=$(hostname -I | awk '{print $1}')
         npm start $x
     fi
+elif [[ $1 == '--install-android' ]]; then
+    install_android
 elif [[ $1 == '--dev' ]]; then
     ip=$(hostname -I | awk '{print $1}')
     npm run dev $ip

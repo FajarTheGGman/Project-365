@@ -30,13 +30,9 @@ export default class Profile extends Component{
             this.setState({ connection: true })
         }else if(this.props.route.params.status == 'offline'){
             this.setState({ connection: true })
+        }else if(this.props.route.params.status == 'online'){
+            this.setState({ connection: false })
         }
-
-        AsyncStorage.getItem('offline').then(x => {
-            if(x == true){
-                this.setState({ connection: true })
-            }
-        })
 
         AsyncStorage.getItem('token').then(res => {
             axios.post(konfigurasi.server + 'auth/getall', { token: res, secret: 'Important' }).then(data => {
@@ -58,7 +54,7 @@ export default class Profile extends Component{
                         <View style={{ backgroundColor: 'white', alignItems: 'center', padding: 15, borderRadius: 15, elevation: 15 }}>
                             <Image source={require('../assets/illustrations/offline.png')} style={{ width: 170, height: 150 }} />
                             <Text>I'm Sorry but, Profile Information</Text>
-                            <Text>Does'nt appear in offline mode</Text>
+                            <Text>Doesn't appear in offline mode</Text>
                             <TouchableOpacity style={{ marginTop: 15, backgroundColor: '#d9d9d9', padding: 7, borderRadius: 10 }} onPress={() => this.props.navigation.goBack()}>
                                 <Text style={{ color: 'white' }}>Going back</Text>
                             </TouchableOpacity>
