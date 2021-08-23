@@ -13,6 +13,9 @@
 <h3>Project 365%</h3>
 </div>
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+
 # How to install ?
 <img src="https://media.giphy.com/media/kQOxxwjjuTB7O/giphy.gif" width="180" />
 
@@ -35,7 +38,14 @@ Windows: "click run.bat"
 
 <b>Example Diagram</b>
 
-![]()
+<i>The Schematic</i>
+![](https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/example_diagram.png?token=AIQPJFLGXMJONNSWRA6FRFTBENONY)
+
+<i>The Flowchart</i>
+![](https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/flowchart.png?token=AIQPJFLGXMJONNSWRA6FRFTBENONY)
+
+<i>Databases Diagram</i>
+![](https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/erd.png?token=AIQPJFLGXMJONNSWRA6FRFTBENONY)
 
 <i>First things is setup your nodemcu wiring like this or any else</i>
 
