@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+// Copyright 2021 By Fajar Firdaus
 
 if(process.argv[3] == '--models'){
     let name = process.argv[4]

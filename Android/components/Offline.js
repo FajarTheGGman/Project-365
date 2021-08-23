@@ -482,12 +482,14 @@ class HomePage extends Component{
         const actual_data = {
             name: this.state.relay_name,
             url: this.state.relay_url,
+            relay_status: false,
             type: this.state.relay_category,
             type_button: this.state.relay_button_type
         }
 
         this.setState({ data_offline: this.state.data_offline.concat(actual_data) })
         console.log(this.state.data_offline)
+        AsyncStorage.setItem("relay_offline", null);
         AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
         AsyncStorage.getItem("relay_offline").then(x => {
             console.log(x)
@@ -517,6 +519,11 @@ class HomePage extends Component{
         }else{
             
         }
+
+        AsyncStorage.getItem('relay_offline').then(data => {
+            let parsing = JSON.parse(data)
+            this.setState({ data_offline: this.state.data_offline.concat(parsing) })
+        })
 
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
@@ -774,15 +781,25 @@ class HomePage extends Component{
         })
     }
 
-    switch(nama, status){
-        AsyncStorage.getItem('token').then(token_user => {
-            axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
-                if(result.status == 200){
-                    this.refresh()
-                }else{
-                    alert('[!] Server Error')
-                }
-            })
+    switch(index, status, url){
+        AsyncStorage.getItem('localip').then(x => {
+            let get_relay = this.state.data_offline[index].status
+
+            get_relay = !status
+
+            if(status){
+                axios.get('http://' + localip + url, { 
+                    toggle: status
+                }).then(response => {
+                    alert('Relay output is ON')
+                })
+            }else{
+                axios.get('http://' + localip + url, {
+                    toggle: status
+                }).then(response => {
+                    alert('Relay output is OFF')
+                })
+            }
         })
     }
 
@@ -913,13 +930,13 @@ class HomePage extends Component{
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
                                   { this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                            {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(x.name, x.status)} value={x.status} /> : <View style={{ marginRight: 5 }}>
+                                            {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.status, x.url)} value={x.status} /> : <View style={{ marginRight: 5 }}>
                                                 {x.status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(x.name, x.status)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
