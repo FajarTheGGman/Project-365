@@ -39,13 +39,13 @@ Windows: "click run.bat"
 <b>Example Diagram</b>
 
 <b>Minimum Wiring</b><br></br>
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/example_diagram.png?token=AIQPJFLGXMJONNSWRA6FRFTBENONY" width="520" height="320" />
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/example_diagram.png" width="520" height="320" />
 <br></br>
 <b>The Flowchart</b><br></br>
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/flowchart.png?token=AIQPJFN773U2UJKKRXZXGLLBENOWO" width="520" height="320" />
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/flowchart.png" width="520" height="320" />
 <br></br>
 <b>Databases Diagram</b><br></br>
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/erd.png?token=AIQPJFPOTJLVRUTX4ZD265DBENO6Y" width="420" height="320" />
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/erd.png" width="420" height="320" />
 
 <b>Hardware</b>
 <pre>
