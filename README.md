@@ -13,7 +13,7 @@
 <h3>Project 365%</h3>
 </div>
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)  [![](https://vercel.com/button)](https://vercel.com/new)
 
 
 # How to install ?
