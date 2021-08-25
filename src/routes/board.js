@@ -6,18 +6,36 @@ const ch = require('cheerio')
 const modelRelay = require('../models/Relay');
 const modelUsers = require('../models/Users')
 
-route.get('/', (req,res) => {
-    res.json({ section: 'board' })
+route.get('/relay', (req,res) => {
+    jwt.verify(req.query.token, req.query.key, (err, token) => {
+        if(err){
+            res.json({ error: "[!] Error Authorization" }).status(301)
+        }else{
+            modelUsers.find({ username: token.username }, (err, data) => {
+                if(err){
+                    res.json({ error: "[!] Users not found" }).status(301)
+                }else{
+                    modelRelay.find({ username: token.username }, (err, done) => {
+                        if(err){
+                            res.json({ error: '[!] Something wrong in server' }).status(301)
+                        }else{
+                            res.json({ data: done })
+                        }
+                    })
+                }
+            })
+        }
+    })
 })
 
-route.post('/relayStatus', (req,res) => {
-    jwt.verify(req.body.token, req.body.key, (err, token) => {
+route.get('/relayStatus', (req,res) => {
+    jwt.verify(req.query.token, req.query.key, (err, token) => {
         modelUsers.find({ username: token.username }, (err, data) => {
             if(err){
                 res.status(301)
                 res.json({ error: "[!] Error Authorization" })
             }else{
-                modelRelay.findOne({ name: req.body.name }, (err, result) => {
+                modelRelay.findOne({ name: req.query.name }, (err, result) => {
                     res.json({ relay: result.status })
                 })
             }
@@ -46,8 +64,8 @@ route.post('/weather', (req,res) => {
     })
 })
 
-route.post('/localip', (req,res) => {
-    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+route.get('/localip', (req,res) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
         if(err){
             res.status(501)
             res.json({ error: '[!] Error Authorization' })
@@ -71,8 +89,8 @@ route.post('/localip', (req,res) => {
     })
 })
 
-route.post('/location', (req,res) => {
-    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+route.get('/location', (req,res) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
         if(err){
             res.status(501)
             res.json({ '[!] Error': 'Wrong Credentials' })

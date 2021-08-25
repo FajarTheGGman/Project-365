@@ -787,35 +787,22 @@ class HomePage extends Component{
     }
 
     switch(index, status, url){
-/*        AsyncStorage.getItem('token').then(token_user => {
-            axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
-                if(result.status == 200){
-                    this.refresh()
-                }else{
-                    alert('[!] Server Error')
-                }
-            })
-        })*/
         AsyncStorage.getItem('localip').then(localip => {
-            let get_relay = this.state.data_offline[index].relay_status;
+            let get_relay = this.state.data_offline[index].status
             
             get_relay = !status
 
             if(get_relay){
-                alert(get_relay)
+                axios.get('http://' + localip + '/relay')
             }
         })
     }
 
-    clicker(nama, status){
-        AsyncStorage.getItem('token').then(token_user => {
-            axios.post(konfigurasi.server + "relay/update?type=status", { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
-                if(result.status == 200){
-                    this.refresh()
-                }else{
-                    alert('[!] Server Error')
-                }
-            })
+    clicker(index, status, url){
+        AsyncStorage.getItem('localip').then(localip => {
+            let get_relay = this.state.data_offline[index].status
+
+            get_relay = !status
         })
     }
 
@@ -934,7 +921,7 @@ class HomePage extends Component{
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
                                   { this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(y, x.url)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
