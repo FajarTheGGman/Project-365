@@ -966,7 +966,7 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
-                                <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
+                                <ScrollView style={{ flexGrow: 1, flexDirection: 'column' }}>
                                     <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <View>
                                             <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Switch Mode</Text>
