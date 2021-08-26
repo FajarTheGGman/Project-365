@@ -52,13 +52,10 @@ route.post('/weather', (req,res) => {
 
         let location;
 
-        axios.get('http://ip-api.com/json').then(x => {
-            axios.get('http://wttr.in/' + x.data.city + '?format=j1').then(response => {
-
-                res.json({ 
-                    condition: response.data.current_condition[0].weatherDesc[0].value,
-                    temp: response.data.current_condition[0].temp_C + "°"
-                })
+        axios.get('http://wttr.in/?format=j1').then(response => {
+            res.json({ 
+                condition: response.data.current_condition[0].weatherDesc[0].value,
+                temp: response.data.current_condition[0].temp_C + "°"
             })
         })
     })

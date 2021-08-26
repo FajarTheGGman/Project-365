@@ -11,6 +11,7 @@ const routeRelay = require('./routes/relay');
 const routeTensorflow = require('./routes/tensorflow');
 const routeSettings = require('./routes/settings');
 const routeBoard = require('./routes/board');
+const routeSerial = require('./routes/serial')
 const routeRelaySchedule = require('./routes/relay_schedule');
 
 require('dotenv').config();
@@ -45,6 +46,7 @@ app.use('/relay', routeRelay)
 app.use('/ai', routeTensorflow)
 app.use('/settings', routeSettings)
 app.use('/schedule', routeRelaySchedule)
+app.use('/serial', routeSerial)
 
 app.get('/', (req, res) => {
   res.json({
