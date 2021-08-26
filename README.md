@@ -71,6 +71,15 @@ Windows: "click run.bat"
 - NodeJS
 </pre>
 
+# Screenshots
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner1.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner2.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner3.png" width="250" height="450" /> 
+
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/online.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/offline.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/settings.png" width="250" height="450" /> 
+
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/login.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/register.png" width="250" height="450" /> 
+
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/menu.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/addrelay.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/list.png" width="250" height="450" /> 
+
 
 <img src="https://media.giphy.com/media/8X2kIbRJZQkdXt46ur/giphy.gif" width="180" />
 <div>
