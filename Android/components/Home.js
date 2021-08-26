@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry } from 'react-native'
+import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
 import { StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import axios from 'axios'
@@ -442,6 +442,7 @@ class HomePage extends Component{
             relay_category: 'lights.png',
             relay_name: "",
             relay_time_interval: null,
+            relay_pin: null,
             relay_url: "",
             internet: false,
             username: '',
@@ -937,6 +938,15 @@ class HomePage extends Component{
 
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
+                                    <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <View>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Switch Mode</Text>
+                                        </View>
+
+                                        <View>
+                                            <Switch trackColor={{ false: 'black', true: 'white' }} />
+                                        </View>
+                                    </View>
                                   { this.state.data.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
@@ -1095,6 +1105,9 @@ class HomePage extends Component{
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
+                                    <View>
+                                        <TextInput keyboardType="numeric" onChangeText={(val) => this.setState({ relay_pin: val })} placeholder="Input Pin" />
+                                    </View>
                                     <View style={{ marginTop: 10 }}>
                                         <Text>Type Button</Text>
                                         <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) } style={{ marginTop: 10, color: 'black' }} />

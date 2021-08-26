@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry } from 'react-native'
+import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
 import { StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import axios from 'axios'
@@ -425,6 +425,7 @@ class HomePage extends Component{
             relay_name: "",
             relay_time_interval: null,
             relay_url: "",
+            relay_pin: null,
             relay_status: false,
             internet: false,
             username: '',
@@ -485,6 +486,7 @@ class HomePage extends Component{
             url: this.state.relay_url,
             type: this.state.relay_category,
             relay_status: false,
+            relay_pin: this.state.relay_pin,
             type_button: this.state.relay_button_type
         }
 
@@ -638,6 +640,17 @@ class HomePage extends Component{
 
     refresh(){
         this.setState({ loading: true, refresh: true, data: [] })
+        
+        AsyncStorage.getItem('relay_offline').then(data => {
+            let parsing = JSON.parse(data)
+            if(parsing == null){
+                this.setState({ data_offline: [] })
+            }else{
+                this.setState({ data_offline: this.state.data_offline.concat(parsing) })
+            }
+        })
+
+
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
@@ -786,23 +799,57 @@ class HomePage extends Component{
         })
     }
 
-    switch(index, status, url){
+    switch(index, status, url, pin){
         AsyncStorage.getItem('localip').then(localip => {
-            let get_relay = this.state.data_offline[index].status
+            let get_status = this.state.data_offline[index].status
+            let get_name = this.state.data_offline[index].name
             
             get_relay = !status
 
-            if(get_relay){
-                axios.get('http://' + localip + '/relay')
+            if(get_status){
+                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
+                    if(res.status == 200){
+                        alert('Relay ' + get_name + 'is ON')
+                    }else{
+                        alert('Something wrong in your connection')
+                    }
+                })
+            }else{
+                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
+                    if(res.status == 200){
+                        alert('Relay ' + get_name + 'is OFF' )
+                    }else{
+                        alert('Something wrong in your connection')
+                    }
+                })
             }
         })
     }
 
-    clicker(index, status, url){
+    clicker(index, status, url, pin){
         AsyncStorage.getItem('localip').then(localip => {
-            let get_relay = this.state.data_offline[index].status
-
+            let get_status = this.state.data_offline[index].status
+            let get_name = this.state.data_offline[index].name
+            
             get_relay = !status
+
+            if(get_status){
+                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
+                    if(res.status == 200){
+                        alert('Relay ' + get_name + 'is ON')
+                    }else{
+                        alert('Something wrong in your connection')
+                    }
+                })
+            }else{
+                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
+                    if(res.status == 200){
+                        alert('Relay ' + get_name + 'is OFF' )
+                    }else{
+                        alert('Something wrong in your connection')
+                    }
+                })
+            }
         })
     }
 
@@ -919,16 +966,25 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
-                                <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
+                                <ScrollView style={{ flexGrow: 1, flexDirection: 'column' }}>
+                                    <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <View>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Switch Mode</Text>
+                                        </View>
+
+                                        <View>
+                                            <Switch trackColor={{ false: 'black', true: 'white' }} />
+                                        </View>
+                                    </View>
                                   { this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(y, x.url)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(y, x.url)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.status, x.url)} value={x.status} /> : <View style={{ marginRight: 5 }}>
-                                                {x.status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status)}>
+                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.status, x.url, x.relay_pin)} value={x.status} /> : <View style={{ marginRight: 5 }}>
+                                                {x.status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
                                                     <Text>Turn ON</Text>
@@ -1078,6 +1134,9 @@ class HomePage extends Component{
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
+                                    <View>
+                                        <TextInput keyboardType="numeric" onChangeText={(val) => this.setState({ relay_pin: val })} placeholder="Input Pin" />
+                                    </View>
                                     <View style={{ marginTop: 10 }}>
                                         <Text>Type Button</Text>
                                         <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) } style={{ marginTop: 10, color: 'black' }} />
