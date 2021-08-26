@@ -2,7 +2,7 @@
 <p>Simple Project For Home Automation</p>
 
 ![](https://img.shields.io/badge/react-native-blue)
-![](https://img.shields.io/badge/nodejs-14.6.1-lime) 
+![](https://img.shields.io/badge/nodejs-16.7.0-lime) 
 ![](https://img.shields.io/badge/expo-4.5.2-white)
 ![](https://img.shields.io/badge/mongo-4.0.19-green)
 ![](https://img.shields.io/badge/expressjs-4.17.1-white)
