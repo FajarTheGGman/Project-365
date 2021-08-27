@@ -451,7 +451,7 @@ class HomePage extends Component{
             scheduleButton: false,
             moduleDetail: false,
             moduleName: '',
-            moduleUrl: ''
+            modulePin: ''
         }
     }
 
@@ -523,8 +523,6 @@ class HomePage extends Component{
         }else{
             
         }
-
-//        AsyncStorage.setItem('relay_offline', null)
 
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
@@ -946,7 +944,7 @@ class HomePage extends Component{
                                 <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
                                 <Text style={{ marginTop: 5 }}>The URL : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrl}</Text></Text>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL Offline ?" onChangeText={(val) => this.setState({ moduleUrl: val })} />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change PIN ?" onChangeText={(val) => this.setState({ modulePin: val })} />
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
                                 </TouchableOpacity>
@@ -994,8 +992,8 @@ class HomePage extends Component{
                                             <Switch trackColor={{ false: 'black', true: 'white' }} onValueChange={(val) => this.setState({ menu_mode: val })} value={this.state.menu_mode} />
                                         </View>
                                     </View>
-                                { this.state.menu_mode ? <Text></Text>: this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(y, x.url)}>
+                                { this.state.menu_mode ? <Text></Text> : this.state.data_offline.map((x, y) => {
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
@@ -1079,7 +1077,6 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Url Offline"/>
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
                                 </TouchableOpacity>
