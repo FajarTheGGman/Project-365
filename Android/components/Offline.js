@@ -417,6 +417,7 @@ class HomePage extends Component{
             getcontent: false,
             type: '',
             menu: false,
+            menu_mode: false,
             schedule: false,
             relay_button_type: true,
             relay_timeout: false,
@@ -522,6 +523,8 @@ class HomePage extends Component{
         }else{
             
         }
+
+//        AsyncStorage.setItem('relay_offline', null)
 
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
@@ -799,12 +802,23 @@ class HomePage extends Component{
         })
     }
 
+    refresh_relay(){
+        AsyncStorage.getItem('relay_offline').then(data => {
+            let parse = JSON.parse(data)
+            this.setState({ data_offline: this.state.data_offline.concat(parse) })
+        })
+    }
+
+    update_relay(){
+        let compress = JSON.stringify(this.state.data_offline)
+        AsyncStorage.setItem('relay_offline', compress)
+    }
+
     switch(index, status, url, pin){
         AsyncStorage.getItem('localip').then(localip => {
-            let get_status = this.state.data_offline[index].status
+            let get_status = this.state.data_offline[index].relay_status
             let get_name = this.state.data_offline[index].name
-            
-            get_relay = !status
+            this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
 
             if(get_status){
                 axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
@@ -814,6 +828,7 @@ class HomePage extends Component{
                         alert('Something wrong in your connection')
                     }
                 })
+                this.refresh_relay()
             }else{
                 axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
                     if(res.status == 200){
@@ -822,6 +837,7 @@ class HomePage extends Component{
                         alert('Something wrong in your connection')
                     }
                 })
+                this.refresh_relay()
             }
         })
     }
@@ -830,8 +846,8 @@ class HomePage extends Component{
         AsyncStorage.getItem('localip').then(localip => {
             let get_status = this.state.data_offline[index].status
             let get_name = this.state.data_offline[index].name
+            this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
             
-            get_relay = !status
 
             if(get_status){
                 axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
@@ -841,6 +857,7 @@ class HomePage extends Component{
                         alert('Something wrong in your connection')
                     }
                 })
+                this.refresh_relay()
             }else{
                 axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
                     if(res.status == 200){
@@ -849,6 +866,7 @@ class HomePage extends Component{
                         alert('Something wrong in your connection')
                     }
                 })
+                this.refresh_relay()
             }
         })
     }
@@ -973,18 +991,18 @@ class HomePage extends Component{
                                         </View>
 
                                         <View>
-                                            <Switch trackColor={{ false: 'black', true: 'white' }} />
+                                            <Switch trackColor={{ false: 'black', true: 'white' }} onValueChange={(val) => this.setState({ menu_mode: val })} value={this.state.menu_mode} />
                                         </View>
                                     </View>
-                                  { this.state.data_offline.map((x, y) => {
+                                { this.state.menu_mode ? <Text></Text>: this.state.data_offline.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(y, x.url)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.status, x.url, x.relay_pin)} value={x.status} /> : <View style={{ marginRight: 5 }}>
-                                                {x.status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin)}>
+                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
+                                                {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
                                                     <Text>Turn ON</Text>
@@ -1125,7 +1143,6 @@ class HomePage extends Component{
                             <View style={{ flexDirection: 'row', marginTop: 25, justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: 'column', marginLeft: -10 }}>
                                     <TextInput placeholder="Name" onChangeText={(value) => this.setState({ relay_name: value })}/>
-                                    <TextInput placeholder="Url Offline" style={{ marginTop: 5 }} onChangeText={(value) => this.setState({ relay_url: value })} />
                                     <Picker selectedValue={this.state.relay_category} onValueChange={(val) => this.setState({ relay_category: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />

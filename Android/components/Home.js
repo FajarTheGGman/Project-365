@@ -427,9 +427,13 @@ class HomePage extends Component{
                 value: []
             },
             data: [],
+            data_serial: [],
+            serial_info: false,
             relayEmpty: false,
             relayAlert: false,
             serial_information: false,
+            serial_name: '',
+            serial_pin: null,
             loading: false,
             refresh: false,
             getcontent: false,
@@ -774,6 +778,16 @@ class HomePage extends Component{
         })
     }
 
+    addSerial(){
+        AsyncStorage.getItem('token').then(data => {
+            axios.post(konfigurasi.server + 'serial/add', { token: data, name: this.state.serial_name }).then(response => {
+                if(response.status == 200){
+                    alert('Done')
+                }
+            })
+        })
+    }
+
     schedule(x){
         AsyncStorage.getItem('token').then(data => {
             axios.post(konfigurasi.server + 'schedule/get', { token: data, secret: konfigurasi.key, name: x }).then(res => {
@@ -944,10 +958,10 @@ class HomePage extends Component{
                                         </View>
 
                                         <View>
-                                            <Switch trackColor={{ false: 'black', true: 'white' }} />
+                                            <Switch trackColor={{ false: 'black', true: 'green' }} onValueChange={(val) => this.setState({ serial_info: val })} value={this.state.serial_info} />
                                         </View>
                                     </View>
-                                  { this.state.data.map((x, y) => {
+                                    { this.state.serial_info ? <Text></Text> : this.state.data.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
@@ -1031,9 +1045,9 @@ class HomePage extends Component{
                             </View>
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
-                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Url Offline"/>
-                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} onChangeText={(val) => this.setState({ serial_name: val })} placeholder="Name" />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} keyboardType="numeric" onChangeText={(val) => this.setState({ serial_pin: val })} placeholder="Input Pin"/>
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.addSerial()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -1096,7 +1110,6 @@ class HomePage extends Component{
                             <View style={{ flexDirection: 'row', marginTop: 25, justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: 'column', marginLeft: -10 }}>
                                     <TextInput placeholder="Name" onChangeText={(value) => this.setState({ relay_name: value })}/>
-                                    <TextInput placeholder="Url Offline" style={{ marginTop: 5 }} onChangeText={(value) => this.setState({ relay_url: value })} />
                                     <Picker selectedValue={this.state.relay_category} onValueChange={(val) => this.setState({ relay_category: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />

@@ -23,6 +23,12 @@ install_android(){
     echo -e $green"[+] node_modules successfully installed"
 }
 
+setup_expo(){
+    echo -e $yellow"[/] Starting Expo"
+    cd Android
+    expo build:android
+}
+
 running(){
     echo -e $green"[+] Running The Servers..."
     echo -e $green"{ Choose }"
