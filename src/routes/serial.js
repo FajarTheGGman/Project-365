@@ -17,7 +17,7 @@ route.post('/getall', (req,res) => {
                         if(err){
                             res.json({ error: '[!] Something wrong in server' }).status(501)
                         }else{
-                            res.json({ data: done })
+                            res.json(done)
                         }
                     })
                 }
@@ -35,7 +35,7 @@ route.post('/add', (req,res) => {
                 if(err){
                     res.json({ error: '[!] Users not found' }).status(301)
                 }else{
-                    modelSerial.insert({ username: token.username, name: req.body.name }, (err, done) => {
+                    modelSerial.insertMany({ username: token.username, name: req.body.name, pin: req.body.pin }, (err, done) => {
                         if(err){
                             res.json({ error: '[!] Something wrong in server' }).status(501)
                         }else{
@@ -72,6 +72,32 @@ route.post('/update', (req,res) => {
         }
     })
 })
+
+route.post('/updateItem', (req,res) => {
+    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+        if(err){
+            res.json({ error: '[!] Wrong Authorization' }).status(301)
+        }else{
+            modelUsers.findOne({ username: token.username }, (err, user) => {
+                if(err){
+                    res.json({ error: '[!] Users not found' }).status(301)
+                }else{
+                    modelSerial.update({ username: token.username, name: req.body.name }, { name: req.body.name, pin: req.body.pin }, (err, done) => {
+                        if(err){
+                            res.json({ error: '[!] Something wrong in server' }).status(501)
+                        }else{
+                            res.json({ 
+                                status: '[+] Data successfully updated',
+                                data: req.body.data
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    })
+})
+
 
 route.post('/delete', (req,res) => {
     jwt.verify(req.body.token, req.body.secret, (err, token) => {

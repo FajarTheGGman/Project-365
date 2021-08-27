@@ -53,10 +53,16 @@ route.post('/weather', (req,res) => {
         let location;
 
         axios.get('http://wttr.in/?format=j1').then(response => {
-            res.json({ 
-                condition: response.data.current_condition[0].weatherDesc[0].value,
-                temp: response.data.current_condition[0].temp_C + "°"
-            })
+            let x = response.data
+            let check = x.search('Unknown location')
+            if(check == 0){
+                res.json({ error: '[!] Api call error' }).status(501)
+            }else{
+                res.json({ 
+                    condition: response.data.current_condition[0].weatherDesc[0].value,
+                    temp: response.data.current_condition[0].temp_C + "°"
+                })
+            }
         })
     })
 })
