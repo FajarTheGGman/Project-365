@@ -801,9 +801,14 @@ class HomePage extends Component{
     }
 
     refresh_relay(){
+        this.setState({ data_offline: [] })
         AsyncStorage.getItem('relay_offline').then(data => {
             let parse = JSON.parse(data)
-            this.setState({ data_offline: this.state.data_offline.concat(parse) })
+            if(parse == null){
+                this.setState({ data_offline: [] })
+            }else{
+                this.setState({ data_offline: this.state.data_offline.concat(parse) })
+            }
         })
     }
 
@@ -819,23 +824,37 @@ class HomePage extends Component{
             this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
 
             if(get_status){
-                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
-                    if(res.status == 200){
-                        alert('Relay ' + get_name + 'is ON')
-                    }else{
-                        alert('Something wrong in your connection')
-                    }
-                })
-                this.refresh_relay()
+                (async() => {
+                    this.setState({ loading: true })
+                    await axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
+                        if(res.status == 200){
+                            alert('Relay ' + get_name + 'is OFF')
+                        }else if(res.status == 404){
+                            alert('I think your nodemcu board not connected to the router')
+                        }else{
+                            alert('Something wrong in your connection')
+                        }
+                    })
+                    this.update_relay()
+                    this.refresh_relay()
+                    this.setState({ loading: false })
+                })()
             }else{
-                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
-                    if(res.status == 200){
-                        alert('Relay ' + get_name + 'is OFF' )
-                    }else{
-                        alert('Something wrong in your connection')
-                    }
-                })
-                this.refresh_relay()
+                (async() => {
+                    this.setState({ loading: true })
+                    await axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
+                        if(res.status == 200){
+                            alert('Relay ' + get_name + 'is ON')
+                        }else if(res.status == 404){
+                            alert('I think your nodemcu board not connected to the router')
+                        }else{
+                            alert('Something wrong in your connection')
+                        }
+                    })
+                    this.update_relay()
+                    this.refresh_relay()
+                    this.setState({ loading: false }) 
+                })()
             }
         })
     }
@@ -848,38 +867,32 @@ class HomePage extends Component{
             
 
             if(get_status){
-                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
+                /*axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
                     if(res.status == 200){
                         alert('Relay ' + get_name + 'is ON')
                     }else{
                         alert('Something wrong in your connection')
                     }
-                })
-                this.refresh_relay()
+                })*/
+                this.setState({ loading: true })
+                this.refresh()
+                this.setState({ loading: false })
             }else{
-                axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
+                /*axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
                     if(res.status == 200){
                         alert('Relay ' + get_name + 'is OFF' )
                     }else{
                         alert('Something wrong in your connection')
                     }
-                })
-                this.refresh_relay()
+                })*/
+                this.setState({ loading: true })
+                this.refresh()
+                this.setState({ loading: false })
             }
         })
     }
 
-    relayData = ({ item, index }) => (
-          <View style={{ flexDirection: 'column', padding: 15, backgroundColor: 'black', borderRadius: 15, elevation: 15, marginTop: 15, paddingLeft: 18, paddingRight: 18 }}>
-             <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Relay</Text>
-          <View style={{ marginTop: 10, padding: 2, backgroundColor: 'orange', borderRadius: 10, alignItems: 'center' }}>
-              <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50 }} />
-          </View>
-          <TouchableOpacity style={{ marginTop: 10, padding: 5, backgroundColor: 'lime', borderRadius: 10 }}>
-             <Text>Turn ON</Text>
-          </TouchableOpacity>
-       </View>
-    )
+
 
     render(){
         return(
@@ -1077,6 +1090,7 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" />
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Input PIN" />
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
                                 </TouchableOpacity>
@@ -1109,7 +1123,6 @@ class HomePage extends Component{
                                         return <Picker.Item label={x.name} value={x.name} />
                                     })}
                                 </Picker>
-                                <TextInput style={{ marginTop: 8, textAlign: 'center' }} placeholder="Url Offline" onChangeText={(val) => this.setState({ schedule_offline: val })} />
                                 <TouchableOpacity style={{ marginTop: 8, backgroundColor: 'orange', padding: 10, borderRadius: 15, elevation: 15 }} onPress={() => this.input_date()}>
                                     <Text style={{ fontWeight: 'bold' }}>Choose Time</Text>
                                 </TouchableOpacity>
