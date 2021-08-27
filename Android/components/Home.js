@@ -947,8 +947,7 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
-                                <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
-                                    <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <View>
                                             <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Switch Mode</Text>
                                         </View>
@@ -957,6 +956,8 @@ class HomePage extends Component{
                                             <Switch trackColor={{ false: 'black', true: 'green' }} onValueChange={(val) => this.setState({ serial_info: val })} value={this.state.serial_info} />
                                         </View>
                                     </View>
+
+                                <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
                                     { this.state.serial_info ? this.state.data.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
