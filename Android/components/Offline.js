@@ -524,8 +524,6 @@ class HomePage extends Component{
             
         }
 
-//        AsyncStorage.setItem('relay_offline', null)
-
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
             if(parsing == null){
