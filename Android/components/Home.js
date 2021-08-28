@@ -542,10 +542,10 @@ class HomePage extends Component{
                 }
             })
 
-            axios.post("http://192.168.1.9:5000/serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
+            axios.post(konfigurasi.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
 //                alert(konfigurasi.key)
 				if(respon.status == 200){
-	                console.log(respon.data[0])
+	                console.log(respon.data)
 				}
             })
 
@@ -569,8 +569,8 @@ class HomePage extends Component{
                 this.setState({ internet: false })
             })
 
-            axios.post(konfigurasi.server + 'board/weather', { token: data, secret: konfigurasi.key }).then(res => {
-                this.setState({ weatherStatus: res.data.condition, weatherTemp: res.data.temp })
+            axios.get('http://wttr.in/?format=j1').then(res => {
+                this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
 
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
 
@@ -678,8 +678,8 @@ class HomePage extends Component{
                 this.setState({ internet: false })
             })
 
-            axios.post(konfigurasi.server + 'board/weather', { token: data, secret: konfigurasi.key }).then(res => {
-                this.setState({ weatherStatus: res.data.condition, weatherTemp: res.data.temp })
+            axios.get('http://wttr.in/?format=j1').then(res => {
+                this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
 
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
 

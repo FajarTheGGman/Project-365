@@ -43,30 +43,6 @@ route.get('/relayStatus', (req,res) => {
     })
 })
 
-route.post('/weather', (req,res) => {
-    jwt.verify(req.body.token, req.body.secret, (err, token) => {
-        if(err){
-            res.status(501)
-            res.json({ "[!] Error ": 'Wrong Credentials' })
-        }
-
-        let location;
-
-        axios.get('http://wttr.in/?format=j1').then(response => {
-            let x = response.data
-            let check = x.search('Unknown location')
-            if(check == 0){
-                res.json({ error: '[!] Api call error' }).status(501)
-            }else{
-                res.json({ 
-                    condition: response.data.current_condition[0].weatherDesc[0].value,
-                    temp: response.data.current_condition[0].temp_C + "°"
-                })
-            }
-        })
-    })
-})
-
 route.get('/localip', (req,res) => {
     jwt.verify(req.query.token, req.query.secret, (err, token) => {
         if(err){
