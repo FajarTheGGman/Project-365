@@ -561,9 +561,9 @@ class HomePage extends Component{
                 this.setState({ internet: false })
             })
 
-            axios.post(konfigurasi.server + 'board/weather', { token: data, secret: konfigurasi.key }).then(res => {
-                this.setState({ weatherStatus: res.data.condition, weatherTemp: res.data.temp })
-
+            axios.get('http://wttr.in/?format=j1').then(res => {
+                this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
+                
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
 
                 if(this.state.weatherStatus.match(/Thunder/i)){
@@ -681,8 +681,8 @@ class HomePage extends Component{
                 this.setState({ internet: false })
             })
 
-            axios.post(konfigurasi.server + 'board/weather', { token: data, secret: konfigurasi.key }).then(res => {
-                this.setState({ weatherStatus: res.data.condition, weatherTemp: res.data.temp })
+            axios.get('http://wttr.in/?format=j1').then(res => {
+                this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
 
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
 
@@ -827,9 +827,7 @@ class HomePage extends Component{
                 (async() => {
                     this.setState({ loading: true })
                     await axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
-                        if(res.status == 200){
-                            alert('Relay ' + get_name + 'is OFF')
-                        }else if(res.status == 404){
+                        if(res.status == 404){
                             alert('I think your nodemcu board not connected to the router')
                         }else{
                             alert('Something wrong in your connection')
@@ -843,9 +841,7 @@ class HomePage extends Component{
                 (async() => {
                     this.setState({ loading: true })
                     await axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
-                        if(res.status == 200){
-                            alert('Relay ' + get_name + 'is ON')
-                        }else if(res.status == 404){
+                        if(res.status == 404){
                             alert('I think your nodemcu board not connected to the router')
                         }else{
                             alert('Something wrong in your connection')
