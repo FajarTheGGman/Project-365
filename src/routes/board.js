@@ -5,9 +5,32 @@ const axios = require('axios')
 const ch = require('cheerio')
 const modelRelay = require('../models/Relay');
 const modelUsers = require('../models/Users')
+const modelBoard = require('../models/Board')
 
 route.get('/relay', (req,res) => {
-    jwt.verify(req.query.token, req.query.key, (err, token) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
+        if(err){
+            res.json({ error: '[!] Error Authorization'}).status(301)
+        }else{
+            modelUsers.find({ username: token.username }, (err, user) => {
+                if(err){
+                    res.json({ error: '[!] Users not found' }).status(301)
+                }else{
+                    modelRelay.find({ username: token.username, name: req.query.name }, (err, done) => {
+                        if(err){
+                            res.json({ error: '[!] Something Wrong in server' }).status(501)
+                        }else{
+                            res.json(done)
+                        }
+                    })
+                }
+            })
+        }
+    })
+})
+
+route.get('/relay/getall', (req,res) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
         if(err){
             res.json({ error: "[!] Error Authorization" }).status(301)
         }else{
@@ -19,7 +42,7 @@ route.get('/relay', (req,res) => {
                         if(err){
                             res.json({ error: '[!] Something wrong in server' }).status(301)
                         }else{
-                            res.json({ data: done })
+                            res.json(done)
                         }
                     })
                 }
@@ -40,6 +63,28 @@ route.get('/relayStatus', (req,res) => {
                 })
             }
         })
+    })
+})
+
+route.get('/relay/update/status', (req,res) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
+        if(err){
+            res.json({ error: '[!] Error Authorization' }).status(301)
+        }else{
+            modelUsers.findOne({ username: token.username }, (err, user) => {
+                if(err){
+                    res.json({ error: '[!] Users not found' }).status(301)
+                }else{
+                    modelRelay.updateMany({ username: token.username, name: req.query.relay }, { status: req.query.status },(err, done) => {
+                        if(err){
+                            res.json({ error: '[!] Something wrong in server' }).status(501)
+                        }else{
+                            res.json({ success: '[+] Successfully updated status' })
+                        }
+                    })
+                }
+            })
+        }
     })
 })
 
@@ -72,11 +117,21 @@ route.get('/location', (req,res) => {
     jwt.verify(req.query.token, req.query.secret, (err, token) => {
         if(err){
             res.status(501)
-            res.json({ '[!] Error': 'Wrong Credentials' })
+            res.json({ error: '[!] Wrong Authorization' })
         }
 
-        axios.get('http://ip-api.com/json/' + req.body.ip).then(response => {
-            res.json({ result: response.data })
+        modelUsers.find({ username: token.username }, (err, user) => {
+            if(err){
+                res.json({ error: '[!] Users not found' })
+            }else{
+                modelBoard.update({ username: token.username }, { location: req.query.location }, (err, done) => {
+                    if(err){
+                        res.json({ error: '[!] Something Wrong in server' })
+                    }else{
+                        res.json({ success: '[+] Successfully updating location '})
+                    }
+                })
+            }
         })
     })
 })
