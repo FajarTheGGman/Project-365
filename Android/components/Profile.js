@@ -73,7 +73,7 @@ export default class Profile extends Component{
                 <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                     <View style={{ marginTop: 15, flexDirection: 'row', backgroundColor: 'black', padding: 15, borderRadius: 15, elevation: 15 }}>
                         <View style={{ flexDirection: 'column', marginRight: 25, alignItems: 'center' }}>
-                            <Text style={{ fontWeight: 'bold', fontSize: 17, color: 'white' }}>Devices</Text>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17, color: 'white' }}>Relays</Text>
                             <Text style={{ marginTop: 10, textAlign: 'center', fontSize: 17, color: 'white' }}>{this.state.devices}</Text>
                         </View>
 
