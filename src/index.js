@@ -17,11 +17,11 @@ json({
 const port = process.env.PORT || 5000;
 if(process.argv[2]){
     app.listen(port, process.argv[2], () => {
-        console.log(color.yellow('[+] Server Running at' + process.argv[2] + ' : ' + port))
+        console.log(color.yellow('[+] Server Running at ' + process.argv[2] + ' : ' + port))
     });
 }else if(process.argv[4]){
     app.listen(port, process.argv[4], () => {
-        console.log(color.yellow('[+] Server Running at' + process.argv[4] + ' : ' + port))
+        console.log(color.yellow('[+] Server Running at ' + process.argv[4] + ' : ' + port))
    })
 }else{
     app.listen(port, () => {
