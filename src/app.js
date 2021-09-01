@@ -8,7 +8,7 @@ const file = require('express-fileupload')
 
 const routeAuth = require('./routes/auth');
 const routeRelay = require('./routes/relay');
-const routeTensorflow = require('./routes/tensorflow');
+//const routeTensorflow = require('./routes/tensorflow');
 const routeSettings = require('./routes/settings');
 const routeBoard = require('./routes/board');
 const routeSerial = require('./routes/serial')
@@ -43,7 +43,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/board', routeBoard);
 app.use('/auth', routeAuth)
 app.use('/relay', routeRelay)
-app.use('/ai', routeTensorflow)
+//app.use('/ai', routeTensorflow)
 app.use('/settings', routeSettings)
 app.use('/schedule', routeRelaySchedule)
 app.use('/serial', routeSerial)

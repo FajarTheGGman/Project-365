@@ -3,7 +3,10 @@ const chalk = require('chalk');
 const json = require('jsome');
 const color = require('colors');
 const box = require('boxen')
+<<<<<<< HEAD
 //const loading = require('ora')
+=======
+>>>>>>> 1de0dfca5b279793062b5d829b1dad629ba2ca0a
 const open = require('open')
 
 console.log(color.rainbow(box("Smarthome 2.0", { padding: 1, borderStyle: 'double' }) + '\n'))
@@ -18,17 +21,20 @@ json({
 const port = process.env.PORT || 5000;
 if(process.argv[2]){
     app.listen(port, process.argv[2], () => {
-//        open("http://" + process.argv[2] + ":" + port, { app: 'google chrome' })
-//        loading(color.cyan('[+] Server Running at port : ' + port)).start()
+        console.log(color.yellow('[+] Server Running at ' + process.argv[2] + ' : ' + port))
     });
 }else if(process.argv[4]){
     app.listen(port, process.argv[4], () => {
-//        open('http://' + process.argv[4] + ":" + port, { app: 'google chrome' })
-    })
+        console.log(color.yellow('[+] Server Running at ' + process.argv[4] + ' : ' + port))
+   })
 }else{
     app.listen(port, () => {
+<<<<<<< HEAD
 //        open('http://0.0.0.0:' + port, { app: 'google chrome' })
 //        loading(color.cyan('[+] Server Running at port : ' + port)).start()
     console.log("app running at port : " + port)
+=======
+        console.log(color.cyan('[+] Server Running at port : ' + port))
+>>>>>>> 1de0dfca5b279793062b5d829b1dad629ba2ca0a
     })
 }

@@ -17,9 +17,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@tensorflow-models/mobilenet": "*",
-    "@tensorflow/tfjs": "*",
-    "@tensorflow/tfjs-node": "*",
     "axios": "*",
     "bcrypt": "*",
     "boxen": "*",
