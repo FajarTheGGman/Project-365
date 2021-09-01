@@ -4,6 +4,7 @@ import Modal from 'react-native-modal'
 import axios from 'axios'
 import konfigurasi from '../config'
 import { StackActions } from '@react-navigation/native'
+import Loading from 'react-native-loading-spinner-overlay'
 
 export default class Register extends Component{
     constructor(props){
@@ -13,7 +14,8 @@ export default class Register extends Component{
             success: false,
             alert_success: "Users Registered !",
             username: "",
-            password: ""
+            password: "",
+            loading: false
         }
     }
 
@@ -21,22 +23,27 @@ export default class Register extends Component{
         if(this.state.username.length == 0 || this.state.password.length == 0){
             alert('Username & password still empty !')
         }else{
-            axios.post(konfigurasi.server + "auth/register", { username: this.state.username, password: this.state.password }).then(result => {
-                if(result.status == 200){
-                    this.setState({ success: true, username: "", password: "" })
-                    this.props.navigation.dispatch(
-                        StackActions.replace('Guide')
-                    )
-                }else{
+            (async() => {
+                this.setState({ loading: true })
+                await axios.post(konfigurasi.server + "auth/register", { username: this.state.username, password: this.state.password }).then(result => {
+                    if(result.status == 200){
+                        this.setState({ success: true, username: "", password: "" })
+                        this.props.navigation.dispatch(
+                            StackActions.replace('Guide')
+                        )
+                    }else{
                     
-                }
-            })
-        }
+                    }
+                })
+                this.setState({ loading: false })
+            })()
+       }
     }
 
     render(){
         return(
             <View style={{ flex: 1, justifyContent: 'center', flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }}>
+                <Loading visible={this.state.loading} textContent={"Please Wait.."} textStyle={{ color: 'white' }} />
                 <View style={{ alignItems: 'center', marginTop: -25 }}>
                     <View style={{ padding: 10, backgroundColor: 'white', borderRadius: 15, elevation: 15, paddingTop: 5 }}>
                         <Image source={require('../assets/icons/icon.png')} style={{ width: 100, height: 100, }}  />
