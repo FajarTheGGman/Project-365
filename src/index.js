@@ -27,7 +27,8 @@ if(process.argv[2]){
     })
 }else{
     app.listen(port, () => {
-        open('http://0.0.0.0:' + port, { app: 'google chrome' })
-        loading(color.cyan('[+] Server Running at port : ' + port)).start()
+//        open('http://0.0.0.0:' + port, { app: 'google chrome' })
+//        loading(color.cyan('[+] Server Running at port : ' + port)).start()
+    console.log("app running at port : " + port)
     })
 }
