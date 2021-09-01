@@ -3,7 +3,7 @@ const chalk = require('chalk');
 const json = require('jsome');
 const color = require('colors');
 const box = require('boxen')
-const loading = require('ora')
+//const loading = require('ora')
 const open = require('open')
 
 console.log(color.rainbow(box("Smarthome 2.0", { padding: 1, borderStyle: 'double' }) + '\n'))
