@@ -570,6 +570,7 @@ class HomePage extends Component{
             })
 
             axios.get('http://wttr.in/?format=j1').then(res => {
+                this.setState({ weatherStatus: null, weatherTemp: null })
                 this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
 
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
@@ -679,6 +680,7 @@ class HomePage extends Component{
             })
 
             axios.get('http://wttr.in/?format=j1').then(res => {
+                this.setState({ weatherStatus: null, weatherTemp: null})
                 this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
 
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
@@ -820,25 +822,33 @@ class HomePage extends Component{
 
     switch(nama, status){
         AsyncStorage.getItem('token').then(token_user => {
-            axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
-                if(result.status == 200){
-                    this.refresh()
-                }else{
-                    alert('[!] Server Error')
-                }
-            })
+            (async() => {
+                this.setState({ loading: true })
+                await axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
+                    if(result.status == 200){
+                        this.refresh()
+                    }else{
+                        alert('[!] Server Error')
+                    }
+                })
+                this.setState({ loading: false })
+            })()
         })
     }
 
     clicker(nama, status){
         AsyncStorage.getItem('token').then(token_user => {
-            axios.post(konfigurasi.server + "relay/update?type=status", { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
-                if(result.status == 200){
-                    this.refresh()
-                }else{
-                    alert('[!] Server Error')
-                }
-            })
+            (async() => {
+                this.setState({ loading: true })
+                await axios.post(konfigurasi.server + "relay/update?type=status", { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
+                    if(result.status == 200){
+                        this.refresh()
+                    }else{
+                        alert('[!] Server Error')
+                    }
+                })
+                this.setState({ loading: false })
+            })()
         })
     }
 
@@ -846,7 +856,7 @@ class HomePage extends Component{
     render(){
         return(
             <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }} refreshControl={<RefreshControl refreshing={this.state.refresh} onRefresh={() => this.refresh()}/>}>
-                <Loading visible={this.state.loading} textContent={"Tunggu bentar"} textStyle={{ color: 'white' }} />
+                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white' }} />
 
                 <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
 
@@ -962,7 +972,7 @@ class HomePage extends Component{
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
-                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
+                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name.length >= 5 ? x.name + '....' : x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
                                             {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(x.name, x.status)} value={x.status} /> : <View style={{ marginRight: 5 }}>

@@ -14,6 +14,17 @@ export default class Banner extends Component{
     }
 
     componentDidMount(){
+        AsyncStorage.getItem('mode').then(data => {
+            if(data == 'outside'){
+                this.props.navigation.dipatch(
+                    StackActions.replace('Offline', { type: 'outside' })
+                )
+            }else if(data == 'offline'){
+                this.props.navigation.dipatch(
+                    StackActions.replace('Offline', { type: 'outside' })
+                )
+            }
+        })
         AsyncStorage.getItem('token').then(res => {
             if(res.length == 0 || res.length == null){
 
@@ -79,8 +90,8 @@ export default class Banner extends Component{
                             <Text style={{ color: "white", fontWeight: 'bold', fontSize: 17 }}>Login</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'white', padding: 12, marginTop: 10, paddingLeft: 110, paddingRight: 110, borderRadius: 15, elevation: 15 }} onPress={() => this.props.navigation.navigate('Register')}>
-                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17 }}>Register</Text>
+                        <TouchableOpacity style={{ backgroundColor: 'white', padding: 12, marginTop: 10, paddingLeft: 110, paddingRight: 110, borderRadius: 15, elevation: 15 }} onPress={() => this.props.navigation.navigate('Guide')}>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17 }}>Offline</Text>
                         </TouchableOpacity>
                     </View>
                 </Swiper>

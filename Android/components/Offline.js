@@ -30,6 +30,7 @@ export default class Home extends Component{
 
     async componentDidMount(){
             await this.battery()
+            AsyncStorage.setItem('mode', 'offline');
             try{
                 if(this.props.route.params.type == 'offline'){
                     AsyncStorage.setItem('offline', true)
@@ -186,7 +187,8 @@ class Settings extends Component{
             iot_board: false,
             ip: null,
             localip: null,
-            type: null
+            type: null,
+            mode: null
         }
     }
 
@@ -202,7 +204,10 @@ class Settings extends Component{
         await this.Network()
         await this.Battery()
 //        await this.setState({ type: this.props.route.params.type })
-        alert(this.props.route.params.status)
+//        alert(this.props.route.params.status)
+        AsyncStorage.getItem('mode').then(data => {
+            this.setState({ mode: data })
+        })
 
         AsyncStorage.getItem('localip').then(data => {
             this.setState({ localip: data })
@@ -214,7 +219,7 @@ class Settings extends Component{
     async refresh(){
         await this.Network()
         await this.Battery()
-        await this.setState({ type: this.props.route.params.type })
+//        await this.setState({ type: this.props.route.params.type })
 
         AsyncStorage.getItem('localip').then(data => {
             this.setState({ localip: data })
@@ -341,7 +346,7 @@ class Settings extends Component{
 
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
-                        {this.state.type == "outside" ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
+                        {this.state.mode == "outside" ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
                             <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
                         </TouchableOpacity>}
 
@@ -418,6 +423,7 @@ class HomePage extends Component{
             serial_information: false,
             loading: false,
             refresh: false,
+            name: null,
             getcontent: false,
             type: '',
             menu: false,
@@ -531,6 +537,10 @@ class HomePage extends Component{
         }else{
             
         }
+
+        AsyncStorage.getItem('name').then(data => {
+            this.setState({ name: data })
+        })
 
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
@@ -661,26 +671,6 @@ class HomePage extends Component{
 
 
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
-
-                if(respon.status == 200){
-                    this.setState({ username: respon.data.user.username })
-                }
-            })
-
-            axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
-                if(result.status == 200){
-
-                    this.setState({ data: this.state.data.concat(result.data) })
-                    if(result.data.length == 0 || result.data.length == null){
-                        this.setState({ relayEmpty: true })
-                    }else{
-                        this.setState({ relayEmpty: false })
-                    }
-                }else{
-                    alert('Server Error !')
-                }
-            })
 
             axios.get(konfigurasi.server).then(respon => {
                 if(!respon.status == 200){
@@ -832,53 +822,24 @@ class HomePage extends Component{
             this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
 
             if(get_status){
-                /*(async() => {
-                    this.setState({ loading: true })
-                    await axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
-                        if(res.status == 404){
-                            alert('I think your nodemcu board not connected to the router')
-                        }else{
-                            alert('Something wrong in your connection')
-                        }
-                    })
-                    this.update_relay()
-                    this.refresh_relay()
-                    this.setState({ loading: false })
-                })()*/
-                (async() => {
-                    this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_on).then(x => {
-                        if(x.status == 200){
-                            alert('Done')
-                        }
-                    })
-//                    this.update_relay()
-//                    this.refresh()
-                    this.setState({ loading: false }) 
-                })()
-            }else{
-                /*(async() => {
-                    this.setState({ loading: true })
-                    await axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
-                        if(res.status == 404){
-                            alert('I think your nodemcu board not connected to the router')
-                        }else{
-                            alert('Something wrong in your connection')
-                        }
-                    })
-                    this.update_relay()
-                    this.refresh_relay()
-                    this.setState({ loading: false }) 
-                })()*/
                 (async() => {
                     this.setState({ loading: true })
                     await axios.get('http://' + localip + uri_off).then(x => {
-                        if(x.status == 200){
-                            alert('Done')
+                        if(x.status != 200){
+                            alert('Error')
                         }
                     })
-//                    this.update_relay()
-//                    this.refresh_relay()
+
+                    this.setState({ loading: false }) 
+                })()
+            }else{
+                (async() => {
+                    this.setState({ loading: true })
+                    await axios.get('http://' + localip + uri_on).then(x => {
+                        if(x.status != 200){
+                            alert('Error')
+                        }
+                    })
                     this.setState({ loading: false }) 
                 })()
             }
@@ -893,13 +854,6 @@ class HomePage extends Component{
             
 
             if(get_status){
-                /*axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=HIGH').then(res => {
-                    if(res.status == 200){
-                        alert('Relay ' + get_name + 'is ON')
-                    }else{
-                        alert('Something wrong in your connection')
-                    }
-                })*/
                 (async() => {
                     this.setState({ loading: true })
                     await axios.get('http://' + localip + uri_on).then(x => {
@@ -907,18 +861,10 @@ class HomePage extends Component{
                             alert('Done')
                         }
                     })
-//                    this.update_relay()
-                    this.refresh_relay()
                     this.setState({ loading: false }) 
                 })()
            }else{
-                /*axios.get('http://' + localip + '/relay?pin=' + pin + '&volt=LOW').then(res => {
-                    if(res.status == 200){
-                        alert('Relay ' + get_name + 'is OFF' )
-                    }else{
-                        alert('Something wrong in your connection')
-                    }
-                })*/
+
                 (async() => {
                     this.setState({ loading: true })
                     await axios.get('http://' + localip + uri_off).then(x => {
@@ -926,8 +872,6 @@ class HomePage extends Component{
                             alert('Done')
                         }
                     })
-//                    this.update_relay()
-                    this.refresh_relay()
                     this.setState({ loading: false }) 
                 })()
            }
@@ -1288,7 +1232,7 @@ class HomePage extends Component{
                         <TouchableOpacity onPress={() => this.refresh()}>
                             <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Project 365%</Text>
                         </TouchableOpacity>
-                        <Text style={{ color: '#ededed' }}>{this.state.waktu} {this.state.username}</Text>
+                        <Text style={{ color: '#ededed' }}>{this.state.waktu} {this.state.name}</Text>
 
                     </View>
 
