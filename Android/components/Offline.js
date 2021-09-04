@@ -193,6 +193,7 @@ class Settings extends Component{
     }
 
     logout(){
+        AsyncStorage.removeItem('mode')
         AsyncStorage.removeItem('token').then(respon => {
             this.props.navigation.dispatch(
                 StackActions.replace('Login')
@@ -417,10 +418,15 @@ class HomePage extends Component{
         this.state = {
             relay: false,
             data_offline: [],
+            data_serial: [],
             data: [],
             relayEmpty: false,
             relayAlert: false,
             serial_information: false,
+            serial_name: null,
+            serial_url: null,
+            serial_details: false,
+            serial_data: null,
             loading: false,
             refresh: false,
             name: null,
@@ -514,6 +520,18 @@ class HomePage extends Component{
         })
     }
 
+    addSerial(){
+        const actual_data = {
+            name: this.state.serial_name,
+            url: this.state.serial_url
+        }
+
+        this.setState({ data_serial: this.state.data_serial.concat(actual_data) })
+        console.log(this.state.data_serial)
+        AsyncStorage.setItem('serial_offline', null)
+        AsyncStorage.setItem('serial_offline', JSON.stringify(this.state.data_serial))
+    }
+
     relay_offline(){
         AsyncStorage.getItem('relay_offline').then(data => {
             this.setState({ data_offline: data })
@@ -548,6 +566,15 @@ class HomePage extends Component{
                 this.setState({ data_offline: [] })
             }else{
                 this.setState({ data_offline: this.state.data_offline.concat(parsing) })
+            }
+        })
+
+        AsyncStorage.getItem('serial_offline').then(data => {
+            let parsing = JSON.parse(data)
+            if(parsing == null){
+                this.setState({ data_serial: [] })
+            }else{
+                this.setState({ data_serial: this.state.data_serial.concat(parsing) })
             }
         })
 
@@ -815,6 +842,19 @@ class HomePage extends Component{
         AsyncStorage.setItem('relay_offline', compress)
     }
 
+    serial_details(name, url){
+        AsyncStorage.getItem('localip').then(localip => {
+            (async() => {
+                this.setState({ loading: true })
+                await axios.get('http://' + localip + url).then(data => {
+                    this.setState({ serial_data: data })
+                })
+                this.setstate({ loading: false })
+                this.setState({ serial_details: true })
+            })()
+       })
+    }
+
     switch(index, status, url, pin, uri_on, uri_off){
         AsyncStorage.getItem('localip').then(localip => {
             let get_status = this.state.data_offline[index].relay_status
@@ -918,6 +958,35 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.serial_details}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
+                                        <Image source={require('../assets/icons/receiving.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
+                                        <Text style={{ fontWeight: 'bold', marginTop: 5, fontSize: 17 }} >Serial Data</Text>
+                                   </View>
+                                </View>
+
+                                <View style={{ marginLeft: 15, marginRight: -5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ serial_details: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            
+                            <View style={{ marginTop: 15, alignItems: 'center' }}>
+                                <View style={{ backgroundColor: 'black', borderRadius: 5, padding: 13 }}>
+                                    <Text style={{ color: 'white', fontWeight: 'bold' }}>{this.state.serial_data}</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+
+
                 <Modal isVisible={this.state.moduleDetail}>
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
@@ -952,27 +1021,6 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
-
-                <Modal isVisible={this.state.scheduleDetail}>
-                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                        <View style={{ backgroundColor: 'white', padding: 10, backgroundColor: 'white', borderRadius: 10, paddingLeft: 27, paddingRight: 15, alignItems: 'center' }}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ marginRight: 15 }}>
-                                    <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Scheduled Time</Text>
-                                </View>
-                                <View style={{ marginLeft: 10, marginRight: -2 }}>
-                                    <TouchableOpacity onPress={() => this.setState({ scheduleDetail: false })}>
-                                        <Icon name="close-outline" size={30} color={"black"} style={{ marginTop: -5, marginRight: -5 }} />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <Text style={{ color: 'white', backgroundColor: 'black', padding: 7, fontWeight: 'bold', borderRadius: 10, marginTop: 5 }}>{this.state.scheduleDetailName}</Text>
-                            <Text style={{ marginTop: 5 }}>Turn on in</Text>
-                            <Text style={{ color: 'white', backgroundColor: 'black', padding: 7, fontWeight: 'bold', borderRadius: 10, marginTop: 5 }}>{this.state.scheduleDetailDate}</Text>
-                        </View>
-                    </View>
-                </Modal>
-
                 <SwipeUpDown modalVisible={this.state.swipeRelay} ContentModal={
                         <View style={{ flex: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15, paddingBottom: 10, elevation: 15 }}>
@@ -991,7 +1039,17 @@ class HomePage extends Component{
                                             <Switch trackColor={{ false: 'black', true: 'white' }} onValueChange={(val) => this.setState({ menu_mode: val })} value={this.state.menu_mode} />
                                         </View>
                                     </View>
-                                { this.state.menu_mode ? <Text></Text> : this.state.data_offline.map((x, y) => {
+                                    { this.state.menu_mode ? this.state.data_serial.map((x, y) => {
+                                        return <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url)}>
+                                            <View>
+                                                <Text style={{ color: 'white', fontWeight: 'bold' }}>{x.name}</Text>
+                                            </View>
+
+                                            <View>
+                                                <Text style={{ color: 'orange' }}>{x.url}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    }) : this.state.data_offline.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
@@ -1075,9 +1133,9 @@ class HomePage extends Component{
                             </View>
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
-                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" />
-                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Input PIN" />
-                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" onChangeText={(val) => this.setState({ serial_name: val })} />
+                                <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Input URL" onChangeText={(val) => this.setState({ serial_url: val })} />
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.addSerial()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -1105,7 +1163,7 @@ class HomePage extends Component{
 
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <Picker selectedValue={this.state.schedule_name_select} onValueChange={(val) => this.setState({ schedule_name_select: val })} style={{ width: 100, height: 50 }}>
-                                    {this.state.data.map((x,y) => {
+                                    {this.state.data_offline.map((x,y) => {
                                         return <Picker.Item label={x.name} value={x.name} />
                                     })}
                                 </Picker>
