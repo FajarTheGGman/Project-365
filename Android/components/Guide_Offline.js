@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, TextInput, Image, TouchableOpacity, AsyncStorage } from 'react-native'
 import axios from 'axios'
 import Swiper from 'react-native-swiper'
+import Loading from 'react-native-loading-spinner-overlay'
 import { StackActions } from '@react-navigation/native'
 
 export default class Guide extends Component{
@@ -11,7 +12,8 @@ export default class Guide extends Component{
         this.state = {
             localip: '',
             ip: '',
-            name: ''
+            name: '',
+            loading: false
         }
     }
 
@@ -21,13 +23,17 @@ export default class Guide extends Component{
                 this.props.navigation.navigate(
                     StackActions.replace('offline', { type: 'offline' })
                 )
+            }else if(x == 'outside'){
+                this.props.navigation.navigate(
+                    StackActions.replace('offline', { type: 'outside' })
+                )
             }
         })
     }
 
-    connection(){
+    async connection(){
         AsyncStorage.setItem('localip', this.state.ip)
-        axios.get(this.state.ip).then(res => {
+        await axios.get('http://' + this.state.ip).then(res => {
             if(res.status == 200){
                 alert('Connected Successfully')
             }else{
@@ -37,19 +43,22 @@ export default class Guide extends Component{
     }
 
     offline(){
+        AsyncStorage.setItem('mode', null);
+        AsyncStorage.setItem('mode', 'outside');
         this.props.navigation.dispatch(
-            StackActions.replace('Offline', { type: 'offline' })
+            StackActions.replace('Offline', { type: 'outside' })
         )
     }
 
     name(){
         AsyncStorage.setItem('name', this.state.name)
-        alert('Done!')
+        alert('Hey ' + this.state.name)
     }
 
     render(){
         return(
             <View style={{ backgroundColor: "#282829", flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white', fontWeight: 'bold' }} />
                 <Swiper showButtons={false}>
                     <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 170 }}>
                         <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>Code IT!</Text>
@@ -105,16 +114,13 @@ export default class Guide extends Component{
                     </View>
 
                     <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 150 }}>
-                        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>Choose Your Mode</Text>
+                        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>Wellcome To Offline Mode</Text>
                         <Image source={require('../assets/illustrations/register/mode.png')} style={{ width: 250, height: 220, marginTop: 15 }} />
-                        <Text style={{ marginTop: 10, color: 'white' }}>Choose Your Mode</Text>
-                        <Text style={{ color: 'white' }}>Or You can change manually in settings</Text>
-                        <TouchableOpacity style={{ backgroundColor: 'green', padding: 10, borderRadius: 15, elevation: 15, marginTop: 15 }} onPress={() => this.props.navigation.navigate('Login')}>
-                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 17 }}>Online Mode</Text>
-                        </TouchableOpacity>
+                        <Text style={{ marginTop: 10, color: 'white' }}><Text style={{ fontWeight: 'bold' }}>Remember</Text>, all your configurations</Text>
+                        <Text style={{ color: 'white' }}>Only appears in your device</Text>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', padding: 10, borderRadius: 15, elevation: 15, marginTop: 10 }} onPress={() => this.offline()}>
-                            <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold' }}>Offline Mode</Text>
+                        <TouchableOpacity style={{ backgroundColor: 'green', padding: 10, borderRadius: 15, elevation: 15, marginTop: 10 }} onPress={() => this.offline()}>
+                            <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold' }}>Let Me in</Text>
                         </TouchableOpacity>
                     </View>
                 </Swiper>

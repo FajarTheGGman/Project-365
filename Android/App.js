@@ -10,6 +10,7 @@ import Home from './components/Home'
 import Profile from './components/Profile'
 import Banner from './components/Banner'
 import Guide from './components/Guide'
+import GuideOffline from './components/Guide_Offline'
 import Offline from './components/Offline' 
 
 export default class App extends Component{
@@ -17,11 +18,12 @@ export default class App extends Component{
         let Stack = createStackNavigator();
         return(
             <NavigationContainer>
-                <Stack.Navigator>
+                <Stack.Navigator initialRouteName="Offline">
                     <Stack.Screen name="Banner" component={Banner} options={{ headerShown: false }} />
                     <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}/>
                     <Stack.Screen name='Register' component={Register} options={{ headerStyle: { backgroundColor: '#292928' }, headerTitleStyle: { color: 'white' } }}/>
                     <Stack.Screen name='Guide' component={Guide} options={{ headerShown: false }} />
+                    <Stack.Screen name='GuideOffline' component={GuideOffline} options={{ headerShown: false }} />
                     <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
                     <Stack.Screen name='Offline' component={Offline} options={{ headerShown: false }}/>
                     <Stack.Screen name='Profile' component={Profile} options={{ headerStyle: { backgroundColor: '#292928', color: 'white' }, headerTitleStyle: { color: 'white' } }} />

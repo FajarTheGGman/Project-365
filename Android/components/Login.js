@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { AsyncStorage, TouchableOpacity, KeyboardAvoidingView, View, TextInput, Text, Modal, Image } from 'react-native'
 import { StackActions } from '@react-navigation/native'
 import axios from 'axios'
+import Loading from 'react-native-loading-spinner-overlay'
 import konfigurasi from '../config'
 
 export default class Login extends Component{
@@ -10,7 +11,8 @@ export default class Login extends Component{
 
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            loading: false
         }
     }
 
@@ -27,25 +29,37 @@ export default class Login extends Component{
     }
 
     login(){
-        axios.post(konfigurasi.server + 'auth/login', { username: this.state.username, password: this.state.password }).then(result => {
-            if(result.status == 201){
-                alert('[!] Username or password is wrong')
-            }else{
-                AsyncStorage.setItem('token', result.headers.token)
-                this.props.navigation.dispatch(
-                    StackActions.replace('Home')
-                )
-            }
-        })
+        (async() => {
+            this.setState({ loading: true })
+            await axios.post(konfigurasi.server + 'auth/login', { username: this.state.username, password: this.state.password }).then(result => {
+                if(result.status == 201){
+                    alert('[!] Username or password is wrong')
+                }else{
+                    AsyncStorage.setItem('token', result.headers.token)
+                    this.props.navigation.dispatch(
+                        StackActions.replace('Home')
+                    )
+                }
+            })
+            this.setState({ loading: false })
+ 
+        })()
+   }
+
+    offline(){
+        this.props.navigation.dispatch(
+            StackActions.replace('Offline', { status: 'outside' })
+        )
     }
 
     render(){
         return(
             <View style={{ flex: 1, alignItems: 'center', justifyContent: "center", flexDirection: 'column', backgroundColor: '#292928' }}>
+                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white' }}/>
                 <View style={{ alignItems: 'center' }}>
-                    <View style={{ padding: 10, backgroundColor: 'white', borderRadius: 15, elevation: 15, paddingTop: 5 }}>
+                    <TouchableOpacity style={{ padding: 10, backgroundColor: 'white', borderRadius: 15, elevation: 15, paddingTop: 5 }} onPress={() => this.offline()}>
                         <Image source={require('../assets/icons/icon.png')} style={{ width: 100, height: 100, }}  />
-                    </View>
+                    </TouchableOpacity>
                     <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 10, color: 'white' }}>Project 365%</Text>
                     <Text style={{ color: 'white' }}>Version: 1.0.0</Text>
 
