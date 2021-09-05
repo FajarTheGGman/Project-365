@@ -32,7 +32,7 @@ Linux: "bash run.sh"
 Windows: "click run.bat"
 </pre>
 
-<i>Build Android Apps<i/>
+<i>Build Android Apps</i>
 ```bash
 root@user-# cd Android
 root@user-# expo build:android
