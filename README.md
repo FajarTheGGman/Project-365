@@ -198,8 +198,8 @@ void loop(void) {
 #include <Update.h>
 #include <ESPmDNS.h>
 
-const char* wifi = "ServerIOT";
-const char* pw = "fajarfirdaus";
+const char* wifi = "yourssid";
+const char* pw = "yourpassword";
 
 WebServer server(80);
 
