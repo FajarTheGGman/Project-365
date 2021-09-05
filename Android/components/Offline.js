@@ -447,7 +447,7 @@ class HomePage extends Component{
             refresh: false,
             name: null,
             getcontent: false,
-            type: '',
+            type: null,
             menu: false,
             menu_mode: false,
             schedule: false,
@@ -455,37 +455,40 @@ class HomePage extends Component{
             relay_timeout: false,
             status: false,
             relay_category: 'lights.png',
-            relay_name: "",
+            relay_name: null,
             relay_time_interval: null,
-            relay_url: "",
+            relay_url: null,
             relay_pin: null,
             relay_status: false,
             internet: false,
             username: '',
-            waktu: '',
+            waktu: null,
             dev: "{ Coder: Fajar Firdaus }",
             swipeRelay: false,
             addRelay: false,
             weather: null,
-            weatherStatus: '',
+            weatherStatus: null,
             weatherCondition: 'No Internet !',
             weatherPallete: 'white',
-            weatherTemp: '',
+            weatherTemp: null,
             error: false,
             date: false,
             input_date: new Date(),
             schedule_date: null,
-            schedule_name_select: "",
-            schedule_offline: "",
+            schedule_name_select: null,
+            schedule_offline: null,
             scheduleDetail: false,
             scheduleDetailName: '',
-            scheduleDetailDate: '',
+            scheduleDetailDate: null,
             scheduleButton: false,
             moduleDetail: false,
-            moduleName: '',
-            modulePin: '',
-            uri_on: '',
-            uri_off: ''
+            moduleName: null,
+            modulePin: null,
+            moduleUrlOn: null,
+            moduleUrlOff: null,
+            moduleIndex: null,
+            uri_on: null,
+            uri_off: null
         }
     }
 
@@ -592,26 +595,6 @@ class HomePage extends Component{
         })
 
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
-
-                if(respon.status == 200){
-                    this.setState({ username: respon.data.user.username })
-                }
-            })
-
-            axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
-                if(result.status == 200){
-                    this.setState({ data: this.state.data.concat(result.data) })
-                    if(result.data.length == 0 || result.data.length == null){
-                        this.setState({ relayEmpty: true })
-                    }else{
-                        this.setState({ relayEmpty: false })
-                    }
-                }else{
-                    alert('Server Error !')
-                }
-            })
-
             axios.get(konfigurasi.server).then(respon => {
                 if(!respon.status == 200){
                     this.setState({ internet: true })
@@ -796,23 +779,16 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
-    moduleDetail(ThisName, url){
-        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url })
-        AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'relay/update', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName, url_offline: this.state.moduleUrl }).then(response => {
-                if(response.status == 200){
-                    alert('Successfully updated relay')
-                }else if(response.status == 301){
-                    alert('Something wrong in server!')
-                }
-            })
-            
-            axios.post(konfigurasi.server + "schedule/get", { token: data, secret: konfigurasi.key, name: ThisName }).then(response => {
-                if(response.status == 200){
-                    this.setState({ scheduleButton: true })
-                }
-            })
-        })
+    moduleDetail(ThisName, url_on, url_off, index){
+        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index })
+    }
+
+    moduleUpdate(index){
+        this.state.data_offline[this.state.moduleIndex].name = this.state.moduleName;
+        this.state.data_offline[this.state.moduleIndex].uri_on = this.state.moduleUrlOn;
+        this.state.data_offline[this.state.moduleIndex].uri_off = this.state.moduleUrlOff;
+        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
+        alert('Data Updated!')
     }
 
     schedule(x){
@@ -1033,10 +1009,12 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
-                                <Text style={{ marginTop: 5 }}>The URL : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrl}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>URL on : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>URL off : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOff}</Text></Text>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change PIN ?" onChangeText={(val) => this.setState({ modulePin: val })} />
-                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL on ?" onChangeText={(val) => this.setState({ moduleUrlOn: val })} />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL off ?" onChangeText={(val) => this.setState({ moduleUrlOff: val })} />
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.moduleUpdate(this.state.moduleIndex)}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
                                 </TouchableOpacity>
                             </View>
@@ -1073,14 +1051,14 @@ class HomePage extends Component{
                                             </View>
                                         </TouchableOpacity>
                                     }) : this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
                                         {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
-                                                {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin, x.uri_on, x.uri_off)}>
+                                                {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin, x.uri_on, x.uri_off, y)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
                                                     <Text>Turn ON</Text>
