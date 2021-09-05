@@ -587,6 +587,8 @@ class HomePage extends Component{
             }
         })
 
+
+
         AsyncStorage.getItem('serial_offline').then(data => {
             let parsing = JSON.parse(data)
             if(parsing == null){
@@ -916,6 +918,7 @@ class HomePage extends Component{
 
     list(){
         AsyncStorage.setItem('serial_offline', JSON.stringify(this.state.data_serial))
+        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
         this.setState({ swipeRelay: true })
     }
 
@@ -1055,7 +1058,7 @@ class HomePage extends Component{
                                     }) : this.state.data_offline.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
-                                            <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
+                                            {x.type == "lights.png" ? <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} /> : <Image source={require('../assets/category/lock.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />}
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
@@ -1203,7 +1206,6 @@ class HomePage extends Component{
                                     <Picker selectedValue={this.state.relay_category} onValueChange={(val) => this.setState({ relay_category: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />
-                                        <Picker.Item label="Servo" value="servo.png" />
                                     </Picker>
                                     <TextInput placeholder="URI on" onChangeText={(val) => this.setState({ uri_on: val })} />
                                     <TextInput placeholder="URI off" onChangeText={(val) => this.setState({ uri_off: val })} />
