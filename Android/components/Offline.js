@@ -188,7 +188,7 @@ class Settings extends Component{
             ip: null,
             localip: null,
             type: null,
-            mode: null
+            offline: false
         }
     }
 
@@ -204,10 +204,11 @@ class Settings extends Component{
     async componentDidMount(){
         await this.Network()
         await this.Battery()
-//        await this.setState({ type: this.props.route.params.type })
-//        alert(this.props.route.params.status)
-        AsyncStorage.getItem('mode').then(data => {
-            this.setState({ mode: data })
+
+        AsyncStorage.getItem('token').then(data => {
+            if(!data){
+                this.setState({ offline: true })
+            }
         })
 
         AsyncStorage.getItem('localip').then(data => {
@@ -220,7 +221,6 @@ class Settings extends Component{
     async refresh(){
         await this.Network()
         await this.Battery()
-//        await this.setState({ type: this.props.route.params.type })
 
         AsyncStorage.getItem('localip').then(data => {
             this.setState({ localip: data })
@@ -347,7 +347,7 @@ class Settings extends Component{
 
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
-                        {this.state.mode == "outside" ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
+                        {this.state.offline ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
                             <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
                         </TouchableOpacity>}
 
@@ -363,9 +363,11 @@ class Settings extends Component{
                             <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                        {this.state.offline ? <TouchableOpacity style={{ marginTop: 200, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Exit</Text>
+                        </TouchableOpacity> : <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
                             <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> }
                     </View>
                 </ScrollView>
             </View>
