@@ -512,12 +512,9 @@ class HomePage extends Component{
         }
 
         this.setState({ data_offline: this.state.data_offline.concat(actual_data) })
-        console.log(this.state.data_offline)
-        AsyncStorage.setItem('relay_offline', null)
+        AsyncStorage.removeItem('relay_offline')
         AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
-        AsyncStorage.getItem("relay_offline").then(x => {
-            console.log(x)
-        })
+        alert('Relay Added!')
     }
 
     addSerial(){
@@ -527,9 +524,9 @@ class HomePage extends Component{
         }
 
         this.setState({ data_serial: this.state.data_serial.concat(actual_data) })
-        console.log(this.state.data_serial)
-        AsyncStorage.setItem('serial_offline', null)
+        AsyncStorage.removeItem('serial_offline')
         AsyncStorage.setItem('serial_offline', JSON.stringify(this.state.data_serial))
+        alert('Sensor Added!')
     }
 
     relay_offline(){
@@ -847,10 +844,15 @@ class HomePage extends Component{
             (async() => {
                 this.setState({ loading: true })
                 await axios.get('http://' + localip + url).then(data => {
-                    this.setState({ serial_data: data })
+                    if(data.status == 200){
+                        this.setState({ serial_data: data })
+                        this.setstate({ loading: false })
+                        this.setState({ serial_details: true })
+                    }else{
+                        alert('[!] Url Sensor not found')
+                        this.setstate({ loading: false })
+                    }
                 })
-                this.setstate({ loading: false })
-                this.setState({ serial_details: true })
             })()
        })
     }
@@ -916,6 +918,11 @@ class HomePage extends Component{
                 })()
            }
         })
+    }
+
+    list(){
+        AsyncStorage.setItem('serial_offline', JSON.stringify(this.state.data_serial))
+        this.setState({ swipeRelay: true })
     }
 
 
@@ -1022,17 +1029,17 @@ class HomePage extends Component{
                 </Modal>
 
                 <SwipeUpDown modalVisible={this.state.swipeRelay} ContentModal={
-                        <View style={{ flex: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
+                        <View style={{ flexGrow: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15, paddingBottom: 10, elevation: 15 }}>
                                 <Icon name='remove-outline' size={40} color="white"/>
                                 <Text style={{ fontWeight: 'bold', marginTop: -5, fontSize: 17, color: 'white' }}>List Devices</Text>
                             </View>
 
-                            <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
+                            <View style={{ flexGrow: 2, height: 65, flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column' }}>
                                     <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <View>
-                                            <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Switch Mode</Text>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Sensor Mode</Text>
                                         </View>
 
                                         <View>
@@ -1121,7 +1128,7 @@ class HomePage extends Component{
                                 <View style={{ paddingLeft: 15 }}>
                                     <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
                                         <Image source={require('../assets/icons/serial_information.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
-                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Serial Information</Text>
+                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Sensor Information</Text>
                                     </View>
                                 </View>
 
@@ -1207,9 +1214,6 @@ class HomePage extends Component{
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
-                                    <View>
-                                        <TextInput keyboardType="numeric" onChangeText={(val) => this.setState({ relay_pin: val })} placeholder="Input Pin" />
-                                    </View>
                                     <View style={{ marginTop: 10 }}>
                                         <Text>Type Button</Text>
                                         <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) } style={{ marginTop: 10, color: 'black' }} />
@@ -1314,7 +1318,7 @@ class HomePage extends Component{
 
                 <View style={{ padding: 15, borderRadius: 15, backgroundColor: '#0d0d0d', elevation: 15, marginTop: 15 }}>
                    <View style={{ flexDirection: "row" }}>
-                       <TouchableOpacity onPress={() => this.setState({ swipeRelay: true })}>
+                       <TouchableOpacity onPress={() => this.list()}>
                            <Image source={require('../assets/icons/box.png')} style={{ width: 60, height: 60 }} />
                        </TouchableOpacity>
 
