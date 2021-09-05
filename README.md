@@ -258,8 +258,8 @@ void setup(void) {
   
   pinMode(relay1, OUTPUT);
   pinMode(relay2, OUTPUT);
-  pinMode(relay, OUTPUT);
-  pinMode(13, OUTPUT);
+  pinMode(relay3, OUTPUT);
+  pinMode(relay4, OUTPUT);
 
   while(WiFi.status() != WL_CONNECTED){
        delay(100);
