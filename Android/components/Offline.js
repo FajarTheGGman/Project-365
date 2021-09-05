@@ -393,12 +393,28 @@ class Barcode extends Component{
         }
     }
 
+    scan(x){
+        AsyncStorage.getItem('localip').then(localip => {
+            (async() => {
+                this.setState({ loading: true })
+                await axios.get('http://' + localip + x).then(data => {
+                    if(data.status == 200){
+                        this.setState({ loading: false })
+                        alert('Done!')
+                    }
+                })
+            })
+        })
+    }
+
     render(){
         return(
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#292928' }}>
+                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white', fontWeight: 'bold' }}/>
                 <Text style={{ textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: 19 }}>Barcode Scanner</Text>
                 <View style={{ paddingLeft: 8, marginTop: 10, paddingRight: 8, paddingTop: 20, paddingBottom: 20, borderRadius: 15, backgroundColor: 'black', elevation: 15 }}>
                     <BarCodeScanner onBarCodeScanned={ this.state.scan ? undefined : ({ type, data }) => {
+                        this.scan(data)
                         this.setState({ scan: true })
                     } } style={{ width: 300, height: 300, justifyContent: 'center', marginTop: 5 }}/>
                 </View>
