@@ -188,7 +188,7 @@ class Settings extends Component{
             ip: null,
             localip: null,
             type: null,
-            mode: null
+            offline: false
         }
     }
 
@@ -204,10 +204,11 @@ class Settings extends Component{
     async componentDidMount(){
         await this.Network()
         await this.Battery()
-//        await this.setState({ type: this.props.route.params.type })
-//        alert(this.props.route.params.status)
-        AsyncStorage.getItem('mode').then(data => {
-            this.setState({ mode: data })
+
+        AsyncStorage.getItem('token').then(data => {
+            if(!data){
+                this.setState({ offline: true })
+            }
         })
 
         AsyncStorage.getItem('localip').then(data => {
@@ -220,7 +221,6 @@ class Settings extends Component{
     async refresh(){
         await this.Network()
         await this.Battery()
-//        await this.setState({ type: this.props.route.params.type })
 
         AsyncStorage.getItem('localip').then(data => {
             this.setState({ localip: data })
@@ -347,7 +347,7 @@ class Settings extends Component{
 
                 <ScrollView style={{ marginTop: 35 }}>
                     <View style={{ flexDirection: 'column' }}>
-                        {this.state.mode == "outside" ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
+                        {this.state.offline ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
                             <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
                         </TouchableOpacity>}
 
@@ -363,9 +363,11 @@ class Settings extends Component{
                             <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                        {this.state.offline ? <TouchableOpacity style={{ marginTop: 200, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Exit</Text>
+                        </TouchableOpacity> : <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
                             <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> }
                     </View>
                 </ScrollView>
             </View>
@@ -393,12 +395,28 @@ class Barcode extends Component{
         }
     }
 
+    scan(x){
+        AsyncStorage.getItem('localip').then(localip => {
+            (async() => {
+                this.setState({ loading: true })
+                await axios.get('http://' + localip + x).then(data => {
+                    if(data.status == 200){
+                        this.setState({ loading: false })
+                        alert('Done!')
+                    }
+                })
+            })
+        })
+    }
+
     render(){
         return(
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#292928' }}>
+                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white', fontWeight: 'bold' }}/>
                 <Text style={{ textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: 19 }}>Barcode Scanner</Text>
                 <View style={{ paddingLeft: 8, marginTop: 10, paddingRight: 8, paddingTop: 20, paddingBottom: 20, borderRadius: 15, backgroundColor: 'black', elevation: 15 }}>
                     <BarCodeScanner onBarCodeScanned={ this.state.scan ? undefined : ({ type, data }) => {
+                        this.scan(data)
                         this.setState({ scan: true })
                     } } style={{ width: 300, height: 300, justifyContent: 'center', marginTop: 5 }}/>
                 </View>
@@ -431,7 +449,7 @@ class HomePage extends Component{
             refresh: false,
             name: null,
             getcontent: false,
-            type: '',
+            type: null,
             menu: false,
             menu_mode: false,
             schedule: false,
@@ -439,37 +457,40 @@ class HomePage extends Component{
             relay_timeout: false,
             status: false,
             relay_category: 'lights.png',
-            relay_name: "",
+            relay_name: null,
             relay_time_interval: null,
-            relay_url: "",
+            relay_url: null,
             relay_pin: null,
             relay_status: false,
             internet: false,
             username: '',
-            waktu: '',
+            waktu: null,
             dev: "{ Coder: Fajar Firdaus }",
             swipeRelay: false,
             addRelay: false,
             weather: null,
-            weatherStatus: '',
+            weatherStatus: null,
             weatherCondition: 'No Internet !',
             weatherPallete: 'white',
-            weatherTemp: '',
+            weatherTemp: null,
             error: false,
             date: false,
             input_date: new Date(),
             schedule_date: null,
-            schedule_name_select: "",
-            schedule_offline: "",
+            schedule_name_select: null,
+            schedule_offline: null,
             scheduleDetail: false,
             scheduleDetailName: '',
-            scheduleDetailDate: '',
+            scheduleDetailDate: null,
             scheduleButton: false,
             moduleDetail: false,
-            moduleName: '',
-            modulePin: '',
-            uri_on: '',
-            uri_off: ''
+            moduleName: null,
+            modulePin: null,
+            moduleUrlOn: null,
+            moduleUrlOff: null,
+            moduleIndex: null,
+            uri_on: null,
+            uri_off: null
         }
     }
 
@@ -512,12 +533,9 @@ class HomePage extends Component{
         }
 
         this.setState({ data_offline: this.state.data_offline.concat(actual_data) })
-        console.log(this.state.data_offline)
-        AsyncStorage.setItem('relay_offline', null)
+        AsyncStorage.removeItem('relay_offline')
         AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
-        AsyncStorage.getItem("relay_offline").then(x => {
-            console.log(x)
-        })
+        alert('Relay Added!')
     }
 
     addSerial(){
@@ -527,9 +545,9 @@ class HomePage extends Component{
         }
 
         this.setState({ data_serial: this.state.data_serial.concat(actual_data) })
-        console.log(this.state.data_serial)
-        AsyncStorage.setItem('serial_offline', null)
+        AsyncStorage.removeItem('serial_offline')
         AsyncStorage.setItem('serial_offline', JSON.stringify(this.state.data_serial))
+        alert('Sensor Added!')
     }
 
     relay_offline(){
@@ -579,26 +597,6 @@ class HomePage extends Component{
         })
 
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
-
-                if(respon.status == 200){
-                    this.setState({ username: respon.data.user.username })
-                }
-            })
-
-            axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
-                if(result.status == 200){
-                    this.setState({ data: this.state.data.concat(result.data) })
-                    if(result.data.length == 0 || result.data.length == null){
-                        this.setState({ relayEmpty: true })
-                    }else{
-                        this.setState({ relayEmpty: false })
-                    }
-                }else{
-                    alert('Server Error !')
-                }
-            })
-
             axios.get(konfigurasi.server).then(respon => {
                 if(!respon.status == 200){
                     this.setState({ internet: true })
@@ -783,23 +781,16 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
-    moduleDetail(ThisName, url){
-        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url })
-        AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'relay/update', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName, url_offline: this.state.moduleUrl }).then(response => {
-                if(response.status == 200){
-                    alert('Successfully updated relay')
-                }else if(response.status == 301){
-                    alert('Something wrong in server!')
-                }
-            })
-            
-            axios.post(konfigurasi.server + "schedule/get", { token: data, secret: konfigurasi.key, name: ThisName }).then(response => {
-                if(response.status == 200){
-                    this.setState({ scheduleButton: true })
-                }
-            })
-        })
+    moduleDetail(ThisName, url_on, url_off, index){
+        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index })
+    }
+
+    moduleUpdate(index){
+        this.state.data_offline[this.state.moduleIndex].name = this.state.moduleName;
+        this.state.data_offline[this.state.moduleIndex].uri_on = this.state.moduleUrlOn;
+        this.state.data_offline[this.state.moduleIndex].uri_off = this.state.moduleUrlOff;
+        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
+        alert('Data Updated!')
     }
 
     schedule(x){
@@ -847,10 +838,15 @@ class HomePage extends Component{
             (async() => {
                 this.setState({ loading: true })
                 await axios.get('http://' + localip + url).then(data => {
-                    this.setState({ serial_data: data })
+                    if(data.status == 200){
+                        this.setState({ serial_data: data })
+                        this.setstate({ loading: false })
+                        this.setState({ serial_details: true })
+                    }else{
+                        alert('[!] Url Sensor not found')
+                        this.setstate({ loading: false })
+                    }
                 })
-                this.setstate({ loading: false })
-                this.setState({ serial_details: true })
             })()
        })
     }
@@ -916,6 +912,11 @@ class HomePage extends Component{
                 })()
            }
         })
+    }
+
+    list(){
+        AsyncStorage.setItem('serial_offline', JSON.stringify(this.state.data_serial))
+        this.setState({ swipeRelay: true })
     }
 
 
@@ -1010,10 +1011,12 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
-                                <Text style={{ marginTop: 5 }}>The URL : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrl}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>URL on : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>URL off : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOff}</Text></Text>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change PIN ?" onChangeText={(val) => this.setState({ modulePin: val })} />
-                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL on ?" onChangeText={(val) => this.setState({ moduleUrlOn: val })} />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL off ?" onChangeText={(val) => this.setState({ moduleUrlOff: val })} />
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.moduleUpdate(this.state.moduleIndex)}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
                                 </TouchableOpacity>
                             </View>
@@ -1022,17 +1025,17 @@ class HomePage extends Component{
                 </Modal>
 
                 <SwipeUpDown modalVisible={this.state.swipeRelay} ContentModal={
-                        <View style={{ flex: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
+                        <View style={{ flexGrow: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15, paddingBottom: 10, elevation: 15 }}>
                                 <Icon name='remove-outline' size={40} color="white"/>
                                 <Text style={{ fontWeight: 'bold', marginTop: -5, fontSize: 17, color: 'white' }}>List Devices</Text>
                             </View>
 
-                            <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
+                            <View style={{ flexGrow: 2, height: 65, flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column' }}>
                                     <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <View>
-                                            <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Switch Mode</Text>
+                                            <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Sensor Mode</Text>
                                         </View>
 
                                         <View>
@@ -1050,14 +1053,14 @@ class HomePage extends Component{
                                             </View>
                                         </TouchableOpacity>
                                     }) : this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
                                         {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
-                                                {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin, x.uri_on, x.uri_off)}>
+                                                {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin, x.uri_on, x.uri_off, y)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
                                                     <Text>Turn ON</Text>
@@ -1121,7 +1124,7 @@ class HomePage extends Component{
                                 <View style={{ paddingLeft: 15 }}>
                                     <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
                                         <Image source={require('../assets/icons/serial_information.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
-                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Serial Information</Text>
+                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Sensor Information</Text>
                                     </View>
                                 </View>
 
@@ -1207,9 +1210,6 @@ class HomePage extends Component{
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
-                                    <View>
-                                        <TextInput keyboardType="numeric" onChangeText={(val) => this.setState({ relay_pin: val })} placeholder="Input Pin" />
-                                    </View>
                                     <View style={{ marginTop: 10 }}>
                                         <Text>Type Button</Text>
                                         <Radio radio_props={[{ label: 'Switch', value: true }, { label: "Clicker", value: false }]}  buttonColor="black" formHorizontal={false} animation={true} onPress={(value) => this.setState({ relay_button_type: value }) } style={{ marginTop: 10, color: 'black' }} />
@@ -1314,7 +1314,7 @@ class HomePage extends Component{
 
                 <View style={{ padding: 15, borderRadius: 15, backgroundColor: '#0d0d0d', elevation: 15, marginTop: 15 }}>
                    <View style={{ flexDirection: "row" }}>
-                       <TouchableOpacity onPress={() => this.setState({ swipeRelay: true })}>
+                       <TouchableOpacity onPress={() => this.list()}>
                            <Image source={require('../assets/icons/box.png')} style={{ width: 60, height: 60 }} />
                        </TouchableOpacity>
 
