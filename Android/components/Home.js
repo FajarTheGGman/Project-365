@@ -881,7 +881,7 @@ class HomePage extends Component{
                     }
                 }).catch((err) => {
                 if(err){
-                    this.setState({ error_server: true })
+                    this.setState({ loading: false, error_server: true })
                 }
             })
                 await axios.post(konfigurasi.server + 'board/activites/update', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
@@ -892,7 +892,7 @@ class HomePage extends Component{
                     }
                 }).catch((err) => {
                 if(err){
-                    this.setState({ error_server: true })
+                    this.setState({ loading: false, error_server: true })
                 }
             })
                 this.setState({ loading: false })
@@ -912,7 +912,7 @@ class HomePage extends Component{
                     }
                 }).catch((err) => {
                 if(err){
-                    this.setState({ error_server: true })
+                    this.setState({ loading: false, error_server: true })
                 }
             })
                 this.setState({ loading: false })
