@@ -856,6 +856,10 @@ class HomePage extends Component{
                         if(x.status != 200){
                             alert('Error')
                         }
+                    }).catch(err => {
+                        if(err){
+                            this.setState({ loading: false, error_server: true })
+                        }
                     })
 
                     this.setState({ loading: false }) 
@@ -866,6 +870,10 @@ class HomePage extends Component{
                     await axios.get('http://' + localip + uri_on).then(x => {
                         if(x.status != 200){
                             alert('Error')
+                        }
+                    }).catch(err => {
+                        if(err){
+                            this.setState({ loading: false, error_server: true })
                         }
                     })
                     this.setState({ loading: false }) 
@@ -888,6 +896,10 @@ class HomePage extends Component{
                         if(x.status == 200){
                             alert('Done')
                         }
+                    }).catch(err => {
+                        if(err){
+                            this.setState({ loading: false, error_server: true })
+                        }
                     })
                     this.setState({ loading: false }) 
                 })()
@@ -898,6 +910,10 @@ class HomePage extends Component{
                     await axios.get('http://' + localip + uri_off).then(x => {
                         if(x.status == 200){
                             alert('Done')
+                        }
+                    }).catch(err => {
+                        if(err){
+                            this.setState({ loading: false, error_server: true })
                         }
                     })
                     this.setState({ loading: false }) 
@@ -917,7 +933,7 @@ class HomePage extends Component{
     render(){
         return(
             <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }} refreshControl={<RefreshControl refreshing={this.state.refresh} onRefresh={() => this.refresh()}/>}>
-                <Loading visible={this.state.loading} textContent={"Tunggu bentar"} textStyle={{ color: 'white' }} />
+                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white' }} />
 
                 <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
 
@@ -956,6 +972,8 @@ class HomePage extends Component{
                     <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ padding: 12, backgroundColor: 'white', borderRadius: 10, alignItems: 'center' }}>
                             <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15 }}>Error Connecting to server</Text>
+                            <Text style={{ marginTop: 8 }}>Plz check your ip configuration</Text>
+                            <Text>or your machine</Text>
                             <Image source={require('../assets/illustrations/error.png')} style={{ width: 150, height: 80, marginTop: 15 }}  />
                             <TouchableOpacity style={{ marginTop: 10, padding: 8, borderRadius: 5, backgroundColor: 'orange' }} onPress={() => this.refresh()}>
                                 <Text style={{ fontWeight: 'bold' }}>Refresh</Text>
