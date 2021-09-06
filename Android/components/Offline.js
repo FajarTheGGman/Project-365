@@ -449,6 +449,7 @@ class HomePage extends Component{
             refresh: false,
             name: null,
             getcontent: false,
+            error_server: false,
             type: null,
             menu: false,
             menu_mode: false,
@@ -560,20 +561,6 @@ class HomePage extends Component{
     async componentDidMount(){
         const network = await Network.getNetworkStateAsync()
 
-        if(network.isConnected == true){
-            this.setState({ getcontent: true })
-            AsyncStorage.getItem('d').then(data => {
-                axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
-                    
-                }).catch(err => {
-                
-                })
-            })
-            this.setState({ getcontent: false })
-        }else{
-            
-        }
-
         AsyncStorage.getItem('name').then(data => {
             this.setState({ name: data })
         })
@@ -597,14 +584,6 @@ class HomePage extends Component{
                 this.setState({ data_serial: this.state.data_serial.concat(parsing) })
             }
         })
-
-        AsyncStorage.getItem('token').then(data => {
-            axios.get(konfigurasi.server).then(respon => {
-                if(!respon.status == 200){
-                    this.setState({ internet: true })
-                }
-                this.setState({ internet: false })
-            })
 
             axios.get('http://wttr.in/?format=j1').then(res => {
                 this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
@@ -630,7 +609,6 @@ class HomePage extends Component{
                     })
                 }
             })
-        })
 
         let waktu = new Date();
         let jam = waktu.getHours();
@@ -684,9 +662,14 @@ class HomePage extends Component{
         }
     }
 
-    refresh(){
-        this.setState({ loading: true, refresh: true, data: [] })
-        
+    async refresh(){
+        this.setState({ loading: true })
+        const network = await Network.getNetworkStateAsync()
+
+        AsyncStorage.getItem('name').then(data => {
+            this.setState({ name: data })
+        })
+
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
             if(parsing == null){
@@ -697,18 +680,19 @@ class HomePage extends Component{
         })
 
 
-        AsyncStorage.getItem('token').then(data => {
 
-            axios.get(konfigurasi.server).then(respon => {
-                if(!respon.status == 200){
-                    this.setState({ internet: true })
-                }
-                this.setState({ internet: false })
-            })
+        AsyncStorage.getItem('serial_offline').then(data => {
+            let parsing = JSON.parse(data)
+            if(parsing == null){
+                this.setState({ data_serial: [] })
+            }else{
+                this.setState({ data_serial: this.state.data_serial.concat(parsing) })
+            }
+        })
 
             axios.get('http://wttr.in/?format=j1').then(res => {
                 this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
-
+                
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
 
                 if(this.state.weatherStatus.match(/Thunder/i)){
@@ -721,9 +705,15 @@ class HomePage extends Component{
                     this.setState({ weather: require('../assets/weather/rain.png'), weatherCondition: 'Raining', weatherPallete: 'grey', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Cloudy/i)){
                     this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy', weatherPallete: 'white', weatherFont: 'black' })
+                }else{
+                    this.setState({
+                        weather: require('../assets/weather/cloudy.png'),
+                        weatherCondition: 'Cloudy',
+                        weatherPallete: 'white',
+                        weatherFont: 'black'
+                    })
                 }
             })
-        })
 
         let waktu = new Date();
         let jam = waktu.getHours();
@@ -775,7 +765,7 @@ class HomePage extends Component{
         }else if(jam == 23){
             this.setState({ waktu: 'Good Night' })
         }
-        this.setState({ loading: false, refresh: false })
+        this.setState({ loading: false })
     }
 
     input_date(){
@@ -958,6 +948,22 @@ class HomePage extends Component{
                                     <Text style={{ color: 'white' }}>Continue</Text>
                                 </TouchableOpacity>
                             </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.error_server}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ padding: 12, backgroundColor: 'white', borderRadius: 10, alignItems: 'center' }}>
+                            <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15 }}>Error Connecting to server</Text>
+                            <Image source={require('../assets/illustrations/error.png')} style={{ width: 150, height: 80, marginTop: 15 }}  />
+                            <TouchableOpacity style={{ marginTop: 10, padding: 8, borderRadius: 5, backgroundColor: 'orange' }} onPress={() => this.refresh()}>
+                                <Text style={{ fontWeight: 'bold' }}>Refresh</Text>
+                            </TouchableOpacity>
+                            <Text style={{ marginTop: 10, fontWeight: 'bold' }}>OR</Text>
+                            <TouchableOpacity style={{ marginTop: 10, padding: 8, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ error_server: false })}>
+                                <Text style={{ fontWeight: 'bold' }}>Close</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </Modal>

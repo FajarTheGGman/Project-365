@@ -449,6 +449,7 @@ class HomePage extends Component{
             relay_pin: null,
             relay_url: "",
             internet: false,
+            error_server: false,
             username: '',
             waktu: '',
             dev: "{ Coder: Fajar Firdaus }",
@@ -501,21 +502,6 @@ class HomePage extends Component{
         })
     }
 
-    addRelayOffline(){
-        const actual_data = {
-            name: this.state.relay_name,
-            url: this.state.relay_url,
-            type: this.state.relay_category,
-            type_button: this.state.relay_button_type
-        }
-
-        this.setState({ data_offline: this.state.data_offline.value.push(actual_data) })
-//        AsyncStorage.setItem("relay_offline", JSON.stringify(this.state.data_offline))
-//        AsyncStorage.getItem("relay_offline").then(x => {
-//            console.log(x)
-//        })
-    }
-
 
     async componentDidMount(){
         const network = await Network.getNetworkStateAsync()
@@ -538,18 +524,29 @@ class HomePage extends Component{
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
                 if(respon.status == 200){
+                    this.setState({ error_server: false })
                     this.setState({ username: respon.data.user.username })
+                }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
                 }
             })
 
             axios.post(konfigurasi.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
 				if(respon.status == 200){
+                    this.setState({ error_server: false })
 	                console.log(respon.data)
 				}
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
 
             axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
                 if(result.status == 200){
+                    this.setState({ error_server: false })
                     this.setState({ data: this.state.data.concat(result.data) })
                     if(result.data.length == 0 || result.data.length == null){
                         this.setState({ relayEmpty: true })
@@ -559,13 +556,22 @@ class HomePage extends Component{
                 }else{
                     alert('Server Error !')
                 }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
 
             axios.get(konfigurasi.server).then(respon => {
                 if(!respon.status == 200){
                     this.setState({ internet: true })
                 }
+                    this.setState({ error_server: false })
                 this.setState({ internet: false })
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
 
             axios.get('http://wttr.in/?format=j1').then(res => {
@@ -653,14 +659,19 @@ class HomePage extends Component{
             axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
                 if(respon.status == 200){
+                    this.setState({ error_server: false })
                     this.setState({ username: respon.data.user.username })
+                }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
                 }
             })
 
             axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
                 if(result.status == 200){
-
                     this.setState({ data: this.state.data.concat(result.data) })
+                    this.setState({ error_server: false })
                     if(result.data.length == 0 || result.data.length == null){
                         this.setState({ relayEmpty: true })
                     }else{
@@ -669,13 +680,22 @@ class HomePage extends Component{
                 }else{
                     alert('Server Error !')
                 }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
 
             axios.get(konfigurasi.server).then(respon => {
                 if(!respon.status == 200){
+                    this.setState({ error_server: false })
                     this.setState({ internet: true })
                 }
                 this.setState({ internet: false })
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
 
             axios.get('http://wttr.in/?format=j1').then(res => {
@@ -763,6 +783,10 @@ class HomePage extends Component{
                     alert('Module deleted!')
                     this.refresh()
                 }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
         })
     }
@@ -776,11 +800,19 @@ class HomePage extends Component{
                 }else if(response.status == 301){
                     alert('Something wrong in server!')
                 }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
             
             axios.post(konfigurasi.server + "schedule/get", { token: data, secret: konfigurasi.key, name: ThisName }).then(response => {
                 if(response.status == 200){
                     this.setState({ scheduleButton: true })
+                }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
                 }
             })
         })
@@ -791,6 +823,10 @@ class HomePage extends Component{
             axios.post(konfigurasi.server + 'serial/add', { token: data, name: this.state.serial_name, pin: this.state.serial_pin }).then(response => {
                 if(response.status == 200){
                     alert('Done')
+                }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
                 }
             })
         })
@@ -805,8 +841,18 @@ class HomePage extends Component{
                 }catch(e){
                     
                 }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
             })
         })
+    }
+
+    offline(){
+        this.props.navigation.dispatch(
+            StackActions.replace('Offline', { type: 'offline' })
+        )
     }
 
     addSchedule(){
@@ -814,6 +860,10 @@ class HomePage extends Component{
             axios.post(konfigurasi.server + 'schedule/input', { token: data, secret: konfigurasi.key, name: this.state.schedule_name_select, url_offline: this.state.schedule_offline, schedule: this.state.schedule_date}).then(res => {
                 if(res.status == 200){
                     alert('Done')
+                }
+            }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
                 }
             })
         })
@@ -827,9 +877,24 @@ class HomePage extends Component{
                     if(result.status == 200){
                         this.refresh()
                     }else{
-                        alert('[!] Server Error')
+                        alert('[!] server error')
                     }
-                })
+                }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
+            })
+                await axios.post(konfigurasi.server + 'board/activites/update', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
+                    if(result.status == 200){
+                        this.refresh()
+                    }else{
+                        alert('[!] server error')
+                    }
+                }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
+            })
                 this.setState({ loading: false })
             })()
         })
@@ -845,7 +910,11 @@ class HomePage extends Component{
                     }else{
                         alert('[!] Server Error')
                     }
-                })
+                }).catch((err) => {
+                if(err){
+                    this.setState({ error_server: true })
+                }
+            })
                 this.setState({ loading: false })
             })()
         })
@@ -923,6 +992,22 @@ class HomePage extends Component{
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
                                 </TouchableOpacity>
                             </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.error_server}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ padding: 12, backgroundColor: 'white', borderRadius: 10, alignItems: 'center' }}>
+                            <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15 }}>Error Connecting to server</Text>
+                            <Image source={require('../assets/illustrations/error.png')} style={{ width: 150, height: 80, marginTop: 15 }}  />
+                            <TouchableOpacity style={{ marginTop: 10, padding: 8, borderRadius: 5, backgroundColor: 'orange' }} onPress={() => this.refresh()}>
+                                <Text style={{ fontWeight: 'bold' }}>Refresh</Text>
+                            </TouchableOpacity>
+                            <Text style={{ marginTop: 10, fontWeight: 'bold' }}>OR</Text>
+                            <TouchableOpacity style={{ marginTop: 10, padding: 8, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.offline()}>
+                                <Text style={{ fontWeight: 'bold' }}>Goes to offline mode</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </Modal>

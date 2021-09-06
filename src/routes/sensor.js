@@ -2,7 +2,7 @@ const express = require("express")
 const route = express.Router()
 const jwt = require('jsonwebtoken')
 const modelUsers = require('../models/Users')
-const modelSerial = require('../models/Serial')
+const modelSerial = require('../models/Sensor')
 
 route.post('/getall', (req,res) => {
     jwt.verify(req.body.token, req.body.secret, (err, token) => {

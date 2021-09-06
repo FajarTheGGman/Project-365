@@ -17,11 +17,11 @@ export default class Banner extends Component{
         AsyncStorage.getItem('mode').then(data => {
             if(data == 'offline'){
                 this.props.navigation.dispatch(
-                    StackActions.replace('Offline', { type: 'outside' })
+                    StackActions.replace('Offline', { type: 'offline' })
                 )
             }else if(data == 'outside'){
                 this.props.navigation.dispatch(
-                    StackActions.replace('Offline', { type: 'outside' })
+                    StackActions.replace('Offline', { type: 'offline' })
                 )
             }
         })
