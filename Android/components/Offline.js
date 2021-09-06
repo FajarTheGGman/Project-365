@@ -405,7 +405,7 @@ class Barcode extends Component{
                         alert('Done!')
                     }
                 })
-            })
+            })()
         })
     }
 
@@ -1042,7 +1042,7 @@ class HomePage extends Component{
                                         </View>
 
                                         <View>
-                                            <Switch trackColor={{ false: 'black', true: 'white' }} onValueChange={(val) => this.setState({ menu_mode: val })} value={this.state.menu_mode} />
+                                            <Switch trackColor={{ false: 'black', true: 'green' }} onValueChange={(val) => this.setState({ menu_mode: val })} value={this.state.menu_mode} />
                                         </View>
                                     </View>
                                     { this.state.menu_mode ? this.state.data_serial.map((x, y) => {

@@ -543,7 +543,6 @@ class HomePage extends Component{
             })
 
             axios.post(konfigurasi.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
-//                alert(konfigurasi.key)
 				if(respon.status == 200){
 	                console.log(respon.data)
 				}
@@ -956,7 +955,7 @@ class HomePage extends Component{
                                 <Text style={{ fontWeight: 'bold', marginTop: -5, fontSize: 17, color: 'white' }}>List Devices</Text>
                             </View>
 
-                            <View style={{ flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
+                            <View style={{ flexGrow: 2, height: 55, flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
                                 <View style={{ padding: 20, width: 280, marginTop: 15, borderRadius: 10, backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <View>
                                             <Text style={{ fontWeight: 'bold', fontSize: 19 }}>Switch Mode</Text>

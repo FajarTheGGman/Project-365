@@ -43,7 +43,7 @@ export default class Banner extends Component{
                     <View style={{ alignItems: 'center', marginTop: 200 }}>
                         <Image source={require('../assets/icons/icon.png')} style={{ width: 130, height: 120 }} />
                         <Text style={{ fontSize: 19, color: 'white', fontWeight: 'normal', marginTop: 27  }}>Sup Mate, Wellcome To</Text>
-                        <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Smart Room</Text>
+                        <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>Project 365%</Text>
                         <Text style={{ color: 'white', marginTop: 65 }}>{this.state.dev}</Text>
                         <Text style={{ color: 'white', marginTop: 5 }}>{this.state.version}</Text>
 
@@ -51,9 +51,9 @@ export default class Banner extends Component{
                     </View>
 
                     <View style={{ alignItems: 'center', marginTop: 140}}>
-                        <Text style={{ color: 'white', fontSize: 27, fontWeight: 'bold' }}>So, What is SmartRoom ?</Text>
+                        <Text style={{ color: 'white', fontSize: 27, fontWeight: 'bold' }}>So, What is Project-365% ?</Text>
                         <Image source={require('../assets/illustrations/question.png')} style={{ width: 250, height: 200, marginTop: 5 }} />
-                        <Text style={{ fontSize: 15, color: 'white', marginTop: 5 }}><Text style={{ color: 'white', fontWeight: 'bold' }}>SmartRoom</Text> is simple application for </Text>
+                        <Text style={{ fontSize: 15, color: 'white', marginTop: 5 }}><Text style={{ color: 'white', fontWeight: 'bold' }}>Project-365%</Text> is simple application for </Text>
                         <Text style={{ color: 'white', }}>Internet Of Things stuff, that's like </Text>
                         <Text style={{ color: 'white' }}>Controlling Your IOT Board Just From Your Phone</Text>
                         <Text style={{ marginTop: 100, color: 'white', fontWeight: 'bold', fontSize: 17 }}>Swipe To Right 👉</Text>
