@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, AsyncStorage, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
@@ -14,11 +14,31 @@ import GuideOffline from './components/Guide_Offline'
 import Offline from './components/Offline' 
 
 export default class App extends Component{
+    constructor(props){
+        super(props)
+
+        this.state = {
+            redirect: null
+        }
+    }
+
+    componentDidMount(){
+        AsyncStorage.getItem('mode').then(data => {
+            if(data == 'outside'){
+                this.setState({ redirect: 'offline' })
+            }else if(data == 'offline'){
+                this.setState({ redirect: 'offline' })
+            }else{
+                this.setState({ redirect: null })
+            }
+        })
+    }
+
     render(){
         let Stack = createStackNavigator();
         return(
             <NavigationContainer>
-                <Stack.Navigator>
+                <Stack.Navigator initialRouteName={this.state.redirect}>
                     <Stack.Screen name="Banner" component={Banner} options={{ headerShown: false }} />
                     <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}/>
                     <Stack.Screen name='Register' component={Register} options={{ headerStyle: { backgroundColor: '#292928' }, headerTitleStyle: { color: 'white' } }}/>

@@ -46,7 +46,7 @@ export default class Guide extends Component{
         AsyncStorage.setItem('mode', null);
         AsyncStorage.setItem('mode', 'outside');
         this.props.navigation.dispatch(
-            StackActions.replace('Offline', { type: 'offline' })
+            StackActions.replace('Offline', { type: 'outside' })
         )
     }
 

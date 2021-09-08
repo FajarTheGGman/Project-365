@@ -488,6 +488,7 @@ class HomePage extends Component{
                     name: this.state.relay_name, 
                     timeout_time: this.state.relay_time_interval, 
                     url: this.state.relay_url, 
+                    pin: this.state.relay_pin,
                     timeout: this.state.relay_timeout, 
                     relay_category: this.state.relay_category, 
                     type_button: this.state.relay_button_type 
@@ -520,31 +521,27 @@ class HomePage extends Component{
             
         }
 
-        AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
+        AsyncStorage.getItem('token').then(async(data) => {
+            await axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
 
                 if(respon.status == 200){
                     this.setState({ error_server: false })
                     this.setState({ username: respon.data.user.username })
                 }
             }).catch((err) => {
-                if(err){
-                    this.setState({ error_server: true })
-                }
+
             })
 
-            axios.post(konfigurasi.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
+            await axios.post(konfigurasi.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
 				if(respon.status == 200){
                     this.setState({ error_server: false })
-	                console.log(respon.data)
+
 				}
             }).catch((err) => {
-                if(err){
-                    this.setState({ error_server: true })
-                }
+
             })
 
-            axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+            await axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
                 if(result.status == 200){
                     this.setState({ error_server: false })
                     this.setState({ data: this.state.data.concat(result.data) })
@@ -557,28 +554,24 @@ class HomePage extends Component{
                     alert('Server Error !')
                 }
             }).catch((err) => {
-                if(err){
-                    this.setState({ error_server: true })
-                }
+
             })
 
-            axios.get(konfigurasi.server).then(respon => {
+            await axios.get(konfigurasi.server).then(respon => {
                 if(!respon.status == 200){
                     this.setState({ internet: true })
                 }
                     this.setState({ error_server: false })
                 this.setState({ internet: false })
             }).catch((err) => {
-                if(err){
-                    this.setState({ error_server: true })
-                }
+
             })
 
             axios.get('http://wttr.in/?format=j1').then(res => {
                 this.setState({ weatherStatus: null, weatherTemp: null })
                 this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
 
-                this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
+                this.setState({ weatherCondition: 'Plz Wait...', weatherPallete: 'black', weatherFont: 'white' })
 
                 if(this.state.weatherStatus.match(/Thunder/i)){
                     this.setState({ weather: require('../assets/weather/thunder.png'), weatherCondition: "Thunder", weatherPallete: 'black', weatherFont: 'white' })
@@ -597,6 +590,10 @@ class HomePage extends Component{
                         weatherPallete: 'white',
                         weatherFont: 'black'
                     })
+                }
+            }).catch(err => {
+                if(err){
+                    this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
                 }
             })
         })
@@ -869,57 +866,65 @@ class HomePage extends Component{
         })
     }
 
-    switch(nama, status){
+    switch(nama, status, pin){
         AsyncStorage.getItem('token').then(token_user => {
             (async() => {
                 this.setState({ loading: true })
                 await axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
                     if(result.status == 200){
-                        this.refresh()
+                        axios.post(konfigurasi.server + 'board/relay/activities/update', {
+                            token: token_user,
+                            secret: konfigurasi.key,
+                            name: nama,
+                            status: !status,
+                            pin: pin
+                        }).then(x => {
+                            if(x.status == 200){
+                                this.refresh()
+                            }
+                        })
                     }else{
-                        alert('[!] server error')
+                        alert('[!] Server error')
                     }
                 }).catch((err) => {
-                if(err){
-                    this.setState({ loading: false, error_server: true })
-                }
-            })
-                await axios.post(konfigurasi.server + 'board/activites/update', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
-                    if(result.status == 200){
-                        this.refresh()
-                    }else{
-                        alert('[!] server error')
+                    if(err){
+                        this.setState({ loading: false, error_server: false })
                     }
-                }).catch((err) => {
-                if(err){
-                    this.setState({ loading: false, error_server: true })
-                }
-            })
-                this.setState({ loading: false })
+                })
+                this.setState({ loading: false, error_server: false })
             })()
         })
     }
 
-    clicker(nama, status){
+    clicker(nama, status, pin){
         AsyncStorage.getItem('token').then(token_user => {
             (async() => {
                 this.setState({ loading: true })
-                await axios.post(konfigurasi.server + "relay/update?type=status", { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
+                await axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
                     if(result.status == 200){
-                        this.refresh()
+                        axios.post(konfigurasi.server + 'board/relay/activities/update', {
+                            token: token_user,
+                            secret: konfigurasi.key,
+                            name: nama,
+                            status: !status,
+                            pin: pin
+                        }).then(x => {
+                            if(x.status == 200){
+                                this.refresh()
+                            }
+                        })
                     }else{
-                        alert('[!] Server Error')
+                        alert('[!] Server error')
                     }
                 }).catch((err) => {
                 if(err){
                     this.setState({ loading: false, error_server: true })
                 }
             })
-                this.setState({ loading: false })
+                this.setState({ loading: false, error_server: true })
             })()
         })
     }
-
     
     render(){
         return(
@@ -1075,10 +1080,10 @@ class HomePage extends Component{
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                            {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(x.name, x.status)} value={x.status} /> : <View style={{ marginRight: 5 }}>
+                                            {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(x.name, x.status, x.pin)} value={x.status} /> : <View style={{ marginRight: 5 }}>
                                                 {x.status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(x.name, x.status)}>
                                                     <Text>Turn OFF</Text>
-                                                </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
+                                                </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status, x.pin)}>
                                                     <Text>Turn ON</Text>
                                                 </TouchableOpacity>}
                                             </View>}

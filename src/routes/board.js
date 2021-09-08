@@ -39,22 +39,12 @@ route.get('/relay/activities', (req,res) => {
                 if(err){
                     res.json({ error: '[!] Users not found' }).status(301)
                 }else{
-                    modelRelayBoard.find({ username: token.username }, (err, done) => {
-                        res.json({
-                            name: done.name,
-                            pin: done.pin,
-                            status: done.status
-                        })
+                    modelRelayBoard.find({ username: 'Fajar' }, (err, done) => {
+                        res.json(done[0])
                     })
                 }
             })
         }
-    })
-})
-
-route.post('/testing', (req,res) => {
-    modelRelayBoard.insertMany({ username: 'test', pin: 15, status: true }, (err, done) => {
-        res.json({ done: 'done' })
     })
 })
 
@@ -69,7 +59,7 @@ route.post('/relay/activities/update', (req,res) => {
                 }else{
                     modelRelayBoard.find({ username: token.username }, (err, dataUser) => {
                         if(dataUser.length == 0){
-                            modelRelayBoard.insertMany({ username: token.username, pin: req.body.pin, status: req.body.status }, (err, doneInput) => {
+                            modelRelayBoard.insertMany({ name: req.body.name, username: token.username, pin: req.body.pin, status: req.body.status }, (err, doneInput) => {
                                 if(err){
                                     res.json({ error: '[!] Something Wrong in server' }).status(501)
                                 }else{
