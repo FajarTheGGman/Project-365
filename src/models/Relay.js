@@ -4,7 +4,6 @@ let mongoose = require('mongoose')
 let Relay = new mongoose.Schema({
     username: { type: String },
     name: { type: String },
-//    url_offline: { type: String },
     message: { type: String, default: '' },
     timeout_time: { type: Number, default: 0 },
     status: { type: Boolean, default: false },

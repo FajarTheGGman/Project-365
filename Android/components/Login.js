@@ -12,13 +12,18 @@ export default class Login extends Component{
         this.state = {
             username: '',
             password: '',
-            loading: false
+            loading: false,
+            server: null
         }
     }
 
-    componentDidMount(){
+    async componentDidMount(){
+        await AsyncStorage.getItem('myserver').then(data => {
+            this.setState({ server: data })
+        })
+
         AsyncStorage.getItem('token').then(data => {
-            if(data.length == 0 || data.length == null){
+            if(!data){
 
             }else{
                 this.props.navigation.dispatch(
@@ -31,7 +36,7 @@ export default class Login extends Component{
     login(){
         (async() => {
             this.setState({ loading: true })
-            await axios.post(konfigurasi.server + 'auth/login', { username: this.state.username, password: this.state.password }).then(result => {
+            await axios.post(this.state.server + 'auth/login', { username: this.state.username, password: this.state.password }).then(result => {
                 if(result.status == 201){
                     alert('[!] Username or password is wrong')
                 }else{

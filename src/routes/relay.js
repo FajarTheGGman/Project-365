@@ -123,7 +123,7 @@ route.post('/add', (req,res) => {
                 res.json({ warning: '[!] Username or password is wrong' })
             }
 
-            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, url_offline: req.body.url, timeout: req.body.timeout, type: req.body.relay_category, type_button: req.body.type_button }, (err, done) => {
+            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, url_offline: req.body.url, timeout: req.body.timeout, type: req.body.relay_category, type_button: req.body.type_button, pin: req.body.pin }, (err, done) => {
                 if(err){
                     res.status(301)
                     res.json({ error: '[!] Something Wrong in server :(' })

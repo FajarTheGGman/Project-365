@@ -9,7 +9,7 @@ console.log(color.rainbow(box("Smarthome 2.0", { padding: 1, borderStyle: 'doubl
 
 json({
     'Coder': 'Fajar Firdaus',
-    'IG': '@kernel024',
+    'IG': '@fajar.psd',
     'Twitter': '@kernel024',
     'Github': 'FajarTheGGman'
 })
