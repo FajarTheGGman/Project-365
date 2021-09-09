@@ -66,7 +66,7 @@ route.post('/input', (req,res) => {
             if(user.length != 0){
                 modelRelay.findOne({ username: token.username, name: req.body.name }, (err, duplicate) => {
                     if(duplicate.length == 0){
-                        modelRelay.insertMany({ username: token.username, name: req.body.name, url_offline: req.body.url, schedule: req.body.schedule }, (err, done) => {
+                        modelRelay.insertMany({ username: token.username, name: req.body.name, pin: req.body.pin, schedule: req.body.schedule }, (err, done) => {
                             if(err){
                                 res.status(301)
                                 res.json({ error: "Server Error :(" })

@@ -4,9 +4,11 @@ const jwt = require('jsonwebtoken')
 const axios = require('axios')
 const ch = require('cheerio')
 const modelRelay = require('../models/Relay');
-const modelUsers = require('../models/Users')
-const modelBoard = require('../models/Board')
+const modelUsers = require('../models/Users');
+const modelBoard = require('../models/Board');
+const modelSensor = require('../models/Sensor');
 const modelRelayBoard = require('../models/Relay_Board');
+
 
 route.get('/relay', (req,res) => {
     jwt.verify(req.query.token, req.query.secret, (err, token) => {
@@ -79,6 +81,60 @@ route.post('/relay/activities/update', (req,res) => {
                }
             })
         }
+    })
+})
+
+route.get('/sensor/activities', (req,res) => {
+    jwt.verify(req.query.token, req.query.secret, (err, token) => {
+        if(err){
+            res.json({ error: '[!] Error Authorization' }).status(301);
+        }
+
+        modelUsers.find({ username: token.username }, (err, user) => {
+            if(err){
+                res.json({ error: '[!] Users not found'}).status(301)
+            }
+
+            modelSensor.find({ username: token.username }, (err, done) => {
+                res.json(done)
+            })
+        })
+    })
+})
+
+route.post('/sensor/activities/update', (req,res) => {
+    jwt.verify(req.body.token, req.body.secret, (err, token) => {
+        if(err){
+            res.json({ error: "[!] Wrong Authorization" }).status(301)
+        }
+
+        modelUsers.find({ username: token.username }, (err, user) => {
+            if(err){
+                res.json({ error: '[!] Users not found' }).status(301)
+            }
+
+            modelSensor.find({ 
+                username: token.username,
+                name: req.body.name
+            }, (err, done) => {
+                if(done.length == 0){
+                    modelSensor.insertMany({ 
+                        username: token.username,
+                        name: req.body.name,
+                        pin: req.body.pin,
+                    }, (err, input) => {
+                        res.json({ success: '[!] Success updating data sensor' })
+                    })
+                }else{
+                    modelSensor.update({
+                        username: token.username,
+                        name: req.body.name
+                    }, {
+                        data: req.body.data
+                    })
+                }
+            })
+        })
     })
 })
 

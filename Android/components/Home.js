@@ -16,7 +16,16 @@ import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
-import* as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system'
+import * as Notif from 'expo-notifications'
+
+Notif.setNotificationHandler({
+    handleNotification: async() => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false
+    })
+})
 
 export default class Home extends Component{
     constructor(props){
@@ -434,6 +443,7 @@ class HomePage extends Component{
             serial_information: false,
             serial_name: '',
             serial_pin: null,
+            serial_data: null,
             loading: false,
             refresh: false,
             getcontent: false,
@@ -472,7 +482,9 @@ class HomePage extends Component{
             scheduleButton: false,
             moduleDetail: false,
             moduleName: '',
-            moduleUrl: ''
+            moduleUrl: '',
+            serial_details: false,
+            server: null
         }
     }
 
@@ -482,7 +494,7 @@ class HomePage extends Component{
                 this.setState({ relay_timeout: true })
             }
 
-            axios.post(konfigurasi.server + "relay/add", 
+            axios.post(this.state.server + "relay/add", 
                 { token: key, 
                     secret: konfigurasi.key, 
                     name: this.state.relay_name, 
@@ -507,10 +519,14 @@ class HomePage extends Component{
     async componentDidMount(){
         const network = await Network.getNetworkStateAsync()
 
+        await AsyncStorage.getItem('myserver').then(data => {
+            this.setState({ server: data })
+        })
+
         if(network.isConnected == true){
             this.setState({ getcontent: true })
             AsyncStorage.getItem('d').then(data => {
-                axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+                axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
                     
                 }).catch(err => {
                 
@@ -522,7 +538,7 @@ class HomePage extends Component{
         }
 
         AsyncStorage.getItem('token').then(async(data) => {
-            await axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
+            await axios.post(this.state.server + 'settings/users', { token: data }).then(respon => {
 
                 if(respon.status == 200){
                     this.setState({ error_server: false })
@@ -532,7 +548,7 @@ class HomePage extends Component{
 
             })
 
-            await axios.post(konfigurasi.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
+            await axios.post(this.state.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
 				if(respon.status == 200){
                     this.setState({ error_server: false })
 
@@ -541,7 +557,7 @@ class HomePage extends Component{
 
             })
 
-            await axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+            await axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
                 if(result.status == 200){
                     this.setState({ error_server: false })
                     this.setState({ data: this.state.data.concat(result.data) })
@@ -557,7 +573,7 @@ class HomePage extends Component{
 
             })
 
-            await axios.get(konfigurasi.server).then(respon => {
+            await axios.get(this.state.server).then(respon => {
                 if(!respon.status == 200){
                     this.setState({ internet: true })
                 }
@@ -653,7 +669,7 @@ class HomePage extends Component{
     refresh(){
         this.setState({ loading: true, refresh: true, data: [] })
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'settings/users', { token: data }).then(respon => {
+            axios.post(this.state.server + 'settings/users', { token: data }).then(respon => {
 
                 if(respon.status == 200){
                     this.setState({ error_server: false })
@@ -665,7 +681,7 @@ class HomePage extends Component{
                 }
             })
 
-            axios.post(konfigurasi.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+            axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
                 if(result.status == 200){
                     this.setState({ data: this.state.data.concat(result.data) })
                     this.setState({ error_server: false })
@@ -788,10 +804,38 @@ class HomePage extends Component{
         })
     }
 
+    serial_details(name, url){
+        AsyncStorage.getItem('localip').then(localip => {
+            (async() => {
+                this.setState({ loading: true })
+                await axios.get('http://' + localip + url).then(data => {
+                    if(data.status == 200){
+                        this.setState({ serial_data: data })
+                        this.setstate({ loading: false })
+                        this.setState({ serial_details: true })
+                    }else{
+                        alert('[!] Url Sensor not found')
+                        this.setstate({ loading: false })
+                    }
+                })
+            })()
+       })
+    }
+
+    async notif(title, body){
+        await Notif.scheduleNotificationAsync({
+            content: {
+                title: title,
+                body: body
+            },
+            trigger: { seconds: 1 }
+        })
+    }
+
     moduleDetail(ThisName, url){
         this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url })
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'relay/update', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName, url_offline: this.state.moduleUrl }).then(response => {
+            axios.post(this.state.server + 'relay/update', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName, url_offline: this.state.moduleUrl }).then(response => {
                 if(response.status == 200){
                     alert('Successfully updated relay')
                 }else if(response.status == 301){
@@ -803,7 +847,7 @@ class HomePage extends Component{
                 }
             })
             
-            axios.post(konfigurasi.server + "schedule/get", { token: data, secret: konfigurasi.key, name: ThisName }).then(response => {
+            axios.post(this.state.server + "schedule/get", { token: data, secret: konfigurasi.key, name: ThisName }).then(response => {
                 if(response.status == 200){
                     this.setState({ scheduleButton: true })
                 }
@@ -817,7 +861,7 @@ class HomePage extends Component{
 
     addSerial(){
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'serial/add', { token: data, name: this.state.serial_name, pin: this.state.serial_pin }).then(response => {
+            axios.post(this.state.server + 'serial/add', { token: data, name: this.state.serial_name, pin: this.state.serial_pin }).then(response => {
                 if(response.status == 200){
                     alert('Done')
                 }
@@ -831,7 +875,7 @@ class HomePage extends Component{
 
     schedule(x){
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'schedule/get', { token: data, secret: konfigurasi.key, name: x }).then(res => {
+            axios.post(this.state.server + 'schedule/get', { token: data, secret: konfigurasi.key, name: x }).then(res => {
                 try{
                     this.setState({ scheduleDetailName: res.data.data[0].name, scheduleDetailDate: res.data.data[0].schedule, scheduleDetail: true })
                     console.log(res.data)
@@ -854,7 +898,7 @@ class HomePage extends Component{
 
     addSchedule(){
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'schedule/input', { token: data, secret: konfigurasi.key, name: this.state.schedule_name_select, url_offline: this.state.schedule_offline, schedule: this.state.schedule_date}).then(res => {
+            axios.post(this.state.server + 'schedule/input', { token: data, secret: konfigurasi.key, name: this.state.schedule_name_select, url_offline: this.state.schedule_offline, schedule: this.state.schedule_date}).then(res => {
                 if(res.status == 200){
                     alert('Done')
                 }
@@ -870,9 +914,9 @@ class HomePage extends Component{
         AsyncStorage.getItem('token').then(token_user => {
             (async() => {
                 this.setState({ loading: true })
-                await axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
+                await axios.post(this.state.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
                     if(result.status == 200){
-                        axios.post(konfigurasi.server + 'board/relay/activities/update', {
+                        axios.post(this.state.server + 'board/relay/activities/update', {
                             token: token_user,
                             secret: konfigurasi.key,
                             name: nama,
@@ -880,6 +924,11 @@ class HomePage extends Component{
                             pin: pin
                         }).then(x => {
                             if(x.status == 200){
+                                if(status){
+                                    this.notif('Switching to OFF', nama + ' is turn OFF')
+                                }else{
+                                    this.notif('Switching to ON', nama + ' is turn ON')
+                                }
                                 this.refresh()
                             }
                         })
@@ -900,9 +949,9 @@ class HomePage extends Component{
         AsyncStorage.getItem('token').then(token_user => {
             (async() => {
                 this.setState({ loading: true })
-                await axios.post(konfigurasi.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
+                await axios.post(this.state.server + 'relay/update?type=status', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
                     if(result.status == 200){
-                        axios.post(konfigurasi.server + 'board/relay/activities/update', {
+                        axios.post(this.state.server + 'board/relay/activities/update', {
                             token: token_user,
                             secret: konfigurasi.key,
                             name: nama,
@@ -1038,6 +1087,33 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.serial_details}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ paddingLeft: 15 }}>
+                                    <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
+                                        <Image source={require('../assets/icons/receiving.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
+                                        <Text style={{ fontWeight: 'bold', marginTop: 5, fontSize: 17 }} >Serial Data</Text>
+                                   </View>
+                                </View>
+
+                                <View style={{ marginLeft: 15, marginRight: -5 }}>
+                                    <TouchableOpacity onPress={() => this.setState({ serial_details: false })}>
+                                        <Icon name="close-outline" size={30} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            
+                            <View style={{ marginTop: 15, alignItems: 'center' }}>
+                                <View style={{ backgroundColor: 'black', borderRadius: 5, padding: 13 }}>
+                                    <Text style={{ color: 'white', fontWeight: 'bold' }}>{this.state.serial_data}</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 <SwipeUpDown modalVisible={this.state.swipeRelay} ContentModal={
                         <View style={{ flex: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15, paddingBottom: 10, elevation: 15 }}>
@@ -1057,23 +1133,17 @@ class HomePage extends Component{
                                     </View>
 
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
-                                    { this.state.serial_info ? this.state.data.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
-                                        <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
-                                            <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />
-                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name.length >= 5 ? x.name + '....' : x.name}</Text>
-                                        </View>
-                                        <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                            {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(x.name, x.status)} value={x.status} /> : <View style={{ marginRight: 5 }}>
-                                                {x.status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(x.name, x.status)}>
-                                                    <Text>Turn OFF</Text>
-                                                </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
-                                                    <Text>Turn ON</Text>
-                                                </TouchableOpacity>}
-                                            </View>}
-                                        </View>
-                                    </TouchableOpacity>
-                                  }) : this.state.data.map((x, y) => {
+                                    { this.state.serial_info ? this.state.data_serial.map((x, y) => {
+                                        <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url)}>
+                                            <View>
+                                                <Text style={{ color: 'white', fontWeight: 'bold' }}>{x.url}</Text>
+                                            </View>
+
+                                            <View>
+                                                <Text style={{ color: 'orange' }}>{x.url}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    }) : this.state.data.map((x, y) => {
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 15, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.url_offline)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />

@@ -16,7 +16,16 @@ import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
-import* as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system'
+import * as Notif from 'expo-notifications'
+
+Notif.setNotificationHandler({
+    handleNotification: async() => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false
+    }),
+})
 
 export default class Home extends Component{
     constructor(props){
@@ -825,6 +834,16 @@ class HomePage extends Component{
         AsyncStorage.setItem('relay_offline', compress)
     }
 
+    async notif(title, body){
+        await Notif.scheduleNotificationAsync({
+            content: {
+                title: title,
+                body: body
+            },
+            trigger: { seconds: 1 }
+        })
+    }
+
     serial_details(name, url){
         AsyncStorage.getItem('localip').then(localip => {
             (async() => {
@@ -856,6 +875,7 @@ class HomePage extends Component{
                         if(x.status != 200){
                             alert('Error')
                         }
+                        this.notif('Turning OFF', get_name + ' is now OFF')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -871,6 +891,7 @@ class HomePage extends Component{
                         if(x.status != 200){
                             alert('Error')
                         }
+                        this.notif('Turning ON', get_name + ' is now ON')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
