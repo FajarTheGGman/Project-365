@@ -191,70 +191,108 @@ server.begin();
 
 void loop(void) {
   server.handleClient();
+    
+http.useHTTP10(true);
+
+// [Online Mode] get relay activities from android app and send it to nodemcu
+http.begin(get_activities);
+http.GET();
+
+StaticJsonDocument<200> js;
+deserializeJson(js, http.getStream());
+
+int pin = js["pin"];
+bool v = js["status"];
+
+if(v){
+    digitalWrite(pin, LOW);
+}else{
+    digitalWrite(pin, HIGH);
+}
+
+http.end();
+
+// [Online Mode] get sensor activities from nodemcu and send it to android app
+http.begin(get_sensor_activities);
+
+StaticJsonDocument<200> doc;
+deserializeJson(doc, http.getStream());
+
+
+http.end();
 }
 ```
 
 ```c
 // [ESP-32]
+// Copyright 2021 By Fajar Firdaus
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <HTTPClient.h>
-#include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 #include <Update.h>
 #include <ESPmDNS.h>
 
-const char* wifi = "yourssid";
-const char* pw = "yourpassword";
+const char* wifi = "ServerIOT";
+const char* pw = "fajarfirdaus";
+
+String cloudServer = "http://192.168.1.9:5000/";
+String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkZhamFyIiwicGFzc3dvcmQiOiIkMmIkMTAkL3RQWDh1L3dCd1dlaEQ0aDV2aW1aTzlsTHNRQ0Qya1gzQUhrNi9YcHh5SnJYLnJrUnlodVciLCJpYXQiOjE2MzA4MzA0MDl9.7UEggl8cHfmpGZIHKQYVfsb-R0Kw3BalGxQvwoQTaB4";
+String key = "Important";
+
+String get_activities = cloudServer + "board/relay/activities?token=" + token + "&secret=" + key;
+String get_sensor_activities = cloudServer + "board/sensor/activities?token=" + token + "&secret" + key;
+String send_location = cloudServer + "board/location?token=" + token + "&secret=" + key + "&location="; 
+String get_location = "http://ip-api/json";
 
 WebServer server(80);
+HTTPClient http;
 
-// [Offline Mode] Initialize relays pin
 const int relay1 = 23;
 const int relay2 = 22;
 const int relay3 = 21;
 const int relay4 = 19;
 
-// [Offline Mode] relay function [ ON ]
-void relayone(){
-    digitalWrite(relay1, LOW);
-    server.send(200, "text/plain", "{ Relay1: ON }");
+// Default Relay Settings
+void relay(){
+    String get_pin = server.arg("pin");
+    int pin = get_pin.toInt();
+    
+    if(server.arg("volt") == "HIGH"){
+      digitalWrite(pin, HIGH);
+      server.send(200, "text/plain", "{ pin " + get_pin + ": ON } ");
+    }else if(server.arg("volt") == "LOW"){
+      digitalWrite(pin, LOW);
+      server.send(200, "text/plain", "{ pin " + get_pin + ": OFF } ");
+    }else{
+      server.send(200, "text/plain", "{ error: 'No Arguments' }");
+    }
 }
 
-void relaytwo(){
-    digitalWrite(relay2, LOW);
-    server.send(200, "text/plain", "{ Relay2: ON }");
+void readSensor(){
+  String get_pin = server.arg("pin");
+  int pin = get_pin.toInt();
+
+  if(server.arg("type") == "analog"){
+    int data_sensor = analogRead(pin);
+    String str = String(data_sensor);
+    server.send(200, "text/plain", str);
+  }else if(server.arg("type") == "digital"){
+    int data_sensor = digitalRead(pin);
+    String str = String(data_sensor);
+    server.send(200, "text/plain", str);
+  }else{
+    server.send(200, "text/plain","{ Error: 'No Arguments' }");
+  }
 }
 
-void relaythree(){
-    digitalWrite(relay3, LOW);
-    server.send(200, "text/plain", "{ Relay3: ON }");
-}
-
-void relayfour(){
-    digitalWrite(relay4, LOW);
-    server.send(200, "text/plain", "{ Relay4: ON }");
-}
-
-// [Offline Mode] relay function [ OFF ]
-void relayonedie(){
-    digitalWrite(relay1, HIGH);
-    server.send(200, "text/plain", "{ Relay1: OFF }");
-}
-
-void relaytwodie(){
-    digitalWrite(relay2, HIGH);
-    server.send(200, "text/plain", "{ Relay2: OFF }");
-}
-
-void relaythreedie(){
-    digitalWrite(relay3, HIGH);
-    server.send(200, "text/plain", "{ Relay3: OFF }");
-}
-
-void relayfourdie(){
-    digitalWrite(relay4, HIGH);
-    server.send(200, "text/plain", "{ Relay4: OFF }");
+void catch_relay(int pin, bool volt){
+  if(volt){
+    digitalWrite(pin, LOW);
+  }else{
+    digitalWrite(pin, HIGH);
+  }
 }
 
 void setup(void) {
@@ -262,11 +300,15 @@ void setup(void) {
   WiFi.mode(WIFI_STA);
   WiFi.begin(wifi, pw);
   
-  pinMode(relay1, OUTPUT);
-  pinMode(relay2, OUTPUT);
-  pinMode(relay3, OUTPUT);
-  pinMode(relay4, OUTPUT);
-
+  // Example pin
+  pinMode(4, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+  
+  digitalWrite(LED_BUILTIN, LOW);
+   
+  // Check router connection
   while(WiFi.status() != WL_CONNECTED){
        delay(100);
        Serial.print("-");
@@ -284,6 +326,8 @@ void setup(void) {
   Serial.println(WiFi.localIP());
   Serial.println("}");
 
+  digitalWrite(LED_BUILTIN, HIGH);
+
   if(!MDNS.begin("Project-365")){
     while(1){
       delay(1000);
@@ -294,16 +338,11 @@ void setup(void) {
       server.send(200, "text/plain", "{ Server: 'Project - 365%'}");
    });
 
-  // [Offline Mode] Routing url
-  server.on("/relay1", relayone);
-  server.on("/relay2", relaytwo);
-  server.on("/relay3", relaythree);
-  server.on("/relay4", relayfour);
-  
-  server.on("/relay1die", relayonedie);
-  server.on("/relay2die", relaytwodie);
-  server.on("/relay3die", relaythreedie);
-  server.on("/relay4die", relayfourdie);
+  server.on("/relay", relay);
+  server.on("/read", readSensor);
+  server.on("/test", [](){
+     server.send(200, "text/plain", server.uri());
+  });
    
   server.on("/code", HTTP_POST, []() {
     server.sendHeader("Connection", "close");
@@ -335,7 +374,38 @@ void setup(void) {
 
 void loop(void) {
   server.handleClient();
+  
+http.useHTTP10(true);
+
+// [Online Mode] get relay activities from android app and send it to nodemcu
+http.begin(get_activities);
+http.GET();
+
+StaticJsonDocument<200> js;
+deserializeJson(js, http.getStream());
+
+int pin = js["pin"];
+bool v = js["status"];
+
+if(v){
+    digitalWrite(pin, LOW);
+}else{
+    digitalWrite(pin, HIGH);
 }
+
+http.end();
+
+// [Online Mode] get sensor activities from nodemcu and send it to android app
+http.begin(get_sensor_activities);
+
+StaticJsonDocument<200> doc;
+deserializeJson(doc, http.getStream());
+
+
+http.end();
+
+}
+
 ```
 
 # Screenshots
