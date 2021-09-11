@@ -18,6 +18,7 @@ export default class Banner extends Component{
     }
 
     componentDidMount(){
+        AsyncStorage.removeItem('myserver')
         AsyncStorage.getItem('myserver').then(data => {
             if(data == null){
                 this.setState({ noserver: true })
