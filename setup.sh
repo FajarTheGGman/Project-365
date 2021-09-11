@@ -97,6 +97,7 @@ echo -e $blue"{ Choose: One }"
 echo '[1] Install'
 echo '[2] Run'
 echo '[3] Setup Docker'
+echo '[4] Setup Android App'
 echo -e $red'[0] Exit'
 
 echo -e $green
@@ -114,6 +115,8 @@ elif [[ $out == 2 ]]; then
 elif [[ $out == 0 ]]; then
     echo -e $red"[!] Exiting Program.."
     break
+elif [[ $out == 4 ]]; then
+    setup_expo
 else 
     clear
 fi
