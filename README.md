@@ -1,5 +1,5 @@
 # Project 365%
-<p>Simple Project For Home Automation</p>
+<p>Home Automation With MERN Stack</p>
 
 ![](https://img.shields.io/badge/react-native-blue)
 ![](https://img.shields.io/badge/nodejs-16.7.0-lime) 
@@ -7,12 +7,14 @@
 ![](https://img.shields.io/badge/mongo-4.0.19-green)
 ![](https://img.shields.io/badge/expressjs-4.17.1-white)
 
-<b top="10">This Project Still Under Development!</b>
-
 <div align='center'>
 <img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
 <h3>Project 365%</h3>
 </div>
+
+
+![](https://img.shields.io/badge/Tested-ESP32-lime)
+![](https://img.shields.io/badge/Tested-ESP8266-lime)
 
 [![Deploy Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)  [![Deploy Vercel](https://vercel.com/button)](https://vercel.com/new) [![Deploy Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/neverendingqs/netlify-express)
 
@@ -412,11 +414,11 @@ http.end();
 ```
 
 # Screenshots
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner1.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner2.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner3.png" width="250" height="450" /> 
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/bannner2.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner3.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/404.png" width="250" height="450" /> 
 
 <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/online.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/offline.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/settings.png" width="250" height="450" /> 
 
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/login.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/register.png" width="250" height="450" /> 
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/login.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/register.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/server.png" width="250" height="450" /> 
 
 <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/menu.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/addrelay.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/list.png" width="250" height="450" /> 
 
