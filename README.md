@@ -46,6 +46,9 @@ root@user-# expo build:android
 <b>Example Wiring</b><br></br>
 <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/example_diagram.png" width="620" height="320" />
 <br></br>
+<b>Minimum Wiring</b><br></br>
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/Android/assets/icons/schematic.png" width="450" height="290" />
+<br></br>
 <b>The Flowchart</b><br></br>
 <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/flowchart.png" width="520" height="320" />
 <br></br>
