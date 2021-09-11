@@ -414,7 +414,10 @@ http.end();
 ```
 
 # Screenshots
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/bannner2.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner3.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/404.png" width="250" height="450" /> 
+
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/Android/assets/splash.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/bannner2.png" width="250" height="450" /> 
+
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner3.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/404.png" width="250" height="450" /> 
 
 <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/online.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/offline.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/settings.png" width="250" height="450" /> 
 
