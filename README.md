@@ -239,11 +239,11 @@ http.end();
 #include <Update.h>
 #include <ESPmDNS.h>
 
-const char* wifi = "ServerIOT";
-const char* pw = "fajarfirdaus";
+const char* wifi = "ssid";
+const char* pw = "password";
 
-String cloudServer = "http://192.168.1.9:5000/";
-String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkZhamFyIiwicGFzc3dvcmQiOiIkMmIkMTAkL3RQWDh1L3dCd1dlaEQ0aDV2aW1aTzlsTHNRQ0Qya1gzQUhrNi9YcHh5SnJYLnJrUnlodVciLCJpYXQiOjE2MzA4MzA0MDl9.7UEggl8cHfmpGZIHKQYVfsb-R0Kw3BalGxQvwoQTaB4";
+String cloudServer = "yourserver";
+String token = "yourtoken";
 String key = "Important";
 
 String get_activities = cloudServer + "board/relay/activities?token=" + token + "&secret=" + key;
