@@ -260,36 +260,47 @@ const int relay3 = 21;
 const int relay4 = 19;
 
 // Default Relay Settings
-void relay(){
-    String get_pin = server.arg("pin");
-    int pin = get_pin.toInt();
-    
-    if(server.arg("volt") == "HIGH"){
-      digitalWrite(pin, HIGH);
-      server.send(200, "text/plain", "{ pin " + get_pin + ": ON } ");
-    }else if(server.arg("volt") == "LOW"){
-      digitalWrite(pin, LOW);
-      server.send(200, "text/plain", "{ pin " + get_pin + ": OFF } ");
-    }else{
-      server.send(200, "text/plain", "{ error: 'No Arguments' }");
-    }
+
+// [Offline Mode] relay function [ ON ]
+void relayone(){
+    digitalWrite(relay1, LOW);
+    server.send(200, "text/plain", "{ Relay1: ON }");
 }
 
-void readSensor(){
-  String get_pin = server.arg("pin");
-  int pin = get_pin.toInt();
+void relaytwo(){
+    digitalWrite(relay2, LOW);
+    server.send(200, "text/plain", "{ Relay2: ON }");
+}
 
-  if(server.arg("type") == "analog"){
-    int data_sensor = analogRead(pin);
-    String str = String(data_sensor);
-    server.send(200, "text/plain", str);
-  }else if(server.arg("type") == "digital"){
-    int data_sensor = digitalRead(pin);
-    String str = String(data_sensor);
-    server.send(200, "text/plain", str);
-  }else{
-    server.send(200, "text/plain","{ Error: 'No Arguments' }");
-  }
+void relaythree(){
+    digitalWrite(relay3, LOW);
+    server.send(200, "text/plain", "{ Relay3: ON }");
+}
+
+void relayfour(){
+    digitalWrite(relay4, LOW);
+    server.send(200, "text/plain", "{ Relay4: ON }");
+}
+
+// [Offline Mode] relay function [ OFF ]
+void relayonedie(){
+    digitalWrite(relay1, HIGH);
+    server.send(200, "text/plain", "{ Relay1: OFF }");
+}
+
+void relaytwodie(){
+    digitalWrite(relay2, HIGH);
+    server.send(200, "text/plain", "{ Relay2: OFF }");
+}
+
+void relaythreedie(){
+    digitalWrite(relay3, HIGH);
+    server.send(200, "text/plain", "{ Relay3: OFF }");
+}
+
+void relayfourdie(){
+    digitalWrite(relay4, HIGH);
+    server.send(200, "text/plain", "{ Relay4: OFF }");
 }
 
 void catch_relay(int pin, bool volt){
@@ -342,12 +353,18 @@ void setup(void) {
   server.on("/", []() {
       server.send(200, "text/plain", "{ Server: 'Project - 365%'}");
    });
+   
+// [Offline Mode] routing url
+  server.on("/relay1", relayone);
+  server.on("/relay2", relaytwo);
+  server.on("/relay3", relaythree);
+  server.on("/relay4", relayfour);
 
-  server.on("/relay", relay);
-  server.on("/read", readSensor);
-  server.on("/test", [](){
-     server.send(200, "text/plain", server.uri());
-  });
+  server.on("/relay1die", relayonedie);
+  server.on("/relay2die", relaytwodie);
+  server.on("/relay3die", relaythreedie);
+  server.on("/relay4die", relayfourdie);
+
    
   server.on("/code", HTTP_POST, []() {
     server.sendHeader("Connection", "close");
