@@ -8,7 +8,6 @@ const file = require('express-fileupload')
 
 const routeAuth = require('./routes/auth');
 const routeRelay = require('./routes/relay');
-//const routeTensorflow = require('./routes/tensorflow');
 const routeSettings = require('./routes/settings');
 const routeBoard = require('./routes/board');
 const routeSensor = require('./routes/sensor')
@@ -22,16 +21,14 @@ const app = express();
 
 // Mongodb connections
 try{
-    db.connect(process.env.DB, {
+    db.connect("mongodb+srv://fajar:firdaus@project-365.9i8cg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", {
           useNewUrlParser: true,
           useUnifiedTopology: true,
           useFindAndModify: false,
           useCreateIndex: true
     })
 }catch(err){
-    if(err){
-        console.log(chalk.bgRed("[!] Error Connecting to database"))
-    }
+    console.log(chalk.bgRed("[!] Error Connecting to database"))
 }
 
 app.use(file())
