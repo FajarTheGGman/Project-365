@@ -1,5 +1,5 @@
 # Project 365%
-<p>Simple Project For Home Automation</p>
+<p>Home Automation With MERN Stack</p>
 
 ![](https://img.shields.io/badge/react-native-blue)
 ![](https://img.shields.io/badge/nodejs-16.7.0-lime) 
@@ -7,12 +7,14 @@
 ![](https://img.shields.io/badge/mongo-4.0.19-green)
 ![](https://img.shields.io/badge/expressjs-4.17.1-white)
 
-<b top="10">This Project Still Under Development!</b>
-
 <div align='center'>
 <img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
 <h3>Project 365%</h3>
 </div>
+
+
+![](https://img.shields.io/badge/Tested-ESP32-lime)
+![](https://img.shields.io/badge/Tested-ESP8266-lime)
 
 [![Deploy Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)  [![Deploy Vercel](https://vercel.com/button)](https://vercel.com/new) [![Deploy Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/neverendingqs/netlify-express)
 
@@ -237,11 +239,11 @@ http.end();
 #include <Update.h>
 #include <ESPmDNS.h>
 
-const char* wifi = "ServerIOT";
-const char* pw = "fajarfirdaus";
+const char* wifi = "ssid";
+const char* pw = "password";
 
-String cloudServer = "http://192.168.1.9:5000/";
-String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkZhamFyIiwicGFzc3dvcmQiOiIkMmIkMTAkL3RQWDh1L3dCd1dlaEQ0aDV2aW1aTzlsTHNRQ0Qya1gzQUhrNi9YcHh5SnJYLnJrUnlodVciLCJpYXQiOjE2MzA4MzA0MDl9.7UEggl8cHfmpGZIHKQYVfsb-R0Kw3BalGxQvwoQTaB4";
+String cloudServer = "yourserver";
+String token = "yourtoken";
 String key = "Important";
 
 String get_activities = cloudServer + "board/relay/activities?token=" + token + "&secret=" + key;
@@ -258,36 +260,47 @@ const int relay3 = 21;
 const int relay4 = 19;
 
 // Default Relay Settings
-void relay(){
-    String get_pin = server.arg("pin");
-    int pin = get_pin.toInt();
-    
-    if(server.arg("volt") == "HIGH"){
-      digitalWrite(pin, HIGH);
-      server.send(200, "text/plain", "{ pin " + get_pin + ": ON } ");
-    }else if(server.arg("volt") == "LOW"){
-      digitalWrite(pin, LOW);
-      server.send(200, "text/plain", "{ pin " + get_pin + ": OFF } ");
-    }else{
-      server.send(200, "text/plain", "{ error: 'No Arguments' }");
-    }
+
+// [Offline Mode] relay function [ ON ]
+void relayone(){
+    digitalWrite(relay1, LOW);
+    server.send(200, "text/plain", "{ Relay1: ON }");
 }
 
-void readSensor(){
-  String get_pin = server.arg("pin");
-  int pin = get_pin.toInt();
+void relaytwo(){
+    digitalWrite(relay2, LOW);
+    server.send(200, "text/plain", "{ Relay2: ON }");
+}
 
-  if(server.arg("type") == "analog"){
-    int data_sensor = analogRead(pin);
-    String str = String(data_sensor);
-    server.send(200, "text/plain", str);
-  }else if(server.arg("type") == "digital"){
-    int data_sensor = digitalRead(pin);
-    String str = String(data_sensor);
-    server.send(200, "text/plain", str);
-  }else{
-    server.send(200, "text/plain","{ Error: 'No Arguments' }");
-  }
+void relaythree(){
+    digitalWrite(relay3, LOW);
+    server.send(200, "text/plain", "{ Relay3: ON }");
+}
+
+void relayfour(){
+    digitalWrite(relay4, LOW);
+    server.send(200, "text/plain", "{ Relay4: ON }");
+}
+
+// [Offline Mode] relay function [ OFF ]
+void relayonedie(){
+    digitalWrite(relay1, HIGH);
+    server.send(200, "text/plain", "{ Relay1: OFF }");
+}
+
+void relaytwodie(){
+    digitalWrite(relay2, HIGH);
+    server.send(200, "text/plain", "{ Relay2: OFF }");
+}
+
+void relaythreedie(){
+    digitalWrite(relay3, HIGH);
+    server.send(200, "text/plain", "{ Relay3: OFF }");
+}
+
+void relayfourdie(){
+    digitalWrite(relay4, HIGH);
+    server.send(200, "text/plain", "{ Relay4: OFF }");
 }
 
 void catch_relay(int pin, bool volt){
@@ -340,12 +353,18 @@ void setup(void) {
   server.on("/", []() {
       server.send(200, "text/plain", "{ Server: 'Project - 365%'}");
    });
+   
+// [Offline Mode] routing url
+  server.on("/relay1", relayone);
+  server.on("/relay2", relaytwo);
+  server.on("/relay3", relaythree);
+  server.on("/relay4", relayfour);
 
-  server.on("/relay", relay);
-  server.on("/read", readSensor);
-  server.on("/test", [](){
-     server.send(200, "text/plain", server.uri());
-  });
+  server.on("/relay1die", relayonedie);
+  server.on("/relay2die", relaytwodie);
+  server.on("/relay3die", relaythreedie);
+  server.on("/relay4die", relayfourdie);
+
    
   server.on("/code", HTTP_POST, []() {
     server.sendHeader("Connection", "close");
@@ -412,11 +431,14 @@ http.end();
 ```
 
 # Screenshots
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner1.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner2.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner3.png" width="250" height="450" /> 
+
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/Android/assets/splash.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/bannner2.png" width="250" height="450" /> 
+
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/banner3.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/404.png" width="250" height="450" /> 
 
 <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/online.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/offline.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/settings.png" width="250" height="450" /> 
 
-<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/login.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/register.png" width="250" height="450" /> 
+<img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/login.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/register.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/server.png" width="250" height="450" /> 
 
 <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/menu.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/addrelay.png" width="250" height="450" /> <img src="https://raw.githubusercontent.com/FajarTheGGman/Project-365/main/images/screenshots/list.png" width="250" height="450" /> 
 
