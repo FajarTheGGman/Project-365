@@ -19,7 +19,6 @@
   "dependencies": {
     "axios": "*",
     "bcrypt": "*",
-    "boxen": "*",
     "chalk": "*",
     "cheerio": "*",
     "colors": "*",
