@@ -1,23 +1,35 @@
+// React Components
 import React, { Component } from 'react'
 import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
+
 import { StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+
+// Expo Package
+import * as FileSystem from 'expo-file-system'
+import * as Notif from 'expo-notifications'
+import { Gyroscope } from 'expo-sensors'
+import * as TaskManager from 'expo-task-manager'
+import * as BackgroundFetch from 'expo-background-fetch'
+import * as Network from 'expo-network'
+import * as Battery from 'expo-battery'
+
+// Random Package
 import axios from 'axios'
 import Modal from 'react-native-modal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Loading from 'react-native-loading-spinner-overlay'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import GridList from 'react-native-grid-list'
-import konfigurasi from '../config'
 import { BarCodeScanner } from 'expo-barcode-scanner'
-import * as Network from 'expo-network'
-import * as Battery from 'expo-battery'
 import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
-import * as FileSystem from 'expo-file-system'
-import * as Notif from 'expo-notifications'
+
+// Configurations
+import konfigurasi from '../config'
+
 
 Notif.setNotificationHandler({
     handleNotification: async() => ({
@@ -48,6 +60,8 @@ export default class Home extends Component{
             }catch(e){
             
             }
+
+
     }
 
     async battery(){
