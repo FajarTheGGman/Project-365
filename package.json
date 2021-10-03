@@ -1,5 +1,5 @@
 {
-  "name": "Project-365%",
+  "name": "Project-365",
   "version": "1.0.0",
   "description": "#Simple program for home automation",
   "main": "index.js",
@@ -34,7 +34,6 @@
     "morgan": "*",
     "node-base64-image": "*",
     "open": "*",
-    "ora": "*",
     "uuid": "*"
   },
   "devDependencies": {

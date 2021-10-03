@@ -3,6 +3,7 @@ const chalk = require('chalk');
 const json = require('jsome');
 const color = require('colors');
 const box = require('boxen')
+//const loading = require('ora')
 const open = require('open')
 
 console.log(color.rainbow(box("Smarthome 2.0", { padding: 1, borderStyle: 'double' }) + '\n'))
@@ -25,6 +26,9 @@ if(process.argv[2]){
    })
 }else{
     app.listen(port, () => {
-        console.log(color.cyan('[+] Server Running at port : ' + port))
+//        open('http://0.0.0.0:' + port, { app: 'google chrome' })
+//        loading(color.cyan('[+] Server Running at port : ' + port)).start()
+    console.log("app running at port : " + port)
+       console.log(color.cyan('[+] Server Running at port : ' + port))
     })
 }
