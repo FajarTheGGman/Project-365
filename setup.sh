@@ -20,6 +20,7 @@ install_android(){
     echo -e $yellow"[/] Installing dependencies for android...."
     cd Android
     npm install --legacy-peer-deps
+    cd ..
     echo -e $green"[+] node_modules successfully installed"
 }
 
@@ -27,6 +28,11 @@ setup_expo(){
     echo -e $yellow"[/] Starting Expo"
     cd Android
     expo build:android
+}
+
+run_android(){
+    cd Android
+    npm start
 }
 
 running(){
@@ -49,6 +55,8 @@ running(){
 
 if [[ $1 == '--install' ]]; then
     installing
+    install_android
+
     exit
 elif [[ $1 == '--run' ]]; then
     if [[ $2 ]]; then
@@ -62,6 +70,16 @@ elif [[ $1 == '--install-android' ]]; then
 elif [[ $1 == '--dev' ]]; then
     ip=$(hostname -I | awk '{print $1}')
     npm run dev $ip
+elif [[ $1 == '--server' ]]; then
+    if [[ $2 ]]; then
+        npm start $2
+    else
+        x=$(hostname -I | awk '{print $1}')
+        npm start $x
+    fi
+elif [[ $1 == '--android' ]]; then
+    cd Android
+    npm start
 fi
 
 echo -e $yellow"[/] Checking some dependencies..."
@@ -95,9 +113,10 @@ echo -e $green"
 
 echo -e $blue"{ Choose: One }"
 echo '[1] Install'
-echo '[2] Run'
-echo '[3] Setup Docker'
-echo '[4] Setup Android App'
+echo '[2] Run Backend'
+echo '[3] Run React Native'
+echo '[4] Setup Docker'
+echo '[5] Setup Android App'
 echo -e $red'[0] Exit'
 
 echo -e $green
@@ -105,17 +124,19 @@ read -p "root@Project-365%-# " out
 
 if [[ $out == 1 ]]; then
     echo -e $green"[/] Install node modules"
-    npm install
+    installing
+    install_android
 
-    npm start
     break
 elif [[ $out == 2 ]]; then
     running
     break
+elif [[ $out == 3 ]]; then
+    run_android
 elif [[ $out == 0 ]]; then
     echo -e $red"[!] Exiting Program.."
     break
-elif [[ $out == 4 ]]; then
+elif [[ $out == 5 ]]; then
     setup_expo
 else 
     clear

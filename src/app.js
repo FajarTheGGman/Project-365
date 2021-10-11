@@ -21,11 +21,8 @@ const app = express();
 
 // Mongodb connections
 try{
-    db.connect("mongodb+srv://fajar:firdaus@project-365.9i8cg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", {
-          useNewUrlParser: true,
+    db.connect(process.env.DB, {
           useUnifiedTopology: true,
-          useFindAndModify: false,
-          useCreateIndex: true
     })
 }catch(err){
     console.log(chalk.bgRed("[!] Error Connecting to database"))

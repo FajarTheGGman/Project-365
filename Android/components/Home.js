@@ -1,23 +1,32 @@
+// React Components
 import React, { Component } from 'react'
 import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
+
+// Expo Packages
+import * as Network from 'expo-network'
+import * as Battery from 'expo-battery'
+import * as FileSystem from 'expo-file-system'
+import * as Notif from 'expo-notifications'
+import { BarCodeScanner } from 'expo-barcode-scanner'
+
+// Navigations
 import { StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+
+// Common Packagaes
 import axios from 'axios'
 import Modal from 'react-native-modal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Loading from 'react-native-loading-spinner-overlay'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import GridList from 'react-native-grid-list'
-import konfigurasi from '../config'
-import { BarCodeScanner } from 'expo-barcode-scanner'
-import * as Network from 'expo-network'
-import * as Battery from 'expo-battery'
 import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
-import * as FileSystem from 'expo-file-system'
-import * as Notif from 'expo-notifications'
+
+// Configurations
+import konfigurasi from '../config'
 
 Notif.setNotificationHandler({
     handleNotification: async() => ({
@@ -216,7 +225,7 @@ class Settings extends Component{
     logout(){
         AsyncStorage.removeItem('token').then(respon => {
             this.props.navigation.dispatch(
-                StackActions.replace('Login')
+                StackActions.replace('Banner')
             )
         })
     }
@@ -441,7 +450,7 @@ class HomePage extends Component{
             relayEmpty: false,
             relayAlert: false,
             serial_information: false,
-            serial_name: '',
+            serial_name: null,
             serial_pin: null,
             serial_data: null,
             loading: false,
@@ -454,35 +463,35 @@ class HomePage extends Component{
             relay_timeout: false,
             status: false,
             relay_category: 'lights.png',
-            relay_name: "",
+            relay_name: null,
             relay_time_interval: null,
             relay_pin: null,
-            relay_url: "",
+            relay_url: null,
             internet: false,
             error_server: false,
-            username: '',
-            waktu: '',
+            username: null,
+            waktu: null,
             dev: "{ Coder: Fajar Firdaus }",
             swipeRelay: false,
             addRelay: false,
             weather: null,
-            weatherStatus: '',
+            weatherStatus: null,
             weatherCondition: 'No Internet !',
             weatherPallete: 'white',
-            weatherTemp: '',
+            weatherTemp: null,
             error: false,
             date: false,
             input_date: new Date(),
             schedule_date: null,
-            schedule_name_select: "",
-            schedule_offline: "",
+            schedule_name_select: null,
+            schedule_offline: null,
             scheduleDetail: false,
-            scheduleDetailName: '',
-            scheduleDetailDate: '',
+            scheduleDetailName: null,
+            scheduleDetailDate: null,
             scheduleButton: false,
             moduleDetail: false,
-            moduleName: '',
-            moduleUrl: '',
+            moduleName: null,
+            moduleUrl: null,
             serial_details: false,
             server: null
         }
@@ -508,7 +517,7 @@ class HomePage extends Component{
                 if(!data.status == 200){
                     alert('Server Error :(')
                 }else{
-                    this.refresh()
+                    this.reload_relay()
                     alert('Relay Successfully Added')
                 }
             })
@@ -523,26 +532,12 @@ class HomePage extends Component{
             this.setState({ server: data })
         })
 
-        if(network.isConnected == true){
-            this.setState({ getcontent: true })
-            AsyncStorage.getItem('d').then(data => {
-                axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
-                    
-                }).catch(err => {
-                
-                })
-            })
-            this.setState({ getcontent: false })
-        }else{
-            
-        }
-
         AsyncStorage.getItem('token').then(async(data) => {
             await axios.post(this.state.server + 'settings/users', { token: data }).then(respon => {
 
                 if(respon.status == 200){
                     this.setState({ error_server: false })
-                    this.setState({ username: respon.data.user.username })
+                    this.setState({ username: respon.data.user[0].username })
                 }
             }).catch((err) => {
 
@@ -784,6 +779,26 @@ class HomePage extends Component{
         this.setState({ loading: false, refresh: false })
     }
 
+    reload_relay(){
+        AsyncStorage.getItem('token').then(data => {
+            axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+                if(result.status == 200){
+                    this.setState({ data: [], error_server: false })
+                    this.setState({ data: this.state.data.concat(result.data) })
+                    if(result.data.length == 0 || result.data.length == null){
+                        this.setState({ relayEmpty: true })
+                    }else{
+                        this.setState({ relayEmpty: false })
+                    }
+                }else{
+                    alert('Server Error !')
+                }
+            }).catch((err) => {
+                console.log(err)
+            })
+        })
+    }
+
     input_date(){
         this.setState({ date: false })
         this.setState({ date: true })
@@ -794,7 +809,7 @@ class HomePage extends Component{
             axios.post(konfigurasi.server + 'relay/delete', { token: data, secret: konfigurasi.key, name: mod }).then(response => {
                 if(response.status == 200){
                     alert('Module deleted!')
-                    this.refresh()
+                    this.reload_relay()
                 }
             }).catch((err) => {
                 if(err){
@@ -929,7 +944,7 @@ class HomePage extends Component{
                                 }else{
                                     this.notif('Switching to ON', nama + ' is turn ON')
                                 }
-                                this.refresh()
+                                this.reload_relay()
                             }
                         })
                     }else{
@@ -959,7 +974,7 @@ class HomePage extends Component{
                             pin: pin
                         }).then(x => {
                             if(x.status == 200){
-                                this.refresh()
+                                this.reload_relay()
                             }
                         })
                     }else{
@@ -967,7 +982,7 @@ class HomePage extends Component{
                     }
                 }).catch((err) => {
                 if(err){
-                    this.setState({ loading: false, error_server: true })
+                    this.setState({ loading: false, error_server: false })
                 }
             })
                 this.setState({ loading: false, error_server: true })
@@ -1215,7 +1230,7 @@ class HomePage extends Component{
                                 <View style={{ paddingLeft: 15 }}>
                                     <View style={{ marginTop: 15, marginLeft: 30, alignItems: 'center' }}>
                                         <Image source={require('../assets/icons/serial_information.png')} style={{ width: 80, height: 80, marginLeft: -15 }} />
-                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Serial Information</Text>
+                                        <Text style={{ fontWeight: 'bold', fontSize: 17 }} >Sensor Information</Text>
                                     </View>
                                 </View>
 

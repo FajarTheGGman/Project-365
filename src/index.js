@@ -2,10 +2,10 @@ const app = require('./app');
 const chalk = require('chalk');
 const json = require('jsome');
 const color = require('colors');
-const box = require('boxen')
+const say = require('yosay')
 const open = require('open')
 
-console.log(color.rainbow(box("Smarthome 2.0", { padding: 1, borderStyle: 'double' }) + '\n'))
+say('Project 365%');
 
 json({
     'Coder': 'Fajar Firdaus',
