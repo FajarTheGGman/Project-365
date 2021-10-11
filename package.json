@@ -34,6 +34,9 @@
     "morgan": "*",
     "node-base64-image": "*",
     "open": "*",
+    "ora": "*",
+    "uuid": "*",
+    "yosay": "*"
     "uuid": "*"
   },
   "devDependencies": {

@@ -12,7 +12,8 @@ res.json({ section: 'settings' })
 
 route.post('/users', (req,res) => {
     jwt.verify(req.body.token, process.env.KEY, (err, token) => {
-        modelUsers.findOne({ username: token.username }, (err, data) => {
+        console.log(token.username)
+        modelUsers.find({ username: token.username }, (err, data) => {
             res.json({ user: data })
         })
     })
