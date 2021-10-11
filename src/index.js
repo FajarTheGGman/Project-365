@@ -1,17 +1,17 @@
 const app = require('./app');
 const chalk = require('chalk');
-const json = require('jsome');
+const jsome = require('jsome');
 const color = require('colors');
 const say = require('yosay')
 const open = require('open')
 
-say('Project 365%');
+console.log(say('Project 365%'));
 
-json({
+jsome({
     'Coder': 'Fajar Firdaus',
     'IG': '@fajar.psd',
     'Twitter': '@kernel024',
-    'Github': 'FajarTheGGman'
+    'Github': 'FajarTheGGman',
 })
 
 const port = process.env.PORT || 5000;
@@ -25,8 +25,6 @@ if(process.argv[2]){
    })
 }else{
     app.listen(port, () => {
-//        open('http://0.0.0.0:' + port, { app: 'google chrome' })
-//        loading(color.cyan('[+] Server Running at port : ' + port)).start()
     console.log("app running at port : " + port)
        console.log(color.cyan('[+] Server Running at port : ' + port))
     })
