@@ -36,7 +36,7 @@
     "open": "*",
     "ora": "*",
     "uuid": "*",
-    "yosay": "*"
+    "yosay": "*",
     "uuid": "*"
   },
   "devDependencies": {
