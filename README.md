@@ -24,14 +24,22 @@
 
 <i>Installations</i>
 <pre>
-Linux : bash install.sh
-Windows: "click install.bat"
+[ Linux ]
+Linux : bash setup.sh --install
+
+[ Windows ]
+install-dependencies: "click setup.bat"
 </pre>
 
 <i>How to run ?</i>
 <pre>
-Linux: "bash run.sh"
-Windows: "click run.bat"
+[ Linux ]
+running backend: "bash setup.sh --server"
+running android: "bash setup.sh --android"
+
+[ Windows ]
+running backend: "click backend.bat"
+running android: "click android.bat"
 </pre>
 
 <i>Build Android Apps</i>
