@@ -1,0 +1,12 @@
+{
+    "name": "Project 365",
+    "description": "Project for internet of things",
+    "env": {
+        "DB": {
+            "value": "your mongodb url"
+        },
+        "KEY": {
+            "value": "Important"
+        }
+    }
+}

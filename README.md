@@ -10,6 +10,7 @@
 <div align='center'>
 <img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
 <h3>Project 365%</h3>
+<a href="https://github.com/FajarTheGGman/Project-365/raw/main/Project-365.apk"><img src="https://img.shields.io/badge/Application-Download-green?style=for-the-badge&logo=appveyor" width='200' /></a>
 </div>
 
 
@@ -24,14 +25,22 @@
 
 <i>Installations</i>
 <pre>
-Linux : bash install.sh
-Windows: "click install.bat"
+[ Linux ]
+Linux : bash setup.sh --install
+
+[ Windows ]
+install-dependencies: "click setup.bat"
 </pre>
 
 <i>How to run ?</i>
 <pre>
-Linux: "bash run.sh"
-Windows: "click run.bat"
+[ Linux ]
+running backend: "bash setup.sh --server"
+running android: "bash setup.sh --android"
+
+[ Windows ]
+running backend: "click backend.bat"
+running android: "click android.bat"
 </pre>
 
 <i>Build Android Apps</i>

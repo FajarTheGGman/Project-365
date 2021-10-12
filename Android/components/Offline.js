@@ -1,4 +1,4 @@
-// React Components
+ // React Components
 import React, { Component } from 'react'
 import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
 
@@ -9,8 +9,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import * as FileSystem from 'expo-file-system'
 import * as Notif from 'expo-notifications'
 import { Gyroscope } from 'expo-sensors'
-import * as TaskManager from 'expo-task-manager'
-import * as BackgroundFetch from 'expo-background-fetch'
 import * as Network from 'expo-network'
 import * as Battery from 'expo-battery'
 
@@ -219,7 +217,7 @@ class Settings extends Component{
         AsyncStorage.removeItem('mode')
         AsyncStorage.removeItem('token').then(respon => {
             this.props.navigation.dispatch(
-                StackActions.replace('Login')
+                StackActions.replace('Home')
             )
         })
     }
@@ -279,7 +277,7 @@ class Settings extends Component{
 
     Online(){
         this.props.navigation.dispatch(
-            StackActions.replace('Home', { type: 'online' })
+            StackActions.replace('Banner', { type: 'online' })
         )
     }
 
@@ -422,7 +420,7 @@ class Barcode extends Component{
         AsyncStorage.getItem('localip').then(localip => {
             (async() => {
                 this.setState({ loading: true })
-                await axios.get('http://' + localip + x).then(data => {
+                await axios.get('http://' + localip + '/' + x).then(data => {
                     if(data.status == 200){
                         this.setState({ loading: false })
                         alert('Done!')

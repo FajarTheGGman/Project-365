@@ -30,14 +30,14 @@ route.get('/get', (req,res) => {
 route.post('/getall', (req,res) => {
     jwt.verify(req.body.token, req.body.secret, (err, token) => {
         modelUsers.find({ username: token.username }, (err, done) => {
-            if(done.length == 0 || done.length == null){
+            if(err){
                 res.status(301)
                 res.json({ error: "[!] Users not found!" })
+            }else{
+                modelRelay.find({ username: token.username }, (err, data) => {
+                    res.json(data)
+                })
             }
-
-            modelRelay.find({ username: token.username }, (err, data) => {
-                res.json(data)
-            })
         })
     })
 })
