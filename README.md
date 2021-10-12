@@ -49,8 +49,16 @@ root@user-# cd Android
 root@user-# expo build:android
 ```
 
+<i>How to deploy to Heroku ? </i>
+<pre>
+1.fork this project
+2.change "your mongodb url" to your mongodb server in app.json file
+3.click deploy to heroku
+</pre>
+
 <br>
 <br>
+
 
 # How can i setup this things
 
