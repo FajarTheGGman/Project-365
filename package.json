@@ -39,6 +39,10 @@
     "yosay": "*",
     "uuid": "*"
   },
+  {
+    "node": "14.16.1",
+    "npm": "7.13.0"
+  },
   "devDependencies": {
     "eslint": "*",
     "eslint-config-airbnb-base": "*",
