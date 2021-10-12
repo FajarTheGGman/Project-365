@@ -1,0 +1,12 @@
+{
+    "name": "Project 365",
+    "description": "Project for internet of things",
+    "env": {
+        "DB": {
+            "value": "mongodb+srv://fajar:firdaus@project-365.9i8cg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+        },
+        "KEY": {
+            "value": "Important"
+        }
+    }
+}
