@@ -14,7 +14,7 @@ npm install
 color b
 echo [/] Installing dependencies for react native
 cd Android
-npm install
+npm install --legacy-peer-deps
 
 color a
 echo [+] Successfully installing dependencies

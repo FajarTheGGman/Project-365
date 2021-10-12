@@ -29,7 +29,7 @@ try{
 }
 
 app.use(file())
-app.use(morgan())
+//app.use(morgan())
 app.use(cors());
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }))
