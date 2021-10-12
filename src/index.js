@@ -5,7 +5,7 @@ const color = require('colors');
 const say = require('yosay')
 const open = require('open')
 
-console.log(say('Project 365%'));
+console.log(say('Project 365%'))
 
 jsome({
     'Coder': 'Fajar Firdaus',
@@ -25,7 +25,6 @@ if(process.argv[2]){
    })
 }else{
     app.listen(port, () => {
-    console.log("app running at port : " + port)
        console.log(color.cyan('[+] Server Running at port : ' + port))
     })
 }
