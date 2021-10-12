@@ -10,6 +10,7 @@
 <div align='center'>
 <img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
 <h3>Project 365%</h3>
+<a href="https://github.com/FajarTheGGman/Project-365/raw/main/Project-365.apk"><img src="https://img.shields.io/badge/Application-Download-green?style=for-the-badge&logo=appveyor" width='200' /></a>
 </div>
 
 
