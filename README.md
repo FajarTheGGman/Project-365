@@ -1,6 +1,8 @@
 # Project 365%
 <p>Home Automation With MERN Stack</p>
 
+![](https://img.shields.io/badge/caution-information-yellow) <b>Online Mode Still in development</b>
+
 ![](https://img.shields.io/badge/react-native-blue)
 ![](https://img.shields.io/badge/nodejs-16.7.0-lime) 
 ![](https://img.shields.io/badge/expo-4.5.2-white)
