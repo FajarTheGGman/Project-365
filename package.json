@@ -27,6 +27,7 @@
     "dotenv": "*",
     "express": "*",
     "express-fileupload": "*",
+    "firebase": "7.24.0",
     "helmet": "*",
     "jsome": "*",
     "jsonwebtoken": "*",
@@ -36,8 +37,7 @@
     "open": "*",
     "ora": "*",
     "uuid": "*",
-    "yosay": "*",
-    "uuid": "*"
+    "yosay": "*"
   },
   "engines": {
     "node": "14.16.1",

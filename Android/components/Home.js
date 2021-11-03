@@ -27,6 +27,7 @@ import * as Animasi from 'react-native-animatable'
 
 // Configurations
 import konfigurasi from '../config'
+import firebase from './Firebase'
 
 Notif.setNotificationHandler({
     handleNotification: async() => ({
@@ -35,6 +36,7 @@ Notif.setNotificationHandler({
         shouldSetBadge: false
     })
 })
+
 
 export default class Home extends Component{
     constructor(props){
@@ -536,6 +538,7 @@ class HomePage extends Component{
             await axios.post(this.state.server + 'settings/users', { token: data }).then(respon => {
 
                 if(respon.status == 200){
+
                     this.setState({ error_server: false })
                     this.setState({ username: respon.data.user[0].username })
                 }
@@ -850,7 +853,7 @@ class HomePage extends Component{
     moduleDetail(ThisName, url){
         this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url })
         AsyncStorage.getItem('token').then(data => {
-            axios.post(this.state.server + 'relay/update', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName, url_offline: this.state.moduleUrl }).then(response => {
+            axios.post(this.state.server + 'relay/updateMany', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName }).then(response => {
                 if(response.status == 200){
                     alert('Successfully updated relay')
                 }else if(response.status == 301){

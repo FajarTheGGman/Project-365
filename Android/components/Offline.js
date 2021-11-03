@@ -59,7 +59,6 @@ export default class Home extends Component{
             
             }
 
-
     }
 
     async battery(){
@@ -114,8 +113,6 @@ export default class Home extends Component{
                         icons = 'home-outline'
                     }else if(route.name == 'Barcode'){
                         icons = 'qr-code-outline'
-                    }else if(route.name == 'Code'){
-                        icons = 'code-slash-outline'
                     }else if(route.name == 'Settings'){
                         icons = 'settings-outline'
                     }
@@ -125,7 +122,6 @@ export default class Home extends Component{
             })}>
                 <Tabs.Screen name='Home' component={HomePage} />
                 <Tabs.Screen name='Barcode' component={Barcode} />
-                <Tabs.Screen name="Code" component={Code }/>
                 <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
             </View>
@@ -215,11 +211,11 @@ class Settings extends Component{
 
     logout(){
         AsyncStorage.removeItem('mode')
-        AsyncStorage.removeItem('token').then(respon => {
-            this.props.navigation.dispatch(
-                StackActions.replace('Home')
-            )
-        })
+        AsyncStorage.removeItem('localip')
+        AsyncStorage.removeItem('name')
+        this.props.navigation.dispatch(
+            StackActions.replace('Banner')
+        )
     }
 
     async componentDidMount(){
@@ -550,8 +546,8 @@ class HomePage extends Component{
             relay_status: false,
             relay_pin: this.state.relay_pin,
             type_button: this.state.relay_button_type,
-            uri_on: this.state.uri_on,
-            uri_off: this.state.uri_off
+            uri_on: '/' + this.state.uri_on,
+            uri_off: '/' + this.state.uri_on + 'mati'
         }
 
         this.setState({ data_offline: this.state.data_offline.concat(actual_data) })
@@ -585,6 +581,8 @@ class HomePage extends Component{
         AsyncStorage.getItem('name').then(data => {
             this.setState({ name: data })
         })
+
+
 
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
@@ -634,7 +632,9 @@ class HomePage extends Component{
         let waktu = new Date();
         let jam = waktu.getHours();
 
-        if(jam == 1){
+        if(jam == 0){
+            this.setState({ waktu: 'Good Night' })
+        }else if(jam == 1){
             this.setState({ waktu: 'Good Night' })
         }else if(jam == 2){
             this.setState({ waktu: 'Good Night' })
@@ -740,51 +740,51 @@ class HomePage extends Component{
         let jam = waktu.getHours();
 
         if(jam == 1){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 2){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 3){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 4){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 5){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 6){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 7){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 8){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 9){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 10){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 11){
-            this.setState({ waktu: "Good Morning" })
+            this.setState({ waktu: "Selamat Siang" })
         }else if(jam == 12){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Siang' })
         }else if(jam == 13){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Siang' })
         }else if(jam == 14){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 15){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 16){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 17){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 18){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 19){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 20){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 21){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 22){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 23){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }
         this.setState({ loading: false })
     }
@@ -836,6 +836,7 @@ class HomePage extends Component{
             if(parse == null){
                 this.setState({ data_offline: [] })
             }else{
+                this.setState({ data_offline: [] })
                 this.setState({ data_offline: this.state.data_offline.concat(parse) })
             }
         })
@@ -1264,8 +1265,7 @@ class HomePage extends Component{
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />
                                     </Picker>
-                                    <TextInput placeholder="URI on" onChangeText={(val) => this.setState({ uri_on: val })} />
-                                    <TextInput placeholder="URI off" onChangeText={(val) => this.setState({ uri_off: val })} />
+                                    <TextInput placeholder="Relay" onChangeText={(val) => this.setState({ uri_on: val })} />
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
@@ -1369,7 +1369,7 @@ class HomePage extends Component{
                     <Text style={{ color: 'white' }}>{this.state.dev}</Text>
                 </View>
 
-                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigation</Text>
+                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigasi</Text>
 
                 <View style={{ padding: 15, borderRadius: 15, backgroundColor: '#0d0d0d', elevation: 15, marginTop: 15 }}>
                    <View style={{ flexDirection: "row" }}>
@@ -1382,7 +1382,9 @@ class HomePage extends Component{
                        </TouchableOpacity>
                    </View>
                 </View>
-                <Text style={{ color: 'orange', marginTop: 5 }}>You're in offline mode</Text>
+                <View style={{ marginTop: 10 }}>
+                    <Text style={{ color: 'orange' }}>Wellcome to offline mode</Text>
+                </View>
             </ScrollView>
         )
     }
