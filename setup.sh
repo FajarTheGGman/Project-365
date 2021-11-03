@@ -11,6 +11,7 @@ yellow='\033[33;1m'
 
 
 installing(){
+    cp .env.sample .env
     echo -e $yellow"[/] Installing Dependencies...."
     npm install --legacy-peer-deps
     echo -e $green"[+] node_modules successfully installed"
