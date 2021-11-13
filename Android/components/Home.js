@@ -494,8 +494,10 @@ class HomePage extends Component{
             moduleDetail: false,
             moduleName: null,
             moduleUrl: null,
+            moduleId: null,
             serial_details: false,
-            server: null
+            server: null,
+            relay_id: null,
         }
     }
 
@@ -514,7 +516,8 @@ class HomePage extends Component{
                     pin: this.state.relay_pin,
                     timeout: this.state.relay_timeout, 
                     relay_category: this.state.relay_category, 
-                    type_button: this.state.relay_button_type 
+                    type_button: this.state.relay_button_type,
+                    id: this.state.relay_id
                 }).then(data => {
                 if(!data.status == 200){
                     alert('Server Error :(')
@@ -807,9 +810,9 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
-    delete(mod){
+    delete(mod, relayId){
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'relay/delete', { token: data, secret: konfigurasi.key, name: mod }).then(response => {
+            axios.post(konfigurasi.server + 'relay/delete', { token: data, secret: konfigurasi.key, name: mod, id: relayId }).then(response => {
                 if(response.status == 200){
                     alert('Module deleted!')
                     this.reload_relay()
@@ -850,12 +853,12 @@ class HomePage extends Component{
         })
     }
 
-    moduleDetail(ThisName, url){
-        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url })
+    moduleDetail(ThisName, url, id){
+        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrl: url, moduleId: this.state.id })
         AsyncStorage.getItem('token').then(data => {
             axios.post(this.state.server + 'relay/updateMany', { token: data, secret: konfigurasi.key, name: ThisName, newName: this.state.moduleName }).then(response => {
                 if(response.status == 200){
-                    alert('Successfully updated relay')
+
                 }else if(response.status == 301){
                     alert('Something wrong in server!')
                 }
@@ -1057,7 +1060,7 @@ class HomePage extends Component{
                                 <Text style={{ marginTop: 5 }}>The URL : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrl}</Text></Text>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
                                 <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL Offline ?" onChangeText={(val) => this.setState({ moduleUrl: val })} />
-                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'red', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.delete(this.state.moduleName)}>
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'red', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.delete(this.state.moduleName, this.state.moduleId)}>
                                     <Text>Delete</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }}>
@@ -1152,7 +1155,7 @@ class HomePage extends Component{
 
                                 <ScrollView style={{ flexGrow: 1, flexDirection: 'column'}}>
                                     { this.state.serial_info ? this.state.data_serial.map((x, y) => {
-                                        <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url)}>
+                                        <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url, x.id)}>
                                             <View>
                                                 <Text style={{ color: 'white', fontWeight: 'bold' }}>{x.url}</Text>
                                             </View>
@@ -1314,6 +1317,7 @@ class HomePage extends Component{
                                         <Picker.Item label="Lock" value="lock.png" />
                                         <Picker.Item label="Servo" value="servo.png" />
                                     </Picker>
+                                    <TextInput placeholder="Input ID" onChangeText={(value) => this.setState({ relay_id: value })} />
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>

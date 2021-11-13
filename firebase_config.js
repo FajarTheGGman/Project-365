@@ -1,7 +1,13 @@
 const firebase = require('firebase')
 
 const config = {
-    // Put your firebase config here...
+      apiKey: "",
+      authDomain: "",
+      databaseURL: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
 }
 
 let fire = firebase.initializeApp(config)
