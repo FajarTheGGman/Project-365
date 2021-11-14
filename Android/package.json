@@ -29,6 +29,7 @@
     "expo-sensors": "~10.2.2",
     "expo-status-bar": "~1.0.4",
     "expo-task-manager": "^9.2.2",
+    "expo-updates": "~0.8.2",
     "firebase": "*",
     "react": "16.13.1",
     "react-dom": "16.13.1",

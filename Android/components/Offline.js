@@ -11,6 +11,7 @@ import * as Notif from 'expo-notifications'
 import { Gyroscope } from 'expo-sensors'
 import * as Network from 'expo-network'
 import * as Battery from 'expo-battery'
+import * as Updates from 'expo-updates'
 
 // Random Package
 import axios from 'axios'
@@ -405,7 +406,8 @@ class Barcode extends Component{
 
         this.state = {
             camera: false,
-            scan: false
+            scan: false,
+            error: false
         }
     }
 
@@ -421,12 +423,17 @@ class Barcode extends Component{
     scan(x){
         AsyncStorage.getItem('localip').then(localip => {
             (async() => {
+                const decrypt = base64.decode(x)
                 this.setState({ loading: true })
-                await axios.get('http://' + localip + x).then(data => {
+                await axios.get('http://' + localip + decrypt).then(data => {
                     if(data.status == 200){
                         this.setState({ loading: false })
                         alert('Done!')
+                    }else{
+                        this.setState({ error: true })
                     }
+                }).catch(err => {
+                    this.setState({ error: true })
                 })
             })()
         })
@@ -438,6 +445,22 @@ class Barcode extends Component{
                         this.scan(data)
                         this.setState({ scan: true })
             } } style={{ flex: 1, backgroundColor: '#292928', justifyContent: 'center', marginTop: 5 }}>
+                <Modal isVisible={this.state.error}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ padding: 10, borderRadius: 10, backgroundColor: 'white', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17, color: 'red' }}>QR Code Denied !</Text>
+                            <Image source={require('../assets/illustrations/denied.png')} style={{ width: 160, height: 150, marginTop: 10 }} />
+                            <Text style={{ marginTop: 7 }}>QR Code was denied by application</Text>
+                            <Text>Try creating again using</Text>
+                            <Text>qr code generator in Home Menu</Text>
+
+                            <TouchableOpacity style={{ marginTop: 10, padding: 5, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ error: false })}>
+                                <Text style={{ color: 'white' }}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 200 }}>
                         <View style={{ padding: 15, backgroundColor: 'none', borderLeftWidth: 5, borderTopWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
@@ -816,6 +839,10 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
+    module_delete(){
+        this.state.data_offline.splice(this.state.moduleIndex, 1)
+    }
+
     moduleDetail(ThisName, url_on, url_off, index){
         this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index })
     }
@@ -991,17 +1018,21 @@ class HomePage extends Component{
     }
 
     result_qr(x, type){
-        if(!x){
+        if(x == undefined){
             if(type == true){
-                this.setState({ qr_code: this.state.data_offline[0].relay_on, qr_result: true, qr_generator_popup: false })
+                const data = base64.encode(this.state.data_offline[0].relay_on)
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
             }else{
-                this.setState({ qr_code: this.state.data_offline[0].relay_on + 'die', qr_result: true, qr_generator_popup: false })
+                const data = base64.encode(this.state.data_offline[0].relay_on + 'die')
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
             }
         }else{
             if(type == true){
-                this.setState({ qr_code: x, qr_result: true, qr_generator_popup: false })
+                const data = base64.encode(x)
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
             }else{
-                this.setState({ qr_code: x + 'die', qr_result: true, qr_generator_popup: false })
+                const data = base64.encode(x + 'die')
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
             }
         }
     }
@@ -1172,6 +1203,7 @@ class HomePage extends Component{
                                         {this.state.scheduleButton ? <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 10, backgroundColor: 'green' }} onPress={() => this.schedule(this.state.moduleName)}>
                                             <Text>Schedule</Text>
                                         </TouchableOpacity>:<View></View>}
+
                                     </View>
                                 </View>
 
@@ -1185,6 +1217,10 @@ class HomePage extends Component{
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
                                 <Text style={{ marginTop: 5 }}>Relay : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
+                                <TouchableOpacity style={{ marginTop: 15, padding: 5, backgroundColor: 'red', borderRadius: 10, elevation: 15 }} onPress={() => this.module_delete()}>
+                                    <Text>Delete</Text>
+                                </TouchableOpacity>
+
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
                                 <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change Relay ?" onChangeText={(val) => this.setState({ newRelay: val })} />
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.moduleUpdate(this.state.moduleIndex)}>
