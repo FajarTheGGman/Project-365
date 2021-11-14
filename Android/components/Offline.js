@@ -1,6 +1,6 @@
  // React Components
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
+import { View, TouchableOpacity, CameraRoll, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
 
 import { StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -11,6 +11,7 @@ import * as Notif from 'expo-notifications'
 import { Gyroscope } from 'expo-sensors'
 import * as Network from 'expo-network'
 import * as Battery from 'expo-battery'
+import * as Updates from 'expo-updates'
 
 // Random Package
 import axios from 'axios'
@@ -24,6 +25,8 @@ import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
+import base64 from 'react-native-base64'
+import QRCode from 'react-native-qrcode-svg'
 
 // Configurations
 import konfigurasi from '../config'
@@ -58,7 +61,6 @@ export default class Home extends Component{
             }catch(e){
             
             }
-
 
     }
 
@@ -114,8 +116,6 @@ export default class Home extends Component{
                         icons = 'home-outline'
                     }else if(route.name == 'Barcode'){
                         icons = 'qr-code-outline'
-                    }else if(route.name == 'Code'){
-                        icons = 'code-slash-outline'
                     }else if(route.name == 'Settings'){
                         icons = 'settings-outline'
                     }
@@ -125,7 +125,6 @@ export default class Home extends Component{
             })}>
                 <Tabs.Screen name='Home' component={HomePage} />
                 <Tabs.Screen name='Barcode' component={Barcode} />
-                <Tabs.Screen name="Code" component={Code }/>
                 <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
             </View>
@@ -215,11 +214,11 @@ class Settings extends Component{
 
     logout(){
         AsyncStorage.removeItem('mode')
-        AsyncStorage.removeItem('token').then(respon => {
-            this.props.navigation.dispatch(
-                StackActions.replace('Home')
-            )
-        })
+        AsyncStorage.removeItem('localip')
+        AsyncStorage.removeItem('name')
+        this.props.navigation.dispatch(
+            StackActions.replace('Banner')
+        )
     }
 
     async componentDidMount(){
@@ -367,28 +366,32 @@ class Settings extends Component{
                 </View>
 
                 <ScrollView style={{ marginTop: 35 }}>
-                    <View style={{ flexDirection: 'column' }}>
-                        {this.state.offline ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
-                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
-                        </TouchableOpacity>}
+                    <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <View>
+                            {this.state.offline ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
+                                <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
+                            </TouchableOpacity>}
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
-                            <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
+                                <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ settings_network: true })}>
-                            <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ settings_network: true })}>
+                                <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
-                            <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
+                                <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
+                            </TouchableOpacity>
+                        </View>
 
-                        {this.state.offline ? <TouchableOpacity style={{ marginTop: 200, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
-                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Exit</Text>
-                        </TouchableOpacity> : <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
-                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
-                        </TouchableOpacity> }
+                        <View style={{ marginTop: 250 }}>
+                            {this.state.offline ? <TouchableOpacity style={{ backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Exit</Text>
+                            </TouchableOpacity> : <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
+                            </TouchableOpacity> }
+                        </View>
                     </View>
                 </ScrollView>
             </View>
@@ -403,7 +406,8 @@ class Barcode extends Component{
 
         this.state = {
             camera: false,
-            scan: false
+            scan: false,
+            error: false
         }
     }
 
@@ -419,12 +423,17 @@ class Barcode extends Component{
     scan(x){
         AsyncStorage.getItem('localip').then(localip => {
             (async() => {
+                const decrypt = base64.decode(x)
                 this.setState({ loading: true })
-                await axios.get('http://' + localip + '/' + x).then(data => {
+                await axios.get('http://' + localip + decrypt).then(data => {
                     if(data.status == 200){
                         this.setState({ loading: false })
                         alert('Done!')
+                    }else{
+                        this.setState({ error: true })
                     }
+                }).catch(err => {
+                    this.setState({ error: true })
                 })
             })()
         })
@@ -432,20 +441,45 @@ class Barcode extends Component{
 
     render(){
         return(
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#292928' }}>
-                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white', fontWeight: 'bold' }}/>
-                <Text style={{ textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: 19 }}>Barcode Scanner</Text>
-                <View style={{ paddingLeft: 8, marginTop: 10, paddingRight: 8, paddingTop: 20, paddingBottom: 20, borderRadius: 15, backgroundColor: 'black', elevation: 15 }}>
-                    <BarCodeScanner onBarCodeScanned={ this.state.scan ? undefined : ({ type, data }) => {
+            <BarCodeScanner onBarCodeScanned={ this.state.scan ? undefined : ({ type, data }) => {
                         this.scan(data)
                         this.setState({ scan: true })
-                    } } style={{ width: 300, height: 300, justifyContent: 'center', marginTop: 5 }}/>
-                </View>
+            } } style={{ flex: 1, backgroundColor: '#292928', justifyContent: 'center', marginTop: 5 }}>
+                <Modal isVisible={this.state.error}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ padding: 10, borderRadius: 10, backgroundColor: 'white', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17, color: 'red' }}>QR Code Denied !</Text>
+                            <Image source={require('../assets/illustrations/denied.png')} style={{ width: 160, height: 150, marginTop: 10 }} />
+                            <Text style={{ marginTop: 7 }}>QR Code was denied by application</Text>
+                            <Text>Try creating again using</Text>
+                            <Text>qr code generator in Home Menu</Text>
 
-                { this.state.scan ? <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, borderRadius: 15, padding: 10, marginTop: 10 }} onPress={() => this.setState({ scan: false })}>
-                    <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>Scan Again</Text>
-                </TouchableOpacity> : <Text></Text> }
-            </View>
+                            <TouchableOpacity style={{ marginTop: 10, padding: 5, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ error: false })}>
+                                <Text style={{ color: 'white' }}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 200 }}>
+                        <View style={{ padding: 15, backgroundColor: 'none', borderLeftWidth: 5, borderTopWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+
+                        <View style={{ padding: 15, backgroundColor: 'none', borderRightWidth: 5, borderTopWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+                    </View>
+
+                    <View style={{ justifyContent: 'center', marginTop: 50, marginBottom: 50 }}>
+                        { this.state.scan ? <TouchableOpacity style={{ backgroundColor: 'white', padding: 10, borderRadius: 5 }} onPress={() => this.setState({ scan: false })}><Text>Retry</Text></TouchableOpacity> : 
+                        <Text style={{ fontSize: 17, fontWeight: "bold" }}>Scan Here!</Text> }
+                    </View>
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 200 }}>
+                        <View style={{ padding: 15, backgroundColor: 'none', borderLeftWidth: 5, borderBottomWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+
+                        <View style={{ padding: 15, backgroundColor: 'none', borderRightWidth: 5, borderBottomWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+                    </View>
+                </View>
+            </BarCodeScanner>
         )
     }
 }
@@ -512,7 +546,13 @@ class HomePage extends Component{
             moduleUrlOff: null,
             moduleIndex: null,
             uri_on: null,
-            uri_off: null
+            uri_off: null,
+            newRelay: null,
+            qr_generator: null,
+            qr_generator_popup: false,
+            qr_result: false,
+            qr_type: false,
+            author: false,
         }
     }
 
@@ -550,8 +590,8 @@ class HomePage extends Component{
             relay_status: false,
             relay_pin: this.state.relay_pin,
             type_button: this.state.relay_button_type,
-            uri_on: this.state.uri_on,
-            uri_off: this.state.uri_off
+            uri_on: '/' + this.state.uri_on,
+            uri_off: '/' + this.state.uri_on + 'die'
         }
 
         this.setState({ data_offline: this.state.data_offline.concat(actual_data) })
@@ -585,6 +625,8 @@ class HomePage extends Component{
         AsyncStorage.getItem('name').then(data => {
             this.setState({ name: data })
         })
+
+
 
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
@@ -634,7 +676,9 @@ class HomePage extends Component{
         let waktu = new Date();
         let jam = waktu.getHours();
 
-        if(jam == 1){
+        if(jam == 0){
+            this.setState({ waktu: 'Good Night' })
+        }else if(jam == 1){
             this.setState({ waktu: 'Good Night' })
         }else if(jam == 2){
             this.setState({ waktu: 'Good Night' })
@@ -696,6 +740,7 @@ class HomePage extends Component{
             if(parsing == null){
                 this.setState({ data_offline: [] })
             }else{
+                this.setState({ data_offline: [] })
                 this.setState({ data_offline: this.state.data_offline.concat(parsing) })
             }
         })
@@ -740,51 +785,51 @@ class HomePage extends Component{
         let jam = waktu.getHours();
 
         if(jam == 1){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 2){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 3){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 4){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 5){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 6){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 7){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 8){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 9){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 10){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 11){
-            this.setState({ waktu: "Good Morning" })
+            this.setState({ waktu: "Selamat Siang" })
         }else if(jam == 12){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Siang' })
         }else if(jam == 13){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Siang' })
         }else if(jam == 14){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 15){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 16){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 17){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 18){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 19){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 20){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 21){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 22){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 23){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }
         this.setState({ loading: false })
     }
@@ -794,14 +839,17 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
+    module_delete(){
+        this.state.data_offline.splice(this.state.moduleIndex, 1)
+    }
+
     moduleDetail(ThisName, url_on, url_off, index){
         this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index })
     }
 
     moduleUpdate(index){
         this.state.data_offline[this.state.moduleIndex].name = this.state.moduleName;
-        this.state.data_offline[this.state.moduleIndex].uri_on = this.state.moduleUrlOn;
-        this.state.data_offline[this.state.moduleIndex].uri_off = this.state.moduleUrlOff;
+        this.state.data_offline[this.state.moduleIndex].uri_on = this.state.newRelay;
         AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
         alert('Data Updated!')
     }
@@ -836,6 +884,7 @@ class HomePage extends Component{
             if(parse == null){
                 this.setState({ data_offline: [] })
             }else{
+                this.setState({ data_offline: [] })
                 this.setState({ data_offline: this.state.data_offline.concat(parse) })
             }
         })
@@ -883,7 +932,7 @@ class HomePage extends Component{
             if(get_status){
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_off).then(x => {
+                    await axios.get('http://' + localip + uri_on + 'die').then(x => {
                         if(x.status != 200){
                             alert('Error')
                         }
@@ -962,6 +1011,31 @@ class HomePage extends Component{
     }
 
 
+    save_qr(){
+        this.svg.toDataURL(async (data) => {
+
+        })
+    }
+
+    result_qr(x, type){
+        if(x == undefined){
+            if(type == true){
+                const data = base64.encode(this.state.data_offline[0].relay_on)
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+            }else{
+                const data = base64.encode(this.state.data_offline[0].relay_on + 'die')
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+            }
+        }else{
+            if(type == true){
+                const data = base64.encode(x)
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+            }else{
+                const data = base64.encode(x + 'die')
+                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+            }
+        }
+    }
 
     render(){
         return(
@@ -969,6 +1043,76 @@ class HomePage extends Component{
                 <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white' }} />
 
                 <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
+
+                <Modal isVisible={this.state.author}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 5, alignItems: 'center', }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Authors</Text>
+                            
+                            <Image source={require('../assets/icons/author.jpeg')} style={{ width: 100, height: 100, borderRadius: 10, marginTop: 10 }} />
+
+                            <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 5 }}>
+                                <Text style={{ marginTop: 3, fontWeight: 'bold' }}>My Social Media</Text>
+                                <Text style={{ marginTop: 5 }}>Github: FajarTheGGman</Text>
+                                <Text>IG: @FajarTheGGman</Text>
+                                <Text>Twitter: @kernel024</Text>
+                                <Text>Web: fajarfirdaus.now.sh</Text>
+
+                                <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ author: false })}>
+                                    <Text style={{ color: 'white' }}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.qr_result}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: -5, marginLeft: 5 }}>
+                                <TouchableOpacity onPress={() => this.setState({ qr_result: false })}>
+                                    <Icon name='close-outline' size={30} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={{ fontWeight: 'bold', marginTop: 10, fontSize: 16 }}>Result QR Code</Text>
+                            
+                            <View style={{ marginTop: 25 }}>
+                                <QRCode value={this.state.qr_code} logo={require('../assets/icon.png')} size={120} getRef={(x) => (this.svg = x)} />
+                            </View>
+
+                            <TouchableOpacity style={{ marginTop: 25, padding: 5, backgroundColor: 'black', borderRadius: 5 }} onPress={() => this.save_qr()}>
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Save</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.qr_generator_popup}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center',justifyContent: 'center' }}>
+                        <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5, alignItems: 'center' }}>
+                            <TouchableOpacity style={{ alignSelf: 'flex-end', marginTop: -3 }} onPress={() => this.setState({ qr_generator_popup: false })}>
+                                <Icon name='close-outline' size={30} />
+                            </TouchableOpacity>
+
+                            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>QR Code Generator</Text>
+                            <Image source={require('../assets/icons/qr.png')} style={{ width: 80, height: 80, marginTop: 10 }} />
+
+                            <Text style={{ marginTop: 20 }}>Select Devices</Text>
+                            <Picker selectedValue={this.state.qr_generator} onValueChange={(val) => this.setState({ qr_generator: val })} style={{ width: 100, height: 50 }} style={{ width: 110 }}>
+                                {this.state.data_offline.map((x,y) => {
+                                    return <Picker.Item label={x.name} value={x.uri_on} />
+                                })}
+                            </Picker>
+
+                            <Radio radio_props={[{ label: 'ON', value: true }, { label: "OFF", value: false }]}  buttonColor="black" formHorizontal={true} animation={true} onPress={(value) => this.setState({ qr_type: value }) } style={{ marginTop: 10, color: 'black' }} labelStyle={{ padding: 10, marginTop: -5 }} />
+
+                            <TouchableOpacity style={{ marginTop: 20, borderRadius: 5, backgroundColor: 'black', padding: 5 }} onPress={() => this.result_qr(this.state.qr_generator, this.state.qr_type)}>
+                                <Text style={{ fontWeight: 'bold', color: 'white' }}>Generate!</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
 
                 <Modal isVisible={this.state.error}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -1059,6 +1203,7 @@ class HomePage extends Component{
                                         {this.state.scheduleButton ? <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 10, backgroundColor: 'green' }} onPress={() => this.schedule(this.state.moduleName)}>
                                             <Text>Schedule</Text>
                                         </TouchableOpacity>:<View></View>}
+
                                     </View>
                                 </View>
 
@@ -1071,11 +1216,13 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
-                                <Text style={{ marginTop: 5 }}>URL on : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
-                                <Text style={{ marginTop: 5 }}>URL off : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOff}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>Relay : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
+                                <TouchableOpacity style={{ marginTop: 15, padding: 5, backgroundColor: 'red', borderRadius: 10, elevation: 15 }} onPress={() => this.module_delete()}>
+                                    <Text>Delete</Text>
+                                </TouchableOpacity>
+
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL on ?" onChangeText={(val) => this.setState({ moduleUrlOn: val })} />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL off ?" onChangeText={(val) => this.setState({ moduleUrlOff: val })} />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change Relay ?" onChangeText={(val) => this.setState({ newRelay: val })} />
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.moduleUpdate(this.state.moduleIndex)}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
                                 </TouchableOpacity>
@@ -1151,9 +1298,9 @@ class HomePage extends Component{
 
                             <View style={{ flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 10 }}>
-                                    <TouchableOpacity onPress={() => this.setState({ schedule: true, menu: false })}>
-                                        <Image source={require('../assets/icons/timer.png')} style={{ width: 70, height: 70 }} />
-                                        <Text style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>Schedule</Text>
+                                    <TouchableOpacity onPress={() => this.setState({ qr_generator_popup: true, menu: false })}>
+                                        <Image source={require('../assets/icons/qr.png')} style={{ width: 70, height: 70 }} />
+                                        <Text style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>QR Generator</Text>
                                     </TouchableOpacity>
                                 </View>
 
@@ -1264,8 +1411,7 @@ class HomePage extends Component{
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />
                                     </Picker>
-                                    <TextInput placeholder="URI on" onChangeText={(val) => this.setState({ uri_on: val })} />
-                                    <TextInput placeholder="URI off" onChangeText={(val) => this.setState({ uri_off: val })} />
+                                    <TextInput placeholder="Relay" onChangeText={(val) => this.setState({ uri_on: val })} />
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
@@ -1354,7 +1500,7 @@ class HomePage extends Component{
                     </View>
 
                     <View style={{ marginLeft: 130, backgroundColor: 'black', elevation: 15, padding: 5, borderRadius: 10 }}>
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { status: 'offline' })}>
+                        <TouchableOpacity onPress={() => /*this.props.navigation.navigate('Profile', { status: 'offline' })*/ this.setState({ author: true })}>
                             <Image source={require('../assets/icons/profile.png')} style={{ width: 50, height: 50 }} />
                         </TouchableOpacity>
                     </View>
@@ -1369,7 +1515,7 @@ class HomePage extends Component{
                     <Text style={{ color: 'white' }}>{this.state.dev}</Text>
                 </View>
 
-                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigation</Text>
+                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigasi</Text>
 
                 <View style={{ padding: 15, borderRadius: 15, backgroundColor: '#0d0d0d', elevation: 15, marginTop: 15 }}>
                    <View style={{ flexDirection: "row" }}>
@@ -1382,7 +1528,9 @@ class HomePage extends Component{
                        </TouchableOpacity>
                    </View>
                 </View>
-                <Text style={{ color: 'orange', marginTop: 5 }}>You're in offline mode</Text>
+                <View style={{ marginTop: 10 }}>
+                    <Text style={{ color: 'orange' }}>Wellcome to offline mode</Text>
+                </View>
             </ScrollView>
         )
     }

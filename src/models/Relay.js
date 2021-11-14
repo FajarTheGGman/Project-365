@@ -11,7 +11,8 @@ let Relay = new mongoose.Schema({
     type_button: { type: Boolean, default: false },
     type: { type: String, default: 'lights' },
     timeout: { type: Boolean, default: false },
-    schedule: { type: String, default: '' }
+    schedule: { type: String, default: '' },
+    id: { type: String }
 }, { collections: 'relay' })
 
 module.exports = mongoose.model('Relay', Relay)

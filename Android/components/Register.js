@@ -54,8 +54,8 @@ export default class Register extends Component{
                 </View>
                 <View style={{ backgroundColor: 'white', padding: 15, elevation: 15, marginTop: 20, borderRadius: 10, alignItems: 'center', paddingLeft: 35, paddingRight: 35 }}>
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Register</Text>
-                    <TextInput placeholder="Username" style={{ marginTop: 15 }} onChangeText={(value) => this.setState({ username: value })} />
-                    <TextInput placeholder="Password" style={{ marginTop: 5 }} onChangeText={(value) => this.setState({ password: value })} secureTextEntry={true}/>
+                    <TextInput placeholder="Username" style={{ marginTop: 15, padding: 10, backgroundColor: '#ededed', width: 120, borderRadius: 10  }} onChangeText={(value) => this.setState({ username: value })} />
+                    <TextInput placeholder="Password" style={{ marginTop: 10, padding: 10, backgroundColor: '#ededed', width: 120, borderRadius: 10  }} onChangeText={(value) => this.setState({ password: value })} secureTextEntry={true}/>
                     <TouchableOpacity style={{ marginTop: 15 }} onPress={() => this.register()}>
                         <Text style={{ color: 'white', backgroundColor: 'black', elevation: 15, borderRadius: 5, padding: 5 }}>Create</Text>
                     </TouchableOpacity>
