@@ -19,7 +19,6 @@ import Modal from 'react-native-modal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Loading from 'react-native-loading-spinner-overlay'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import GridList from 'react-native-grid-list'
 import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
@@ -27,7 +26,6 @@ import * as Animasi from 'react-native-animatable'
 
 // Configurations
 import konfigurasi from '../config'
-import firebase from './Firebase'
 
 Notif.setNotificationHandler({
     handleNotification: async() => ({
