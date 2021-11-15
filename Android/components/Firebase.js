@@ -16,4 +16,4 @@ if(!firebase.apps.length){
     firebase.app()
 }
 
-export default firebase
+//export default firebase

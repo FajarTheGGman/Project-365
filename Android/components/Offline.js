@@ -19,7 +19,6 @@ import Modal from 'react-native-modal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Loading from 'react-native-loading-spinner-overlay'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import GridList from 'react-native-grid-list'
 import { BarCodeScanner } from 'expo-barcode-scanner'
 import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -46,22 +45,39 @@ export default class Home extends Component{
 
         this.state = {
             wellcome: false,
-            low: false
+            low: false,
+            update: false
         }
     }
 
     async componentDidMount(){
-            await this.battery()
-            AsyncStorage.setItem('mode', 'offline');
-            try{
-                if(this.props.route.params.type == 'offline'){
-                    AsyncStorage.setItem('offline', true)
-                    this.setState({ wellcome: true })
-                }
-            }catch(e){
-            
-            }
+        await this.battery()
+//        const update = await Updates.checkForUpdateAsync()
+        AsyncStorage.setItem('mode', 'offline');
 
+/*        if(update.isAvailable){
+            this.setState({ update: true })
+            this.notif('Update System', 'app has been updated to version 1.2.0')
+        }*/
+
+        try{
+            if(this.props.route.params.type == 'offline'){
+                AsyncStorage.setItem('offline', true)
+                this.setState({ wellcome: true })
+            }
+        }catch(e){
+
+        }
+    }
+
+    async notif(title, body){
+        await Notif.scheduleNotificationAsync({
+            content: {
+                title: title,
+                body: body
+            },
+            trigger: { seconds: 1 }
+        })
     }
 
     async battery(){
@@ -78,6 +94,34 @@ export default class Home extends Component{
         const Tabs = createBottomTabNavigator();
         return(
             <View style={{ flex: 1, backgroundColor: '#292928' }}>
+                <Modal isVisible={this.state.update}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 10, }}>
+                            <TouchableOpacity style={{ flexDirection: 'row', alignSelf: 'flex-end', marginRight: -5, marginTop: -5 }} onPress={() => this.setState({ update: false })}>
+                                <Icon name='close-outline' size={30}/>
+                            </TouchableOpacity>
+
+                            <View style={{ alignItems: 'center', marginTop: 5 }}>
+                                <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 16 }}>Updates Available!</Text>
+
+                                <Image source={require('../assets/illustrations/update.png')} style={{ width: 120, height: 120, marginTop: 10 }} />
+
+                                <View style={{ alignItems: 'center' }}>
+                                    <Text>App has updated to version 1.2.0</Text>
+                                    <Text>So, Whats new ?</Text>
+
+                                    <View style={{ marginTop: 10, alignItems: 'center' }}>
+                                        <Text style={{ fontWeight: 'bold' }}>- Bug Fix</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Update On Air</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Delete in offline relay</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- QR Generator</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 <Modal isVisible={this.state.low}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15, alignItems: 'center' }}>
@@ -424,17 +468,44 @@ class Barcode extends Component{
         AsyncStorage.getItem('localip').then(localip => {
             (async() => {
                 const decrypt = base64.decode(x)
+                const parse = JSON.parse(decrypt)
                 this.setState({ loading: true })
-                await axios.get('http://' + localip + decrypt).then(data => {
-                    if(data.status == 200){
-                        this.setState({ loading: false })
-                        alert('Done!')
-                    }else{
+                if(parse.type_sensor == 'lock.png'){
+                    axios.get('http://' + localip + parse.url).then(data => {
+                        if(data.status == 200){
+                            alert(parse.name + ' is opening')
+                        }else{
+                            this.setState({ error: true })
+                        }
+                    })
+                    setInterval(() => {
+                        axios.get('http://' + localip + parse.url + 'die').then(data => {
+                            if(data.status == 200){
+                                this.setState({ loading: false })
+                                alert(parse.name + ' is closing')
+                            }else{
+                                this.setState({ error: true })
+                            }
+                        }).catch(err => {
+                            this.setState({ error: true })
+                        })
+                    }, 5000)
+                }else{
+                    axios.get('http://' + localip + parse.url).then(data => {
+                        if(data.status == 200){
+                            this.setState({ loading: false })
+                            if(parse.type){
+                                alert(parse.name + ' is on')
+                            }else{
+                                alert(parse.name + ' is off')
+                            }
+                        }else{
+                            this.setState({ error: true })
+                        }
+                    }).catch(err => {
                         this.setState({ error: true })
-                    }
-                }).catch(err => {
-                    this.setState({ error: true })
-                })
+                    })
+                }
             })()
         })
     }
@@ -841,6 +912,8 @@ class HomePage extends Component{
 
     module_delete(){
         this.state.data_offline.splice(this.state.moduleIndex, 1)
+        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
+        this.refresh_relay()
     }
 
     moduleDetail(ThisName, url_on, url_off, index){
@@ -1017,22 +1090,58 @@ class HomePage extends Component{
         })
     }
 
-    result_qr(x, type){
-        if(x == undefined){
+    result_qr(index, type){
+        if(index == null){
             if(type == true){
-                const data = base64.encode(this.state.data_offline[0].relay_on)
-                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+                const raw_data = this.state.data_offline[0]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    url: raw_data.uri_on,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
             }else{
-                const data = base64.encode(this.state.data_offline[0].relay_on + 'die')
-                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+                const raw_data = this.state.data_offline[0]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    url: raw_data.uri_off,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
             }
         }else{
             if(type == true){
-                const data = base64.encode(x)
-                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+                const raw_data = this.state.data_offline[index]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    url: raw_data.uri_on,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
             }else{
-                const data = base64.encode(x + 'die')
-                this.setState({ qr_code: data, qr_result: true, qr_generator_popup: false })
+                const raw_data = this.state.data_offline[index]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    url: raw_data.uri_off,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
             }
         }
     }
@@ -1101,7 +1210,7 @@ class HomePage extends Component{
                             <Text style={{ marginTop: 20 }}>Select Devices</Text>
                             <Picker selectedValue={this.state.qr_generator} onValueChange={(val) => this.setState({ qr_generator: val })} style={{ width: 100, height: 50 }} style={{ width: 110 }}>
                                 {this.state.data_offline.map((x,y) => {
-                                    return <Picker.Item label={x.name} value={x.uri_on} />
+                                    return <Picker.Item label={x.name} value={y} />
                                 })}
                             </Picker>
 
@@ -1263,7 +1372,7 @@ class HomePage extends Component{
                                     return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             {x.type == "lights.png" ? <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} /> : <Image source={require('../assets/category/lock.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />}
-                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
+                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name.length > 5 ? x.name.slice(0, 5)+'...' : x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
                                         {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
