@@ -52,13 +52,13 @@ export default class Home extends Component{
 
     async componentDidMount(){
         await this.battery()
-//        const update = await Updates.checkForUpdateAsync()
+        const update = await Updates.checkForUpdateAsync()
         AsyncStorage.setItem('mode', 'offline');
 
-/*        if(update.isAvailable){
+        if(update.isAvailable){
             this.setState({ update: true })
             this.notif('Update System', 'app has been updated to version 1.2.0')
-        }*/
+        }
 
         try{
             if(this.props.route.params.type == 'offline'){
@@ -1624,7 +1624,7 @@ class HomePage extends Component{
                     <Text style={{ color: 'white' }}>{this.state.dev}</Text>
                 </View>
 
-                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigasi</Text>
+                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigation</Text>
 
                 <View style={{ padding: 15, borderRadius: 15, backgroundColor: '#0d0d0d', elevation: 15, marginTop: 15 }}>
                    <View style={{ flexDirection: "row" }}>
