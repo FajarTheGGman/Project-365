@@ -541,7 +541,7 @@ class Barcode extends Component{
 
                     <View style={{ justifyContent: 'center', marginTop: 50, marginBottom: 50 }}>
                         { this.state.scan ? <TouchableOpacity style={{ backgroundColor: 'white', padding: 10, borderRadius: 5 }} onPress={() => this.setState({ scan: false })}><Text>Retry</Text></TouchableOpacity> : 
-                        <Text style={{ fontSize: 17, fontWeight: "bold" }}>Scan Here!</Text> }
+                        <Text style={{ fontSize: 17, fontWeight: "bold" }}>Scan Disini !</Text> }
                     </View>
 
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 200 }}>
@@ -725,15 +725,15 @@ class HomePage extends Component{
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
 
                 if(this.state.weatherStatus.match(/Thunder/i)){
-                    this.setState({ weather: require('../assets/weather/thunder.png'), weatherCondition: "Thunder", weatherPallete: 'black', weatherFont: 'white' })
+                    this.setState({ weather: require('../assets/weather/thunder.png'), weatherCondition: "Petir", weatherPallete: 'black', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Sunny/i)){
-                    this.setState({ weather: require('../assets/weather/sunny.png'), weatherCondition: 'Sunny', weatherPallete: '#faa825', weatherFont: 'white' })
+                    this.setState({ weather: require('../assets/weather/sunny.png'), weatherCondition: 'Cerah', weatherPallete: '#faa825', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Fair/i)){
-                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy Fair', weatherPallete: 'white', weatherFont: 'black' })
+                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Berawan', weatherPallete: 'white', weatherFont: 'black' })
                 }else if(this.state.weatherStatus.match(/Rain/i)){
-                    this.setState({ weather: require('../assets/weather/rain.png'), weatherCondition: 'Raining', weatherPallete: 'grey', weatherFont: 'white' })
+                    this.setState({ weather: require('../assets/weather/rain.png'), weatherCondition: 'Hujan', weatherPallete: 'grey', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Cloudy/i)){
-                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy', weatherPallete: 'white', weatherFont: 'black' })
+                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Berawan', weatherPallete: 'white', weatherFont: 'black' })
                 }else{
                     this.setState({
                         weather: require('../assets/weather/cloudy.png'),
@@ -748,53 +748,53 @@ class HomePage extends Component{
         let jam = waktu.getHours();
 
         if(jam == 0){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 1){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 2){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 3){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 4){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 5){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 6){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 7){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 8){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 9){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 10){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 11){
-            this.setState({ waktu: "Good Morning" })
+            this.setState({ waktu: "Selamat Pagi" })
         }else if(jam == 12){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 13){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 14){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 15){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 16){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 17){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 18){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 19){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 20){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 21){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 22){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 23){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }
     }
 
@@ -833,15 +833,15 @@ class HomePage extends Component{
                 this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
 
                 if(this.state.weatherStatus.match(/Thunder/i)){
-                    this.setState({ weather: require('../assets/weather/thunder.png'), weatherCondition: "Thunder", weatherPallete: 'black', weatherFont: 'white' })
+                    this.setState({ weather: require('../assets/weather/thunder.png'), weatherCondition: "Petir", weatherPallete: 'black', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Sunny/i)){
-                    this.setState({ weather: require('../assets/weather/sunny.png'), weatherCondition: 'Sunny', weatherPallete: '#faa825', weatherFont: 'white' })
+                    this.setState({ weather: require('../assets/weather/sunny.png'), weatherCondition: 'Cerah', weatherPallete: '#faa825', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Fair/i)){
-                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy Fair', weatherPallete: 'white', weatherFont: 'black' })
+                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Berawan', weatherPallete: 'white', weatherFont: 'black' })
                 }else if(this.state.weatherStatus.match(/Rain/i)){
-                    this.setState({ weather: require('../assets/weather/rain.png'), weatherCondition: 'Raining', weatherPallete: 'grey', weatherFont: 'white' })
+                    this.setState({ weather: require('../assets/weather/rain.png'), weatherCondition: 'Hujan', weatherPallete: 'grey', weatherFont: 'white' })
                 }else if(this.state.weatherStatus.match(/Cloudy/i)){
-                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy', weatherPallete: 'white', weatherFont: 'black' })
+                    this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Berawan', weatherPallete: 'white', weatherFont: 'black' })
                 }else{
                     this.setState({
                         weather: require('../assets/weather/cloudy.png'),
@@ -855,7 +855,9 @@ class HomePage extends Component{
         let waktu = new Date();
         let jam = waktu.getHours();
 
-        if(jam == 1){
+        if(jam == 0){
+            this.setState({ waktu: 'Selamat Malam' })
+        }else if(jam == 1){
             this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 2){
             this.setState({ waktu: 'Selamat Malam' })
@@ -876,11 +878,11 @@ class HomePage extends Component{
         }else if(jam == 10){
             this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 11){
-            this.setState({ waktu: "Selamat Siang" })
+            this.setState({ waktu: "Selamat Pagi" })
         }else if(jam == 12){
-            this.setState({ waktu: 'Selamat Siang' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 13){
-            this.setState({ waktu: 'Selamat Siang' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 14){
             this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 15){
@@ -1344,7 +1346,7 @@ class HomePage extends Component{
                         <View style={{ flexGrow: 1, marginTop: 70, backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928', borderTopLeftRadius: 15, borderTopRightRadius: 15, paddingBottom: 10, elevation: 15 }}>
                                 <Icon name='remove-outline' size={40} color="white"/>
-                                <Text style={{ fontWeight: 'bold', marginTop: -5, fontSize: 17, color: 'white' }}>List Devices</Text>
+                                <Text style={{ fontWeight: 'bold', marginTop: -5, fontSize: 17, color: 'white' }}>List Sensor</Text>
                             </View>
 
                             <View style={{ flexGrow: 2, height: 65, flexDirection: 'column', marginTop: 0, alignItems: 'center' }}>
@@ -1395,7 +1397,7 @@ class HomePage extends Component{
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15 }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 85 }}>
                                 <View style={{ paddingLeft: 15 }}>
-                                    <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Choose One</Text>
+                                    <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Pilih Menu</Text>
                                 </View>
 
                                 <View style={{ marginLeft: 58, marginRight: -4.5 }}>
@@ -1425,7 +1427,7 @@ class HomePage extends Component{
                                 <View style={{ marginLeft: 20 }}>
                                     <TouchableOpacity onPress={() => this.setState({ addRelay: true, menu: false })}>
                                         <Image source={require('../assets/icons/touch.png')} style={{ width: 70, height: 70 }} />
-                                        <Text style={{ textAlign: 'center', color: 'green', fontWeight: 'bold' }}>Button</Text>
+                                        <Text style={{ textAlign: 'center', color: 'green', fontWeight: 'bold' }}>Relay</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -1511,7 +1513,7 @@ class HomePage extends Component{
                             <View style={{ alignItems: 'center', marginTop: -5 }}>
                                 <Image source={require('../assets/icons/relayicon.png')} style={{ width: 50, height: 50 }} />
                             </View>
-                            <Text style={{ fontWeight: 'bold', textAlign: 'center' }}>Add Some Relay</Text>
+                            <Text style={{ fontWeight: 'bold', textAlign: 'center' }}>Tambahkan Relay</Text>
 
                             <View style={{ flexDirection: 'row', marginTop: 25, justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: 'column', marginLeft: -10 }}>
@@ -1602,7 +1604,7 @@ class HomePage extends Component{
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 45 }}>
                     <View style={{ flexDirection: 'column' }}>
                         <TouchableOpacity onPress={() => this.refresh()}>
-                            <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Project 365%</Text>
+                            <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Smart Lab</Text>
                         </TouchableOpacity>
                         <Text style={{ color: '#ededed' }}>{this.state.waktu} {this.state.name}</Text>
 
@@ -1624,7 +1626,7 @@ class HomePage extends Component{
                     <Text style={{ color: 'white' }}>{this.state.dev}</Text>
                 </View>
 
-                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigation</Text>
+                <Text style={{ backgroundColor: 'black', color: 'white', fontWeight: 'bold', padding: 5, borderRadius: 5, marginTop: 70, fontSize: 17 }}>Navigasi</Text>
 
                 <View style={{ padding: 15, borderRadius: 15, backgroundColor: '#0d0d0d', elevation: 15, marginTop: 15 }}>
                    <View style={{ flexDirection: "row" }}>
@@ -1636,9 +1638,6 @@ class HomePage extends Component{
                            <Image source={require('../assets/icons/addrelay.png')} style={{ width: 60, height: 60 }} />
                        </TouchableOpacity>
                    </View>
-                </View>
-                <View style={{ marginTop: 10 }}>
-                    <Text style={{ color: 'orange' }}>Wellcome to offline mode</Text>
                 </View>
             </ScrollView>
         )

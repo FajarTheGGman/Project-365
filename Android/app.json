@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Project 365%",
-    "slug": "Project-365",
-    "version": "1.2.1",
+    "name": "Smart Lab",
+    "slug": "SmartLab",
+    "version": "1.2.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -18,14 +18,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fajartheggman.Project365"
+      "bundleIdentifier": "com.fajartheggman.SmartLab"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.fajartheggman.Project365"
+      "package": "com.fajartheggman.SmartLab"
     },
     "web": {
       "favicon": "./assets/favicon.png"
