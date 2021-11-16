@@ -118,6 +118,7 @@ echo '[2] Run Backend'
 echo '[3] Run React Native'
 echo '[4] Setup Docker'
 echo '[5] Setup Android App'
+echo '[6] Update Android App'
 echo -e $red'[0] Exit'
 
 echo -e $green
@@ -139,7 +140,10 @@ elif [[ $out == 0 ]]; then
     break
 elif [[ $out == 5 ]]; then
     setup_expo
-else 
+elif [[ $out == 6 ]] ; then
+    cd Android
+    npm run update
+else
     clear
 fi
 done
