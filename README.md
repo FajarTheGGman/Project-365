@@ -1,6 +1,8 @@
 # Project 365%
 <p>Home Automation With MERN Stack</p>
 
+![](https://img.shields.io/badge/caution-information-yellow) <b>Online Mode Still in development</b>
+
 ![](https://img.shields.io/badge/react-native-blue)
 ![](https://img.shields.io/badge/nodejs-16.7.0-lime) 
 ![](https://img.shields.io/badge/expo-4.5.2-white)
@@ -49,8 +51,16 @@ root@user-# cd Android
 root@user-# expo build:android
 ```
 
+<i>How to deploy to Heroku ? </i>
+<pre>
+1.fork this project
+2.change "your mongodb url" to your mongodb server in app.json file
+3.click deploy to heroku
+</pre>
+
 <br>
 <br>
+
 
 # How can i setup this things
 
