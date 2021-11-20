@@ -107,7 +107,7 @@ export default class Home extends Component{
                                 <Image source={require('../assets/illustrations/update.png')} style={{ width: 120, height: 120, marginTop: 10 }} />
 
                                 <View style={{ alignItems: 'center' }}>
-                                    <Text>App has updated to version 1.2.0</Text>
+                                    <Text>App has updated to version 1.2.2</Text>
                                     <Text>So, Whats new ?</Text>
 
                                     <View style={{ marginTop: 10, alignItems: 'center' }}>
@@ -622,7 +622,7 @@ class HomePage extends Component{
             qr_generator: null,
             qr_generator_popup: false,
             qr_result: false,
-            qr_type: false,
+            qr_type: true,
             author: false,
         }
     }
@@ -913,6 +913,7 @@ class HomePage extends Component{
     module_delete(){
         this.state.data_offline.splice(this.state.moduleIndex, 1)
         AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
+        this.setState({ moduleDetail: false })
         this.refresh_relay()
     }
 
@@ -1609,7 +1610,7 @@ class HomePage extends Component{
                     </View>
 
                     <View style={{ marginLeft: 130, backgroundColor: 'black', elevation: 15, padding: 5, borderRadius: 10 }}>
-                        <TouchableOpacity onPress={() => /*this.props.navigation.navigate('Profile', { status: 'offline' })*/ this.setState({ author: true })}>
+                        <TouchableOpacity onPress={() => this.props.navigation.navigate('ProfileOffline') }>
                             <Image source={require('../assets/icons/profile.png')} style={{ width: 50, height: 50 }} />
                         </TouchableOpacity>
                     </View>
