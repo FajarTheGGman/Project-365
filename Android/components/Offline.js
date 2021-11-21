@@ -52,13 +52,16 @@ export default class Home extends Component{
 
     async componentDidMount(){
         await this.battery()
-        const update = await Updates.checkForUpdateAsync()
+       // const update = await Updates.checkForUpdateAsync()
         AsyncStorage.setItem('mode', 'offline');
 
-        if(update.isAvailable){
-            this.setState({ update: true })
-            this.notif('Update System', 'app has been updated to version 1.2.0')
-        }
+        AsyncStorage.getItem('update').then(data => {
+            if(data == null || data == undefined){
+                this.setState({ update: true })
+            }else{
+                this.setState({ update: false })
+            }
+        })
 
         try{
             if(this.props.route.params.type == 'offline'){
@@ -68,6 +71,11 @@ export default class Home extends Component{
         }catch(e){
 
         }
+    }
+
+    closeupdate(){
+        AsyncStorage.setItem('update', 'yes')
+        this.setState({ update: false })
     }
 
     async notif(title, body){
@@ -97,7 +105,7 @@ export default class Home extends Component{
                 <Modal isVisible={this.state.update}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 10, }}>
-                            <TouchableOpacity style={{ flexDirection: 'row', alignSelf: 'flex-end', marginRight: -5, marginTop: -5 }} onPress={() => this.setState({ update: false })}>
+                            <TouchableOpacity style={{ flexDirection: 'row', alignSelf: 'flex-end', marginRight: -5, marginTop: -5 }} onPress={() => this.closeupdate()}>
                                 <Icon name='close-outline' size={30}/>
                             </TouchableOpacity>
 
@@ -107,14 +115,13 @@ export default class Home extends Component{
                                 <Image source={require('../assets/illustrations/update.png')} style={{ width: 120, height: 120, marginTop: 10 }} />
 
                                 <View style={{ alignItems: 'center' }}>
-                                    <Text>App has updated to version 1.2.2</Text>
+                                    <Text>App has updated to version 1.2.3</Text>
                                     <Text>So, Whats new ?</Text>
 
                                     <View style={{ marginTop: 10, alignItems: 'center' }}>
                                         <Text style={{ fontWeight: 'bold' }}>- Bug Fix</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- Update On Air</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- Delete in offline relay</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- QR Generator</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Machine Mode</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Profile Mode</Text>
                                     </View>
                                 </View>
                             </View>
@@ -624,6 +631,9 @@ class HomePage extends Component{
             qr_result: false,
             qr_type: true,
             author: false,
+            machine: [],
+            machineIP: null,
+            machineDetailsIP: null
         }
     }
 
@@ -661,6 +671,7 @@ class HomePage extends Component{
             relay_status: false,
             relay_pin: this.state.relay_pin,
             type_button: this.state.relay_button_type,
+            machineIP: this.state.machine.length == 1 ? this.state.machine[0].ip : this.state.machineIP,
             uri_on: '/' + this.state.uri_on,
             uri_off: '/' + this.state.uri_on + 'die'
         }
@@ -708,6 +719,14 @@ class HomePage extends Component{
             }
         })
 
+        AsyncStorage.getItem('machine').then(data => {
+            let parsing = JSON.parse(data)
+            if(parsing == null){
+                this.setState({ machine: [] })
+            }else{
+                this.setState({ machine: this.state.machine.concat(parsing) })
+            }
+        })
 
 
         AsyncStorage.getItem('serial_offline').then(data => {
@@ -917,8 +936,8 @@ class HomePage extends Component{
         this.refresh_relay()
     }
 
-    moduleDetail(ThisName, url_on, url_off, index){
-        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index })
+    moduleDetail(ThisName, url_on, url_off, index, machineIP){
+        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index, machineDetailsIP: machineIP })
     }
 
     moduleUpdate(index){
@@ -997,8 +1016,7 @@ class HomePage extends Component{
        })
     }
 
-    switch(index, status, url, pin, uri_on, uri_off){
-        AsyncStorage.getItem('localip').then(localip => {
+    switch(index, status, url, pin, uri_on, uri_off, machineIP){
             let get_status = this.state.data_offline[index].relay_status
             let get_name = this.state.data_offline[index].name
             this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
@@ -1006,11 +1024,11 @@ class HomePage extends Component{
             if(get_status){
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_on + 'die').then(x => {
+                    await axios.get('http://' + machineIP + uri_on + 'die').then(x => {
                         if(x.status != 200){
-                            alert('Error')
+                            this.setState({ error_server: true })
                         }
-                        this.notif('Turning OFF', get_name + ' is now OFF')
+                        this.notif('Turning OFF', 'Hei ' + this.state.name + ', '+ get_name + ' is now OFF')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -1022,11 +1040,11 @@ class HomePage extends Component{
             }else{
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_on).then(x => {
+                    await axios.get('http://' + machineIP + uri_on).then(x => {
                         if(x.status != 200){
-                            alert('Error')
+                            this.setState({ error_server: false })
                         }
-                        this.notif('Turning ON', get_name + ' is now ON')
+                        this.notif('Turning ON', 'Hei ' + this.state.name + ', ' + get_name + ' is now ON')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -1035,11 +1053,9 @@ class HomePage extends Component{
                     this.setState({ loading: false }) 
                 })()
             }
-        })
     }
 
-    clicker(index, status, url, pin, uri_on, uri_off){
-        AsyncStorage.getItem('localip').then(localip => {
+    clicker(index, status, url, pin, uri_on, uri_off, machineIP){
             let get_status = this.state.data_offline[index].status
             let get_name = this.state.data_offline[index].name
             this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
@@ -1048,10 +1064,11 @@ class HomePage extends Component{
             if(get_status){
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_on).then(x => {
-                        if(x.status == 200){
-                            alert('Done')
+                    await axios.get('http://' + machineIP + uri_on).then(x => {
+                        if(x.status != 200){
+
                         }
+                        this.notif('Turning ON', 'Hei ' + this.state.name + ', ' + get_name + ' is turning on')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -1060,13 +1077,13 @@ class HomePage extends Component{
                     this.setState({ loading: false }) 
                 })()
            }else{
-
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_off).then(x => {
-                        if(x.status == 200){
-                            alert('Done')
+                    await axios.get('http://' + machineIP + uri_on + 'die').then(x => {
+                        if(x.status != 200){
+
                         }
+                        this.notif('Turning OFF', 'Hei ' + this.state.name + ', ' + get_name + ' is turning off')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -1075,7 +1092,6 @@ class HomePage extends Component{
                     this.setState({ loading: false }) 
                 })()
            }
-        })
     }
 
     list(){
@@ -1327,12 +1343,18 @@ class HomePage extends Component{
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
                                 <Text style={{ marginTop: 5 }}>Relay : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>Machine IP : <Text style={{ fontWeight: 'bold' }}>{this.state.machineDetailsIP}</Text></Text>
                                 <TouchableOpacity style={{ marginTop: 15, padding: 5, backgroundColor: 'red', borderRadius: 10, elevation: 15 }} onPress={() => this.module_delete()}>
                                     <Text>Delete</Text>
                                 </TouchableOpacity>
 
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
                                 <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change Relay ?" onChangeText={(val) => this.setState({ newRelay: val })} />
+                                <Picker selectedValue={this.state.machineDetailsIP} onValueChange={(val) => this.setState({ machineDetailsIP: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
+                                    {this.state.machine.map((x, y) => {
+                                    return <Picker.Item label={x.name} value={x.ip} />
+                                    })}
+                                </Picker>
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.moduleUpdate(this.state.moduleIndex)}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
                                 </TouchableOpacity>
@@ -1370,13 +1392,13 @@ class HomePage extends Component{
                                             </View>
                                         </TouchableOpacity>
                                     }) : this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y, x.machineIP)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             {x.type == "lights.png" ? <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} /> : <Image source={require('../assets/category/lock.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />}
-                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name.length > 5 ? x.name.slice(0, 5)+'...' : x.name}</Text>
+                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name.length > 6 ? x.name.slice(0, 5)+'...' : x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
+                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off, x.machineIP)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
                                                 {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin, x.uri_on, x.uri_off, y)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
@@ -1521,6 +1543,13 @@ class HomePage extends Component{
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />
                                     </Picker>
+
+                                    <Picker selectedValue={this.state.machineIP} onValueChange={(val) => this.setState({ machineIP: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
+                                        {this.state.machine.map((x, y) => {
+                                        return <Picker.Item label={x.name} value={x.ip} />
+                                        })}
+                                    </Picker>
+
                                     <TextInput placeholder="Relay" onChangeText={(val) => this.setState({ uri_on: val })} />
                                 </View>
 

@@ -17,7 +17,16 @@ export default class ProfileOffline extends Component{
             devices: null,
             since: '',
             connection: false,
-            addmachine: false
+            totalMachine: null,
+            machine: [],
+            addmachineIP: null,
+            addmachineName: null,
+            addmachine: false,
+            machineDetails: false,
+            machineDetailsName: null,
+            machineDetailsIP: null,
+            machineDetailsStatus: null,
+            machineIndex: null
         }
 
         this.data = [
@@ -25,9 +34,76 @@ export default class ProfileOffline extends Component{
         ]
     }
 
+    machinedelete(){
+        this.state.machine.splice(this.state.machineIndex, 1)
+        AsyncStorage.setItem('machine', JSON.stringify(this.state.machine))
+        this.setState({ machineDetails: false })
+        this.refresh()
+    }
+
+    addmachine(){
+        const data = {
+            name: this.state.addmachineName,
+            ip: this.state.addmachineIP,
+            status: 'ONLINE'
+        }
+
+        this.setState({ machine: this.state.machine.concat(data) })
+        AsyncStorage.removeItem('machine')
+        AsyncStorage.setItem('machine', JSON.stringify(this.state.machine))
+        alert('Machine Added !')
+    }
+
     componentDidMount(){
         AsyncStorage.getItem('name').then(data => {
             this.setState({ username: data })
+        })
+
+
+        AsyncStorage.getItem('machine').then(data => {
+            const parse = JSON.parse(data)
+
+            if(parse == null || parse == undefined){
+                this.setState({ machine: [] })
+            }else{
+                this.setState({ machine: this.state.machine.concat(parse) })
+            }
+        })
+
+
+        const totalMachine = this.state.machine.length
+
+        this.setState({ totalMachine: totalMachine })
+    }
+
+    refresh(){
+        AsyncStorage.getItem('name').then(data => {
+            this.setState({ username: data })
+        })
+
+
+        AsyncStorage.getItem('machine').then(data => {
+            const parse = JSON.parse(data)
+
+            if(parse == null || parse == undefined){
+                this.setState({ machine: [] })
+            }else{
+                this.setState({ machine: this.state.machine.concat(parse) })
+            }
+        })
+
+
+        const totalMachine = this.state.machine.length
+
+        this.setState({ totalMachine: totalMachine })
+    }
+
+    machineDetails(name, ip, index){
+        this.setState({
+            machineDetailsName: name,
+            machineDetailsIP: ip,
+            machineDetails: true,
+            machineIndex: index
         })
     }
 
@@ -58,9 +134,31 @@ export default class ProfileOffline extends Component{
                             <Image source={require("../assets/icons/machine.png")} style={{ width: 100, height: 100, marginTop: 15 }} />
                             
                             <View style={{ marginTop: 10, alignItems: 'center' }}>
-                                <TextInput placeholder="IP / Domain" />
-                                <TouchableOpacity style={{ marginTop: 10, backgroundColor: 'black', padding: 5, borderRadius: 5 }}>
+                                <TextInput placeholder="Machine Name" onChangeText={(val) => this.setState({ addmachineName: val })} />
+                                <TextInput placeholder="IP / Domain" onChangeText={(val) => this.setState({ addmachineIP: val })} />
+                                <TouchableOpacity style={{ marginTop: 10, backgroundColor: 'black', padding: 5, borderRadius: 5 }} onPress={() => this.addmachine()}>
                                     <Text style={{ color: 'white', fontWeight: 'bold' }}>Add Machine</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.machineDetails}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center', width: 170 }}>
+                            <TouchableOpacity style={{ alignSelf: 'flex-end' }} onPress={() => this.setState({ machineDetails: false })}>
+                                <Icon name="close-outline" size={28} />
+                            </TouchableOpacity>
+
+                            <View style={{ alignItems: 'center' }}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Machine Details</Text>
+                                <Image source={require('../assets/icons/machine.png')} style={{ width: 100, height: 100, marginTop: 10 }} />
+                                <Text style={{ marginTop: 10, fontWeight: 'bold' }}>{this.state.machineDetailsName}</Text>
+                                <Text style={{ marginTop: 10 }}>IP : <Text style={{ fontWeight: 'bold' }}>{this.state.machineDetailsIP}</Text></Text>
+                                <Text style={{ marginTop: 10 }}>Status : <Text style={{ color: 'green' }}>ONLINE</Text></Text>
+                                <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'red', padding: 5, borderRadius: 5 }} onPress={() => this.machinedelete()}>
+                                    <Text style={{ fontWeight: 'bold' }}>Delete</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -79,7 +177,7 @@ export default class ProfileOffline extends Component{
                     <View style={{ marginTop: 15, flexDirection: 'row', backgroundColor: 'black', padding: 15, borderRadius: 15, elevation: 15 }}>
                         <View style={{ flexDirection: 'column', marginRight: 25, alignItems: 'center' }}>
                             <Text style={{ fontWeight: 'bold', fontSize: 17, color: 'white' }}>Machine</Text>
-                            <Text style={{ marginTop: 10, textAlign: 'center', fontSize: 17, color: 'white' }}>{this.state.devices}</Text>
+                            <Text style={{ marginTop: 10, textAlign: 'center', fontSize: 17, color: 'white' }}>{this.state.totalMachine}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
@@ -93,20 +191,29 @@ export default class ProfileOffline extends Component{
                     </View>
                 </View>
 
-                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 17, marginTop: 27 }}>Your Machine</Text>
+                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 17, marginTop: 37 }}>Your Machine</Text>
+
+                <TouchableOpacity style={{ marginTop: 10, backgroundColor: 'black', padding: 10, borderRadius: 5 }} onPress={() => this.setState({ addmachine: true })}>
+                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Add Machine</Text>
+                </TouchableOpacity>
 
                 <View style={{ marginTop: 10, padding: 15, borderRadius: 15, elevation: 15, backgroundColor: 'black', flexDirection: 'column', alignItems: 'center' }}>
                     <Text style={{ color: 'white', fontWeight: 'bold' }}>List Machine</Text>
                     <View style={{ marginTop: 10, flexDirection: 'column' }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 150 }}>
+                        {this.state.machine.length == 0 ? <View>
+                            <Text style={{ color: 'white' }}>There is no machine</Text>
+                            <Text style={{ color: 'white' }}>Plz add the machine!</Text>
+                                </View> : this.state.machine.map((x,y) => {
+                        return <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', width: 150, marginTop: 10 }} onPress={() => this.machineDetails(x.name, x.ip, y)}>
                             <View>
-                                <Text style={{ color: 'white' }}>192.168.1.3</Text>
+                                <Text style={{ color: 'white' }}>{x.name}</Text>
                             </View>
 
                             <View>
-                                <Text style={{ color: 'white', color: 'green' }}>ONLINE</Text>
+                                <Text style={{ color: 'white', color: 'green' }}>{x.status}</Text>
                             </View>
-                        </View>
+                        </TouchableOpacity>
+                        })}
                     </View>
                 </View>
             </ScrollView>
