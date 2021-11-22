@@ -708,8 +708,6 @@ class HomePage extends Component{
             this.setState({ name: data })
         })
 
-
-
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
             if(parsing == null){
@@ -725,6 +723,7 @@ class HomePage extends Component{
                 this.setState({ machine: [] })
             }else{
                 this.setState({ machine: this.state.machine.concat(parsing) })
+                this.setState({ machineIP: this.state.machine[0].ip })
             }
         })
 
@@ -823,6 +822,16 @@ class HomePage extends Component{
 
         AsyncStorage.getItem('name').then(data => {
             this.setState({ name: data })
+        })
+
+        AsyncStorage.getItem('machine').then(data => {
+            let parsing = JSON.parse(data)
+            if(parsing == null){
+                this.setState({ machine: [] })
+            }else{
+                this.setState({ machine: this.state.machine.concat(parsing) })
+                this.setState({ machineIP: this.state.machine[0].ip })
+            }
         })
 
         AsyncStorage.getItem('relay_offline').then(data => {
