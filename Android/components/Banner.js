@@ -13,7 +13,7 @@ export default class Banner extends Component{
 
         this.state ={
             dev: "{ Developer: Fajar Firdaus }",
-            version: "{ Version: 'development' }",
+            version: "{ Version: '1.2.3' }",
             server: null,
             noserver: false,
             input_server: false,

@@ -24,17 +24,15 @@ export default class Profile extends Component{
         ]
     }
 
-    async componentDidMount(){
-        const network = await Network.getNetworkStateAsync()
-        if(!network.isConnected){
-            this.setState({ connection: true })
-        }else if(this.props.route.params.status == 'offline'){
-            this.setState({ connection: true })
-        }else if(this.props.route.params.status == 'online'){
-            this.setState({ connection: false })
-        }
+    componentDidMount(){
+    alert('testing')
 
-        AsyncStorage.getItem('token').then(res => {
+        AsyncStorage.getItem('name').then(data => {
+            alert(data)
+        })
+
+
+/*        AsyncStorage.getItem('token').then(res => {
             axios.post(konfigurasi.server + 'auth/getall', { token: res, secret: 'Important' }).then(data => {
                 this.setState({ username: data.data.result.username, since: data.data.result.since })
             })
@@ -43,7 +41,7 @@ export default class Profile extends Component{
                 let total = data.data.length
                 this.setState({ devices: total })
             })
-        })
+        })*/
     }
 
     render(){
