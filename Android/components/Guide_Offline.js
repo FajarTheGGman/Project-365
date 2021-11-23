@@ -75,20 +75,6 @@ export default class Guide extends Component{
                         <Text style={{ color: 'white' }}>3.3v, And <Text style={{ fontWeight: "bold" }}>Signal</Text> pin goes to digital pin</Text>
                     </View>
 
-
-                    <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 150 }}>
-                        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>What's Your Local IP Server ?</Text>
-                        <Image source={require('../assets/illustrations/register/server.png')} style={{ width: 220, height: 220, marginTop: 15 }} />
-                        <Text style={{ color: 'white', marginTop: 10 }}>Input your nodemcu IP, It can be useful</Text>
-                        <Text style={{ color: 'white' }}>if your're using offline mode</Text>
-
-
-                        <TextInput style={{ backgroundColor: "white", marginTop: 10, borderRadius: 10, elevation: 15, padding: 8 }} placeholder="Input IP Server" keyboardType={'numeric'} onChangeText={(val) => this.setState({ ip: val })} />
-                        <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, padding: 12, elevation: 15 }} onPress={() => this.connection()}>
-                            <Text style={{ color: 'white' }}>Test Connection</Text>
-                        </TouchableOpacity>
-                    </View>
-
                     <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 150 }}>
                         <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>By The Way</Text>
                         <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>What's Your Name ?</Text>

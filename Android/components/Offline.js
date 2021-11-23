@@ -46,7 +46,8 @@ export default class Home extends Component{
         this.state = {
             wellcome: false,
             low: false,
-            update: false
+            update: false,
+            nomachine_alert: false
         }
     }
 
@@ -55,11 +56,17 @@ export default class Home extends Component{
        // const update = await Updates.checkForUpdateAsync()
         AsyncStorage.setItem('mode', 'offline');
 
-        AsyncStorage.getItem('update').then(data => {
+        AsyncStorage.getItem(konfigurasi.version).then(data => {
             if(data == null || data == undefined){
                 this.setState({ update: true })
             }else{
                 this.setState({ update: false })
+            }
+        })
+
+        AsyncStorage.getItem('machine').then(data =>  {
+            if(data.length == 2){
+                this.setState({ nomachine_alert: true })
             }
         })
 
@@ -74,7 +81,7 @@ export default class Home extends Component{
     }
 
     closeupdate(){
-        AsyncStorage.setItem('update', 'yes')
+        AsyncStorage.setItem(konfigurasi.version, 'yes')
         this.setState({ update: false })
     }
 
@@ -120,11 +127,29 @@ export default class Home extends Component{
 
                                     <View style={{ marginTop: 10, alignItems: 'center' }}>
                                         <Text style={{ fontWeight: 'bold' }}>- Bug Fix</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- Machine Mode</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- Profile Mode</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Bug Machine Fix</Text>
                                     </View>
                                 </View>
                             </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.nomachine_alert}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center', paddingLeft: 12, paddingRight: 12 }}>
+                            <TouchableOpacity style={{ alignSelf: 'flex-end' }} onPress={() => this.setState({ nomachine_alert: false })}>
+                                <Icon name="close-outline" size={30} />
+                            </TouchableOpacity>
+                            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>There's no machine!</Text>
+                            <Image source={require('../assets/illustrations/offline.png')} style={{ width: 130, height: 120, marginTop: 10 }} />
+                            <Text>Hi dude, There's no machine left,</Text>
+                            <Text>Plz adding the machine </Text>
+                            <Text>by clicking this button</Text>
+
+                            <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 5, backgroundColor: 'black', elevation: 15 }} onPress={() => this.props.navigation.navigate('ProfileOffline')}>
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Add Machine</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </Modal>
@@ -259,7 +284,8 @@ class Settings extends Component{
             ip: null,
             localip: null,
             type: null,
-            offline: false
+            offline: false,
+            authors: false
         }
     }
 
@@ -358,6 +384,28 @@ class Settings extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.authors}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 5, alignItems: 'center', }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Authors</Text>
+                            
+                            <Image source={require('../assets/icons/author.jpeg')} style={{ width: 100, height: 100, borderRadius: 10, marginTop: 10 }} />
+
+                            <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 5 }}>
+                                <Text style={{ marginTop: 3, fontWeight: 'bold' }}>My Social Media</Text>
+                                <Text style={{ marginTop: 5 }}>Github: FajarTheGGman</Text>
+                                <Text>IG: @FajarTheGGman</Text>
+                                <Text>Twitter: @kernel024</Text>
+                                <Text>Web: fajarfirdaus.now.sh</Text>
+
+                                <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ authors: false })}>
+                                    <Text style={{ color: 'white' }}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
 
                 <Modal isVisible={this.state.phone_status}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -433,6 +481,10 @@ class Settings extends Component{
 
                             <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
                                 <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ authors: true })}>
+                                <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>😐 Authors</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -633,7 +685,8 @@ class HomePage extends Component{
             author: false,
             machine: [],
             machineIP: null,
-            machineDetailsIP: null
+            machineDetailsIP: null,
+            not_available: false
         }
     }
 
@@ -722,6 +775,7 @@ class HomePage extends Component{
             if(parsing == null){
                 this.setState({ machine: [] })
             }else{
+                this.setState({ machine: [] })
                 this.setState({ machine: this.state.machine.concat(parsing) })
                 this.setState({ machineIP: this.state.machine[0].ip })
             }
@@ -829,6 +883,7 @@ class HomePage extends Component{
             if(parsing == null){
                 this.setState({ machine: [] })
             }else{
+                this.setState({ machine: [] })
                 this.setState({ machine: this.state.machine.concat(parsing) })
                 this.setState({ machineIP: this.state.machine[0].ip })
             }
@@ -1179,6 +1234,21 @@ class HomePage extends Component{
 
                 <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
 
+                <Modal isVisible={this.state.not_available}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ padding: 10, borderRadius: 10, backgroundColor: 'white', borderRadius: 5, alignItems: 'center', paddingLeft: 15, paddingRight: 15 }}>
+                            <TouchableOpacity style={{ alignSelf: 'flex-end', marginRight: -5 }} onPress={() => this.setState({ not_available: false })}>
+                                <Icon name='close-outline' size={30} />
+                            </TouchableOpacity>
+
+                            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Not Available Yet</Text>
+                            <Image source={require('../assets/illustrations/bug.png')} style={{ width: 150, marginTop: 10, height: 100 }} />
+                            <Text>This Feature still in development,</Text>
+                            <Text>Could be updated soon !</Text>
+                        </View>
+                    </View>
+                </Modal>
+
                 <Modal isVisible={this.state.author}>
                     <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 5, alignItems: 'center', }}>
@@ -1447,7 +1517,7 @@ class HomePage extends Component{
 
                                 <View style={{ marginLeft: 20 }}>
                                     <View style={{ alignItems: 'center' }}>
-                                        <TouchableOpacity onPress={() => this.setState({ serial_information: true, menu: false })}>
+                                        <TouchableOpacity onPress={() => this.setState({ serial_information: false, not_available: true, menu: false })}>
                                             <Image source={require('../assets/icons/resistor.png')} style={{ width: 70, height: 70 }} />
                                             <Text style={{ fontWeight: 'bold', color: 'orange', textAlign: 'center' }}>Sensor Info</Text>
                                         </TouchableOpacity>
