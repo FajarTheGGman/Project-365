@@ -127,7 +127,8 @@ export default class Home extends Component{
 
                                     <View style={{ marginTop: 10, alignItems: 'center' }}>
                                         <Text style={{ fontWeight: 'bold' }}>- Bug Fix</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- Bug Machine Fix</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Update Buat QR Code</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Improve QR Code</Text>
                                     </View>
                                 </View>
                             </View>
@@ -479,10 +480,6 @@ class Settings extends Component{
                                 <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
-                                <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
-                            </TouchableOpacity>
-
                             <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ authors: true })}>
                                 <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>😐 Authors</Text>
                             </TouchableOpacity>
@@ -524,13 +521,12 @@ class Barcode extends Component{
     }
 
     scan(x){
-        AsyncStorage.getItem('localip').then(localip => {
             (async() => {
                 const decrypt = base64.decode(x)
                 const parse = JSON.parse(decrypt)
                 this.setState({ loading: true })
                 if(parse.type_sensor == 'lock.png'){
-                    axios.get('http://' + localip + parse.url).then(data => {
+                    axios.get('http://' + parse.machine + parse.url).then(data => {
                         if(data.status == 200){
                             alert(parse.name + ' is opening')
                         }else{
@@ -538,7 +534,7 @@ class Barcode extends Component{
                         }
                     })
                     setInterval(() => {
-                        axios.get('http://' + localip + parse.url + 'die').then(data => {
+                        axios.get('http://' + parse.machine + parse.url + 'die').then(data => {
                             if(data.status == 200){
                                 this.setState({ loading: false })
                                 alert(parse.name + ' is closing')
@@ -550,7 +546,7 @@ class Barcode extends Component{
                         })
                     }, 5000)
                 }else{
-                    axios.get('http://' + localip + parse.url).then(data => {
+                    axios.get('http://' + parse.machine + parse.url).then(data => {
                         if(data.status == 200){
                             this.setState({ loading: false })
                             if(parse.type){
@@ -566,7 +562,6 @@ class Barcode extends Component{
                     })
                 }
             })()
-        })
     }
 
     render(){
@@ -1119,6 +1114,28 @@ class HomePage extends Component{
             }
     }
 
+    unlock(index){
+        let data = this.state.data_offline[index]
+        (async() => {
+            this.setState({ loading: true })
+            await axios.get('http://' + data.machineIP + data.relay_on).then(response => {
+                
+            }).catch(err => {
+                this.setState({ loading: false, error_server: true })
+            })
+
+            setTimeout(() => {
+                axios.get('http://' + data.machineIP + data.relay_off).then(response => {
+
+                }).catch(err => {
+                    this.setState({ loading: false, error_server: true })
+                })
+            }, 10000)
+
+            this.setState({ loading: false })
+        })()
+    }
+
     clicker(index, status, url, pin, uri_on, uri_off, machineIP){
             let get_status = this.state.data_offline[index].status
             let get_name = this.state.data_offline[index].name
@@ -1179,6 +1196,7 @@ class HomePage extends Component{
                     name: raw_data.name,
                     type_sensor: raw_data.type,
                     type: type,
+                    machine: raw_data.machineIP,
                     url: raw_data.uri_on,
                     message: "Hey dude, what you gonna do with this data ?"
                 }
@@ -1191,6 +1209,7 @@ class HomePage extends Component{
                     name: raw_data.name,
                     type_sensor: raw_data.type,
                     type: type,
+                    machine: raw_data.machineIP,
                     url: raw_data.uri_off,
                     message: "Hey dude, what you gonna do with this data ?"
                 }
@@ -1205,6 +1224,7 @@ class HomePage extends Component{
                     name: raw_data.name,
                     type_sensor: raw_data.type,
                     type: type,
+                    machine: raw_data.machineIP,
                     url: raw_data.uri_on,
                     message: "Hey dude, what you gonna do with this data ?"
                 }
@@ -1217,6 +1237,7 @@ class HomePage extends Component{
                     name: raw_data.name,
                     type_sensor: raw_data.type,
                     type: type,
+                    machine: raw_data.machineIP,
                     url: raw_data.uri_off,
                     message: "Hey dude, what you gonna do with this data ?"
                 }
@@ -1477,7 +1498,9 @@ class HomePage extends Component{
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name.length > 6 ? x.name.slice(0, 5)+'...' : x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off, x.machineIP)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
+                                        {x.type == 'lock.png' ? <TouchableOpacity style={{ marginRight: 10 }} onPress={() => this.unlock(y)}>
+                                            <Icon name='lock-open-outline' size={25} color='white' />
+                                        </TouchableOpacity>: x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off, x.machineIP)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
                                                 {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin, x.uri_on, x.uri_off, y)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
