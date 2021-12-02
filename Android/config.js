@@ -1,6 +1,7 @@
 const konfigurasi = {
     server: "http://192.168.1.12:5000/",
-    key: 'Important'
+    key: 'Important',
+    version: 'v1.2.4-dev'
 }
 
 module.exports = konfigurasi

@@ -41,16 +41,16 @@ export default class ProfileOffline extends Component{
         this.refresh()
     }
 
-    addmachine(){
+    async addmachine(){
+        await AsyncStorage.removeItem('machine')
         const data = {
             name: this.state.addmachineName,
             ip: this.state.addmachineIP,
             status: 'ONLINE'
         }
 
-        this.setState({ machine: this.state.machine.concat(data) })
-        AsyncStorage.removeItem('machine')
-        AsyncStorage.setItem('machine', JSON.stringify(this.state.machine))
+        await this.setState({ machine: this.state.machine.concat(data) })
+        await AsyncStorage.setItem('machine', JSON.stringify(this.state.machine))
         alert('Machine Added !')
     }
 
