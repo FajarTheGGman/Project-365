@@ -122,13 +122,13 @@ export default class Home extends Component{
                                 <Image source={require('../assets/illustrations/update.png')} style={{ width: 120, height: 120, marginTop: 10 }} />
 
                                 <View style={{ alignItems: 'center' }}>
-                                    <Text>App has updated to version 1.2.3</Text>
+                                    <Text>App has updated to version 1.2.5</Text>
                                     <Text>So, Whats new ?</Text>
 
                                     <View style={{ marginTop: 10, alignItems: 'center' }}>
                                         <Text style={{ fontWeight: 'bold' }}>- Bug Fix</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- Update Buat QR Code</Text>
-                                        <Text style={{ fontWeight: 'bold' }}>- Improve QR Code</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Update Sensor Mode</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Fix Machine Mode</Text>
                                     </View>
                                 </View>
                             </View>
@@ -625,6 +625,8 @@ class HomePage extends Component{
             serial_url: null,
             serial_details: false,
             serial_data: null,
+            serial_index: null,
+            serial_type: true,
             loading: false,
             refresh: false,
             name: null,
@@ -681,7 +683,8 @@ class HomePage extends Component{
             machine: [],
             machineIP: null,
             machineDetailsIP: null,
-            not_available: false
+            not_available: false,
+            door_open: false,
         }
     }
 
@@ -733,7 +736,9 @@ class HomePage extends Component{
     addSerial(){
         const actual_data = {
             name: this.state.serial_name,
-            url: this.state.serial_url
+            url: this.state.serial_url,
+            machineIP: this.state.machineIP,
+            type: this.state.serial_type
         }
 
         this.setState({ data_serial: this.state.data_serial.concat(actual_data) })
@@ -1030,7 +1035,6 @@ class HomePage extends Component{
     }
 
     refresh_relay(){
-        this.setState({ data_offline: [] })
         AsyncStorage.getItem('relay_offline').then(data => {
             let parse = JSON.parse(data)
             if(parse == null){
@@ -1057,22 +1061,37 @@ class HomePage extends Component{
         })
     }
 
-    serial_details(name, url){
-        AsyncStorage.getItem('localip').then(localip => {
-            (async() => {
-                this.setState({ loading: true })
-                await axios.get('http://' + localip + url).then(data => {
-                    if(data.status == 200){
-                        this.setState({ serial_data: data })
-                        this.setstate({ loading: false })
-                        this.setState({ serial_details: true })
-                    }else{
-                        alert('[!] Url Sensor not found')
-                        this.setstate({ loading: false })
-                    }
-                })
-            })()
-       })
+    async serial_details(name, url, index, machineIP, type){
+        const actual_data = this.state.data_serial[index]
+
+        if(actual_data.type == true){
+            this.setState({ loading: true })
+            await axios.post('http://' + actual_data.machineIP + url).then(data => {
+                this.setState({ serial_data: data.data, serial_index: index })
+                this.setState({ serial_details: true, loading: false })
+            }).catch(err => {
+                this.setState({ loading: false })
+                this.setState({ serial_data: 'error server' })
+                this.setState({ serial_details: true })
+            })
+        }else{
+            this.setState({ loading: true })
+            await axios.get('http://' + actual_data.machineIP + url).then(data => {
+                this.setState({ serial_data: data.data, serial_index: index })
+                this.setState({ serial_details: true, loading: false })
+            }).catch(err => {
+                this.setState({ loading: false })
+                this.setState({ serial_data: 'error server' })
+                this.setState({ serial_details: true })
+            })
+        }
+
+    }
+
+    serial_delete(index){
+        this.state.data_serial.splice(index, 1)
+        AsyncStorage.setItem('serial_offline', this.state.data_serial)
+        this.setState({ serial_details: false })
     }
 
     switch(index, status, url, pin, uri_on, uri_off, machineIP){
@@ -1083,11 +1102,12 @@ class HomePage extends Component{
             if(get_status){
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + machineIP + uri_on + 'die').then(x => {
+                    await axios.post('http://' + machineIP + uri_on + 'die').then(x => {
                         if(x.status != 200){
                             this.setState({ error_server: true })
                         }
                         this.notif('Turning OFF', 'Hei ' + this.state.name + ', '+ get_name + ' is now OFF')
+                        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -1099,11 +1119,12 @@ class HomePage extends Component{
             }else{
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + machineIP + uri_on).then(x => {
+                    await axios.post('http://' + machineIP + uri_on).then(x => {
                         if(x.status != 200){
                             this.setState({ error_server: false })
                         }
                         this.notif('Turning ON', 'Hei ' + this.state.name + ', ' + get_name + ' is now ON')
+                        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -1116,24 +1137,22 @@ class HomePage extends Component{
 
     unlock(index){
         let data = this.state.data_offline[index]
-        (async() => {
+
             this.setState({ loading: true })
-            await axios.get('http://' + data.machineIP + data.relay_on).then(response => {
-                
+            axios.post('http://' + data.machineIP + data.uri_on).then(response => {
+                this.setState({ door_open: true })
             }).catch(err => {
                 this.setState({ loading: false, error_server: true })
             })
 
             setTimeout(() => {
-                axios.get('http://' + data.machineIP + data.relay_off).then(response => {
-
+                axios.post('http://' + data.machineIP + data.uri_off).then(response => {
+                    this.setState({ door_open: false })
                 }).catch(err => {
                     this.setState({ loading: false, error_server: true })
                 })
             }, 10000)
-
             this.setState({ loading: false })
-        })()
     }
 
     clicker(index, status, url, pin, uri_on, uri_off, machineIP){
@@ -1292,6 +1311,17 @@ class HomePage extends Component{
                     </View>
                 </Modal>
 
+                <Modal isVisible={this.state.door_open}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold' }}>Opening The Door</Text>
+                            <Image source={require('../assets/illustrations/login.png')}  style={{ width: 140, height: 100, marginTop: 10 }}/>
+                            <Text style={{ marginTop: 5 }}>Door Is Opening</Text>
+                            <Text>In 10 Seconds</Text>
+                        </View>
+                    </View>
+                </Modal>
+
                 <Modal isVisible={this.state.qr_result}>
                     <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center' }}>
@@ -1411,6 +1441,10 @@ class HomePage extends Component{
                                 <View style={{ backgroundColor: 'black', borderRadius: 5, padding: 13 }}>
                                     <Text style={{ color: 'white', fontWeight: 'bold' }}>{this.state.serial_data}</Text>
                                 </View>
+
+                                <TouchableOpacity style={{ marginTop: 10, backgroundColor: 'red', padding: 5, borderRadius: 5 }} onPress={() => this.serial_delete(this.state.serial_index)}>
+                                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Delete</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </View>
@@ -1482,7 +1516,7 @@ class HomePage extends Component{
                                         </View>
                                     </View>
                                     { this.state.menu_mode ? this.state.data_serial.map((x, y) => {
-                                        return <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url)}>
+                                        return <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url, y, x.machineIP, x.type)}>
                                             <View>
                                                 <Text style={{ color: 'white', fontWeight: 'bold' }}>{x.name}</Text>
                                             </View>
@@ -1540,7 +1574,7 @@ class HomePage extends Component{
 
                                 <View style={{ marginLeft: 20 }}>
                                     <View style={{ alignItems: 'center' }}>
-                                        <TouchableOpacity onPress={() => this.setState({ serial_information: false, not_available: true, menu: false })}>
+                                        <TouchableOpacity onPress={() => this.setState({ serial_information: true, not_available: false, menu: false })}>
                                             <Image source={require('../assets/icons/resistor.png')} style={{ width: 70, height: 70 }} />
                                             <Text style={{ fontWeight: 'bold', color: 'orange', textAlign: 'center' }}>Sensor Info</Text>
                                         </TouchableOpacity>
@@ -1578,7 +1612,14 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" onChangeText={(val) => this.setState({ serial_name: val })} />
+                                    <Picker selectedValue={this.state.machineIP} onValueChange={(val) => this.setState({ machineIP: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
+                                        {this.state.machine.map((x, y) => {
+                                        return <Picker.Item label={x.name} value={x.ip} />
+                                        })}
+                                    </Picker>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Input URL" onChangeText={(val) => this.setState({ serial_url: val })} />
+                                <Radio radio_props={[{ label: 'POST', value: true }, { label: "GET", value: false }]}  buttonColor="black" formHorizontal={true} animation={true} onPress={(value) => this.setState({ serial_type: value }) } style={{ marginTop: 10, color: 'black' }} style={{ padding: 5 }} />
+
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.addSerial()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
                                 </TouchableOpacity>
