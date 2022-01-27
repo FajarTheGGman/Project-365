@@ -50,10 +50,12 @@
     "react-native-svg": "^12.1.1",
     "react-native-swipe-modal-up-down": "^1.0.9",
     "react-native-swiper": "^1.6.0",
+    "react-native-tts": "^4.1.0",
     "react-native-vector-icons": "^8.1.0",
     "react-native-web": "~0.13.12",
     "react-vector-icons": "^0.0.1",
-    "socket.io-client": "^4.3.2"
+    "socket.io-client": "^4.3.2",
+    "expo-speech": "~9.2.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0"

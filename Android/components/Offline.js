@@ -26,6 +26,7 @@ import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
 import base64 from 'react-native-base64'
 import QRCode from 'react-native-qrcode-svg'
+import * as Speech from 'expo-speech'
 
 // Configurations
 import konfigurasi from '../config'

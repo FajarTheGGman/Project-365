@@ -15,6 +15,9 @@ const Users = new db.Schema({
     picture: { type: String, default: 'profile.png' },
     since: { type: String },
     localip: { type: String, default: '' },
+    mqtt_nickname: { type: String, default: '' },
+    mqtt_server: { type: String, default: '' },
+    mqtt_token: { type: String, default: '' },
     log: [Log]
 
 }, { collections: "users" })

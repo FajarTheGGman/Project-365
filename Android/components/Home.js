@@ -136,7 +136,6 @@ export default class Home extends Component{
             })}>
                 <Tabs.Screen name='Home' component={HomePage} />
                 <Tabs.Screen name='Barcode' component={Barcode} />
-                <Tabs.Screen name="Code" component={Code }/>
                 <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
             </View>
@@ -446,6 +445,8 @@ class HomePage extends Component{
             },
             data: [],
             data_serial: [],
+            io_auth: null,
+            io_username: null,
             serial_info: false,
             relayEmpty: false,
             relayAlert: false,
@@ -497,6 +498,14 @@ class HomePage extends Component{
             server: null,
             relay_id: null,
         }
+    }
+
+    addRelayOnline(){
+        AsyncStorage.getItem('myserver').then(server => {
+            AsyncStorage.getItem('token').then(token => {
+
+            })
+        })
     }
 
     addRelay(){
