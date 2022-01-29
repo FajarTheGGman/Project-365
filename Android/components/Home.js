@@ -569,6 +569,14 @@ class HomePage extends Component{
 
             })
 
+            AsyncStorage.getItem('io_username').then(data => {
+                this.setState({ io_username: data })
+            })
+
+            AsyncStorage.getItem('io_token').then(data => {
+                this.setState({ io_token: data })
+            })
+
             await axios.post(this.state.server + "relay-realtime/getall", { token: data, secret: konfigurasi.key }).then(respon => {
 				if(respon.status == 200){
                     this.setState({ error_server: false })

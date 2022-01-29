@@ -1,8 +1,10 @@
 const mongoose = require('mongoose')
 
 const RelayRealtime = mongoose.Schema({
+    username: { type: String },
     name: { type: String },
-    desc: { type: String },
+    type: { type: String },
+    status: { type: Boolean, default: false },
     io_feeds: { type: String },
 })
 
