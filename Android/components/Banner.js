@@ -139,7 +139,7 @@ export default class Banner extends Component{
                     </View>
 
                     <View style={{ marginTop: 150, alignItems: 'center' }}>
-                        <Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>Now You Can Login Here</Text>
+                        <Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>Choose Your Side </Text>
                         <Image source={require('../assets/illustrations/login.png')} style={{ width: 270, height: 210, marginTop: 15 }} />
 
                         {this.state.noserver ? 
@@ -148,8 +148,8 @@ export default class Banner extends Component{
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>You should write down your server</Text>
                         </View>
                         :
-                        <TouchableOpacity style={{ backgroundColor: 'black', padding: 12, paddingLeft: 120, marginTop: 65, paddingRight: 120, borderRadius: 15, elevation: 15 }} onPress={() => this.props.navigation.navigate('Login')}>
-                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 17 }}>Login</Text>
+                        <TouchableOpacity style={{ backgroundColor: 'green', padding: 12, paddingLeft: 120, marginTop: 65, paddingRight: 120, borderRadius: 15, elevation: 15 }} onPress={() => this.props.navigation.navigate('Guide')}>
+                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 17 }}>Online</Text>
                         </TouchableOpacity>
                         }
 
