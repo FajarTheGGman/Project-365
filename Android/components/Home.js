@@ -501,11 +501,22 @@ class HomePage extends Component{
     }
 
     addRelayOnline(){
-        AsyncStorage.getItem('myserver').then(server => {
             AsyncStorage.getItem('token').then(token => {
-
+                axios.post(this.state.server + 'relay-realtime/add', {
+                    token: token,
+                    secret: konfigurasi.key,
+                    name: this.state.relay_name,
+                    type: this.state.relay_category,
+                    feeds: this.state.feeds,
+                }).then(res => {
+                    if(res.status == 200){
+                        this.reload_relay()
+                        alert('Success Adding Relay')
+                    }
+                }).catch(err => {
+                    alert('Error Adding Relay')
+                })
             })
-        })
     }
 
     addRelay(){
@@ -556,15 +567,22 @@ class HomePage extends Component{
 
             })
 
-            await axios.post(this.state.server + "serial/getall", { token: data, secret: konfigurasi.key }).then(respon => {
+            await axios.post(this.state.server + "relay-realtime/getall", { token: data, secret: konfigurasi.key }).then(respon => {
 				if(respon.status == 200){
                     this.setState({ error_server: false })
-
+                    this.setState({ data: this.state.data.concat(respon.data.relay) })
+                    console.log(this.state.data)
+                    if(result.data.length == 0){
+                        this.setState({ relayEmpty: true })
+                    }else{
+                        this.setState({ relayEmpty: false })
+                    }
 				}
             }).catch((err) => {
 
             })
 
+            /*
             await axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
                 if(result.status == 200){
                     this.setState({ error_server: false })
@@ -580,6 +598,7 @@ class HomePage extends Component{
             }).catch((err) => {
 
             })
+            */
 
             await axios.get(this.state.server).then(respon => {
                 if(!respon.status == 200){
@@ -689,22 +708,19 @@ class HomePage extends Component{
                 }
             })
 
-            axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
-                if(result.status == 200){
-                    this.setState({ data: this.state.data.concat(result.data) })
+            axios.post(this.state.server + "relay-realtime/getall", { token: data, secret: konfigurasi.key }).then(respon => {
+				if(respon.status == 200){
                     this.setState({ error_server: false })
-                    if(result.data.length == 0 || result.data.length == null){
+                    this.setState({ data: this.state.data.concat(respon.data.relay) })
+                    console.log(this.state.data)
+                    if(result.data.length == 0){
                         this.setState({ relayEmpty: true })
                     }else{
                         this.setState({ relayEmpty: false })
                     }
-                }else{
-                    alert('Server Error !')
-                }
+				}
             }).catch((err) => {
-                if(err){
-                    this.setState({ error_server: true })
-                }
+
             })
 
             axios.get(konfigurasi.server).then(respon => {
@@ -794,10 +810,10 @@ class HomePage extends Component{
 
     reload_relay(){
         AsyncStorage.getItem('token').then(data => {
-            axios.post(this.state.server + 'relay/getall', { token: data, secret: konfigurasi.key }).then(result => {
+            axios.post(this.state.server + 'relay-realtime/getall', { token: data, secret: konfigurasi.key }).then(result => {
                 if(result.status == 200){
                     this.setState({ data: [], error_server: false })
-                    this.setState({ data: this.state.data.concat(result.data) })
+                    this.setState({ data: this.state.data.concat(result.data.relay) })
                     if(result.data.length == 0 || result.data.length == null){
                         this.setState({ relayEmpty: true })
                     }else{
@@ -819,7 +835,7 @@ class HomePage extends Component{
 
     delete(mod, relayId){
         AsyncStorage.getItem('token').then(data => {
-            axios.post(konfigurasi.server + 'relay/delete', { token: data, secret: konfigurasi.key, name: mod, id: relayId }).then(response => {
+            axios.post(konfigurasi.server + 'relay-realtime/delete', { token: data, secret: konfigurasi.key, name: mod }).then(response => {
                 if(response.status == 200){
                     alert('Module deleted!')
                     this.reload_relay()
@@ -938,6 +954,48 @@ class HomePage extends Component{
         })
     }
 
+
+    switch(nama, status, feeds){
+        AsyncStorage.getItem('token').then(token_user => {
+            (async() => {
+                this.setState({ loading: true })
+                await axios.post(this.state.server + 'relay-realtime/update', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
+                    if(result.status == 200){
+
+                        axios.post('https://io.adafruit.com/api/v2/FajarTheGGman/feeds/' + feeds + '/data', {
+                            datum: {
+                                value: !status ? 'ON' : 'OFF'
+                            }
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-AIO-Key': 'aio_wKOO82RilVfBeXtLHiBAsFG9LV3P'
+                            }
+                        }).then(response => {
+                            if(response.status == 200){
+                                this.setState({ loading: false })
+                                this.notif('Success', 'Module ' + nama + ' is ' + (status ? 'on' : 'off'))
+                                this.reload_relay()
+                            }
+                        }).catch((err) => {
+                            if(err){
+                                console.log(err)
+                            }
+                        })
+                    }else{
+                        alert('[!] Server error')
+                    }
+                }).catch((err) => {
+                    if(err){
+                        console.log(err)
+                    }
+                })
+                this.setState({ loading: false, error_server: false })
+            })()
+        })
+    }
+
+/* [ Old Version ]
     switch(nama, status, pin){
         AsyncStorage.getItem('token').then(token_user => {
             (async() => {
@@ -1002,7 +1060,8 @@ class HomePage extends Component{
             })()
         })
     }
-    
+    */
+
     render(){
         return(
             <ScrollView contentContainerStyle={{ flexGrow: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: '#292928' }} refreshControl={<RefreshControl refreshing={this.state.refresh} onRefresh={() => this.refresh()}/>}>
@@ -1178,13 +1237,7 @@ class HomePage extends Component{
                                             <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                            {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(x.name, x.status, x.pin)} value={x.status} /> : <View style={{ marginRight: 5 }}>
-                                                {x.status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(x.name, x.status)}>
-                                                    <Text>Turn OFF</Text>
-                                                </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status, x.pin)}>
-                                                    <Text>Turn ON</Text>
-                                                </TouchableOpacity>}
-                                            </View>}
+                                            <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(x.name, x.status, x.io_feeds)} value={x.status} />
                                         </View>
                                     </TouchableOpacity>
                                   })}
@@ -1318,13 +1371,13 @@ class HomePage extends Component{
 
                             <View style={{ flexDirection: 'row', marginTop: 25, justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: 'column', marginLeft: -10 }}>
-                                    <TextInput placeholder="Name" onChangeText={(value) => this.setState({ relay_name: value })}/>
+                                    <TextInput placeholder="Name Alias" onChangeText={(value) => this.setState({ relay_name: value })}/>
                                     <Picker selectedValue={this.state.relay_category} onValueChange={(val) => this.setState({ relay_category: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />
                                         <Picker.Item label="Servo" value="servo.png" />
                                     </Picker>
-                                    <TextInput placeholder="Input ID" onChangeText={(value) => this.setState({ relay_id: value })} />
+                                    <TextInput placeholder="Name" onChangeText={(value) => this.setState({ feeds: value })} />
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
@@ -1339,7 +1392,7 @@ class HomePage extends Component{
                             </View>
 
                             <View style={{ alignItems: 'center', marginTop: 15 }}>
-                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelay()}>
+                                <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, padding: 5, paddingLeft: 15, paddingRight: 15, borderRadius: 15 }} onPress={() => this.addRelayOnline()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white', padding: 2 }}>Add</Text>
                                 </TouchableOpacity>
                             </View>
