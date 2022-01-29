@@ -1,5 +1,5 @@
 # Project 365%
-<p>Home Automation With MERN Stack</p>
+<p>Home Automation With MERN Stack and Adafruit MQTT</p>
 
 ![](https://img.shields.io/badge/caution-information-yellow) <b>Online Mode Still in development</b>
 
@@ -8,6 +8,7 @@
 ![](https://img.shields.io/badge/expo-4.5.2-white)
 ![](https://img.shields.io/badge/mongo-4.0.19-green)
 ![](https://img.shields.io/badge/expressjs-4.17.1-white)
+![](https://img.shields.io/badge/Backend-Adafruit_MQTT-black?logo=adafruit)
 
 <div align='center'>
 <img src="https://i.ibb.co/28BfB88/icon.png"  width='190' />
@@ -104,347 +105,220 @@ root@user-# expo build:android
 <i>[ Setup Routing and relays pin in offline mode ]</i>
 
 ```c
-// [ESP8266]
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266HTTPClient.h>
-#include <ArduinoJson.h>
-#include <SoftwareSerial.h>
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
 
-// Initialize your ssid
-char* ssid = "yourssid";
-char* pwd = "yourpassword";
+ESP8266WebServer server(80);
 
 // [Offline Mode] define a relays pin
-#define relay1 D0 // or another pin, it's up to you
-#define relay2 D1 // or another pin, it's up to you
-#define relay3 D2 // or another pin, it's up to you
-#define relay4 D3 // or another pin, it's up to you
+#define relay1 D1 // or another pin, it's up to you
+#define relay2 D2 // or another pin, it's up to you
+#define relay3 D3 // or another pin, it's up to you
+#define relay4 D4 // or another pin, it's up to you
 
 // [Offline Mode] relay function [ ON ]
-void relayone(){
-    digitalWrite(relay1, LOW);
-    server.send(200, "text/plain", "{ Relay1: ON }");
+void relayone() {
+  digitalWrite(relay1, LOW);
+  server.send(200, "text/plain", "{ Relay1: ON }");
 }
 
-void relaytwo(){
-    digitalWrite(relay2, LOW);
-    server.send(200, "text/plain", "{ Relay2: ON }");
+void relaytwo() {
+  digitalWrite(relay2, LOW);
+  server.send(200, "text/plain", "{ Relay2: ON }");
 }
 
-void relaythree(){
-    digitalWrite(relay3, LOW);
-    server.send(200, "text/plain", "{ Relay3: ON }");
+void relaythree() {
+  digitalWrite(relay3, LOW);
+  server.send(200, "text/plain", "{ Relay3: ON }");
 }
 
-void relayfour(){
-    digitalWrite(relay4, LOW);
-    server.send(200, "text/plain", "{ Relay4: ON }");
+void relayfour() {
+  digitalWrite(relay4, LOW);
+  server.send(200, "text/plain", "{ Relay4: ON }");
 }
 
 // [Offline Mode] relay function [ OFF ]
-void relayonedie(){
-    digitalWrite(relay1, HIGH);
-    server.send(200, "text/plain", "{ Relay1: OFF }");
+void relayonedie() {
+  digitalWrite(relay1, HIGH);
+  server.send(200, "text/plain", "{ Relay1: OFF }");
 }
 
-void relaytwodie(){
-    digitalWrite(relay2, HIGH);
-    server.send(200, "text/plain", "{ Relay2: OFF }");
+void relaytwodie() {
+  digitalWrite(relay2, HIGH);
+  server.send(200, "text/plain", "{ Relay2: OFF }");
 }
 
-void relaythreedie(){
-    digitalWrite(relay3, HIGH);
-    server.send(200, "text/plain", "{ Relay3: OFF }");
+void relaythreedie() {
+  digitalWrite(relay3, HIGH);
+  server.send(200, "text/plain", "{ Relay3: OFF }");
 }
 
-void relayfourdie(){
-    digitalWrite(relay4, HIGH);
-    server.send(200, "text/plain", "{ Relay4: OFF }");
+void relayfourdie() {
+  digitalWrite(relay4, HIGH);
+  server.send(200, "text/plain", "{ Relay4: OFF }");
 }
 
-void setup(void) {
+void notfound(){
+  server.send(404, "text/plain", "{ Not_Found: 404 }");
+}
+
+
+// [Online Mode] Setup The Adafruit IO
+
+#define WLAN_SSID       "YOUR_SSID"
+#define WLAN_PASS       "YOUR_PASS"
+
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883                   // use 8883 for SSL
+#define AIO_USERNAME    "YOUR_USERNAME"
+#define AIO_KEY         "YOUR_KEY"
+
+WiFiClient client;
+
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+
+Adafruit_MQTT_Publish photocell = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/photocell");
+
+Adafruit_MQTT_Subscribe relay_one = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/relay-one");
+Adafruit_MQTT_Subscribe relay_two = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/relay-two");
+Adafruit_MQTT_Subscribe relay_three = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/relay-three");
+Adafruit_MQTT_Subscribe relay_four = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/relay-four");
+
+void MQTT_connect();
+
+void setup() {
   Serial.begin(115200);
-  mainMachine.begin(9600);
-  WiFi.begin(ssid, pwd);
-    
-  // [Offline Mode] Initialize pin
+  
   pinMode(relay1, OUTPUT);
   pinMode(relay2, OUTPUT);
   pinMode(relay3, OUTPUT);
   pinMode(relay4, OUTPUT);
-
- if(WiFi.status() != WL_CONNECTED){
-  delay(100);
-   Serial.print(".");
- }
-
-  Serial.print(" [+] Connected");
-  Serial.println("{");
-  Serial.println("Coder: 'Fajar Firdaus'");
-  Serial.println("IG: '@kernel024'");
-  Serial.println("Twitter: @kernel024'");
-  Serial.println("GIthub: 'FajarTheGGman'");
-  
-  Serial.println("{");
-  Serial.print("IP : ");
-  Serial.println(WiFi.localIP());
-  Serial.println("}");
-
-
-server.on("/", [](){
-  server.send(200, "text/plain", "{ Wellcome: 'Project - 365%' }");
-});
-
-// [Offline Mode] routing url
-server.on("/relay1", relayone);
-server.on("/relay2", relaytwo);
-server.on("/relay3", relaythree);
-server.on("/relay4", relayfour);
-
-server.on("/relay1die", relayonedie);
-server.on("/relay2die", relaytwodie);
-server.on("/relay3die", relaythreedie);
-server.on("/relay4die", relayfourdie);
-
-
-server.begin();
-}
-
-
-void loop(void) {
-  server.handleClient();
-    
-http.useHTTP10(true);
-
-// [Online Mode] get relay activities from android app and send it to nodemcu
-http.begin(get_activities);
-http.GET();
-
-StaticJsonDocument<200> js;
-deserializeJson(js, http.getStream());
-
-int pin = js["pin"];
-bool v = js["status"];
-
-if(v){
-    digitalWrite(pin, LOW);
-}else{
-    digitalWrite(pin, HIGH);
-}
-
-http.end();
-
-// [Online Mode] get sensor activities from nodemcu and send it to android app
-http.begin(get_sensor_activities);
-
-StaticJsonDocument<200> doc;
-deserializeJson(doc, http.getStream());
-
-
-http.end();
-}
-```
-
-```c
-// [ESP-32]
-// Copyright 2021 By Fajar Firdaus
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <HTTPClient.h>
-#include <ArduinoJson.h>
-#include <Update.h>
-#include <ESPmDNS.h>
-
-const char* wifi = "ssid";
-const char* pw = "password";
-
-String cloudServer = "yourserver";
-String token = "yourtoken";
-String key = "Important";
-
-String get_activities = cloudServer + "board/relay/activities?token=" + token + "&secret=" + key;
-String get_sensor_activities = cloudServer + "board/sensor/activities?token=" + token + "&secret" + key;
-String send_location = cloudServer + "board/location?token=" + token + "&secret=" + key + "&location="; 
-String get_location = "http://ip-api/json";
-
-WebServer server(80);
-HTTPClient http;
-
-const int relay1 = 23;
-const int relay2 = 22;
-const int relay3 = 21;
-const int relay4 = 19;
-
-// Default Relay Settings
-
-// [Offline Mode] relay function [ ON ]
-void relayone(){
-    digitalWrite(relay1, LOW);
-    server.send(200, "text/plain", "{ Relay1: ON }");
-}
-
-void relaytwo(){
-    digitalWrite(relay2, LOW);
-    server.send(200, "text/plain", "{ Relay2: ON }");
-}
-
-void relaythree(){
-    digitalWrite(relay3, LOW);
-    server.send(200, "text/plain", "{ Relay3: ON }");
-}
-
-void relayfour(){
-    digitalWrite(relay4, LOW);
-    server.send(200, "text/plain", "{ Relay4: ON }");
-}
-
-// [Offline Mode] relay function [ OFF ]
-void relayonedie(){
-    digitalWrite(relay1, HIGH);
-    server.send(200, "text/plain", "{ Relay1: OFF }");
-}
-
-void relaytwodie(){
-    digitalWrite(relay2, HIGH);
-    server.send(200, "text/plain", "{ Relay2: OFF }");
-}
-
-void relaythreedie(){
-    digitalWrite(relay3, HIGH);
-    server.send(200, "text/plain", "{ Relay3: OFF }");
-}
-
-void relayfourdie(){
-    digitalWrite(relay4, HIGH);
-    server.send(200, "text/plain", "{ Relay4: OFF }");
-}
-
-void catch_relay(int pin, bool volt){
-  if(volt){
-    digitalWrite(pin, LOW);
-  }else{
-    digitalWrite(pin, HIGH);
-  }
-}
-
-void setup(void) {
-  Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(wifi, pw);
-  
-  // Example pin
-  pinMode(4, OUTPUT);
   pinMode(2, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
-  
-  digitalWrite(LED_BUILTIN, LOW);
-   
-  // Check router connection
-  while(WiFi.status() != WL_CONNECTED){
-       delay(100);
-       Serial.print("-");
+
+  // Connect to WiFi access point.
+  Serial.println(); Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(WLAN_SSID);
+
+  WiFi.begin(WLAN_SSID, WLAN_PASS);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
   }
+  Serial.println();
 
-  Serial.print(" [+] Connected");
-  Serial.println("{");
-  Serial.println("Coder: 'Fajar Firdaus'");
-  Serial.println("IG: '@kernel024'");
-  Serial.println("Twitter: @kernel024'");
-  Serial.println("GIthub: 'FajarTheGGman'");
-  
-  Serial.println("{");
-  Serial.print("IP : ");
-  Serial.println(WiFi.localIP());
-  Serial.println("}");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: "); Serial.println(WiFi.localIP());
 
-  digitalWrite(LED_BUILTIN, HIGH);
+  // Setup MQTT subscription
+  mqtt.subscribe(&relay_one);
+  mqtt.subscribe(&relay_two);
+  mqtt.subscribe(&relay_three);
+  mqtt.subscribe(&relay_four);
 
-  if(!MDNS.begin("Project-365")){
-    while(1){
-      delay(1000);
-    }
-  }
+  digitalWrite(2, LOW);
 
   server.on("/", []() {
-      server.send(200, "text/plain", "{ Server: 'Project - 365%'}");
-   });
-   
-// [Offline Mode] routing url
-  server.on("/relay1", relayone);
-  server.on("/relay2", relaytwo);
-  server.on("/relay3", relaythree);
-  server.on("/relay4", relayfour);
-
-  server.on("/relay1die", relayonedie);
-  server.on("/relay2die", relaytwodie);
-  server.on("/relay3die", relaythreedie);
-  server.on("/relay4die", relayfourdie);
-
-   
-  server.on("/code", HTTP_POST, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-    ESP.restart();
-  }, []() {
-    HTTPUpload& upload = server.upload();
-    if (upload.status == UPLOAD_FILE_START) {
-      Serial.printf("Update: %s\n", upload.filename.c_str());
-      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
-        Update.printError(Serial);
-      }
-    } else if (upload.status == UPLOAD_FILE_WRITE) {
-      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-        Update.printError(Serial);
-      }
-    } else if (upload.status == UPLOAD_FILE_END) {
-      if (Update.end(true)) { 
-        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
-      } else {
-        Update.printError(Serial);
-      }
-    }
+    server.send(200, "text/html", "{ Server: 'Project-365% - Main Machine' }");
   });
-   
+
+  // [Offline Mode] routing url
+  server.on("/relay1", HTTP_POST, relayone);
+  server.on("/relay2", HTTP_POST, relaytwo);
+  server.on("/relay3", HTTP_POST,  relaythree);
+  server.on("/relay4", HTTP_POST, relayfour);
+
+  server.on("/relay1die", HTTP_POST, relayonedie);
+  server.on("/relay2die", HTTP_POST, relaytwodie);
+  server.on("/relay3die", HTTP_POST, relaythreedie);
+  server.on("/relay4die", HTTP_POST, relayfourdie);
+
+  server.onNotFound(notfound);
+
 
   server.begin();
 }
 
-void loop(void) {
+uint32_t x=0;
+
+void loop() {
+
   server.handleClient();
   
-http.useHTTP10(true);
+  MQTT_connect();
 
-// [Online Mode] get relay activities from android app and send it to nodemcu
-http.begin(get_activities);
-http.GET();
+  Adafruit_MQTT_Subscribe *subscription;
+  while ((subscription = mqtt.readSubscription(500))) {
+    if (subscription == &relay_one) {
+      String relayOne = (char *)relay_one.lastread;
 
-StaticJsonDocument<200> js;
-deserializeJson(js, http.getStream());
+      Serial.print("Relay One said : ");
+      Serial.println((char *)relay_one.lastread);
 
-int pin = js["pin"];
-bool v = js["status"];
+      if(relayOne == "OFF"){
+        digitalWrite(relay1, HIGH);
+      }else if(relayOne == "ON"){
+        digitalWrite(relay1, LOW);
+      }
+    }else if (subscription == &relay_two) {
+      String relayTwo = (char *)relay_two.lastread;
 
-if(v){
-    digitalWrite(pin, LOW);
-}else{
-    digitalWrite(pin, HIGH);
+      Serial.print("Relay Two said : ");
+      Serial.println((char *)relay_two.lastread);
+
+      if(relayTwo == "OFF"){
+        digitalWrite(relay2, HIGH);
+      }else if(relayTwo == "ON"){
+        digitalWrite(relay2, LOW);
+      }
+    }else if (subscription == &relay_three) {
+      String relayThree = (char *)relay_three.lastread;
+
+      Serial.print("Relay Three said : ");
+      Serial.println((char *)relay_three.lastread);
+
+      if(relayThree == "OFF"){
+        digitalWrite(relay3, HIGH);
+      }else if(relayThree == "ON"){
+        digitalWrite(relay3, LOW);
+      }
+    }else if (subscription == &relay_four) {
+      String relayFour = (char *)relay_four.lastread;
+
+      Serial.print("Relay Four said : ");
+      Serial.println((char *)relay_four.lastread);
+
+      if(relayFour == "OFF"){
+        digitalWrite(relay4, HIGH);
+      }else if(relayFour == "ON"){
+        digitalWrite(relay4, LOW);
+      }
+    }
+  }
+  
+  if(! mqtt.ping()) {
+    mqtt.disconnect();
+  }
+  
 }
 
-http.end();
+void MQTT_connect() {
+  int8_t ret;
 
-// [Online Mode] get sensor activities from nodemcu and send it to android app
-http.begin(get_sensor_activities);
+  if (mqtt.connected()) {
+    return;
+  }
 
-StaticJsonDocument<200> doc;
-deserializeJson(doc, http.getStream());
+  Serial.print("Connecting to MQTT... ");
 
-
-http.end();
-
+  uint8_t retries = 3;
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       mqtt.disconnect();
+  }
+  Serial.println("MQTT Connected!");
 }
 
 ```
