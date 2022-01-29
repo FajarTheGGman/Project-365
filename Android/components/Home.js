@@ -497,6 +497,8 @@ class HomePage extends Component{
             serial_details: false,
             server: null,
             relay_id: null,
+            io_username: null,
+            io_token: null,
         }
     }
 
@@ -962,14 +964,14 @@ class HomePage extends Component{
                 await axios.post(this.state.server + 'relay-realtime/update', { token: token_user, secret: konfigurasi.key, name: nama, status: !status }).then(result => {
                     if(result.status == 200){
 
-                        axios.post('https://io.adafruit.com/api/v2/FajarTheGGman/feeds/' + feeds + '/data', {
+                        axios.post('https://io.adafruit.com/api/v2/' + this.state.io_username + '/feeds/' + feeds + '/data', {
                             datum: {
                                 value: !status ? 'ON' : 'OFF'
                             }
                         }, {
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-AIO-Key': 'aio_wKOO82RilVfBeXtLHiBAsFG9LV3P'
+                                'X-AIO-Key': this.state.io_token
                             }
                         }).then(response => {
                             if(response.status == 200){
