@@ -80,8 +80,6 @@ export default class Home extends Component{
                 })
             }
 
-
-
     }
 
     closeupdate(){
@@ -785,7 +783,6 @@ class HomePage extends Component{
 				if(respon.status == 200){
                     this.setState({ error_server: false })
                     this.setState({ data: this.state.data.concat(respon.data.relay) })
-                    console.log(this.state.data)
                     if(result.data.length == 0){
                         this.setState({ relayEmpty: true })
                     }else{
@@ -1592,7 +1589,7 @@ class HomePage extends Component{
 
                     <View style={{ marginLeft: 130, backgroundColor: 'black', elevation: 15, padding: 5, borderRadius: 10 }}>
                         <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { status: 'online' })}>
-                            <Image source={require('../assets/icons/profile.png')} style={{ width: 50, height: 50 }} />
+                            <Image source={{ uri: 'https://avatars.dicebear.com/api/male/' + this.state.username + '.png' }} style={{ width: 50, height: 50 }} />
                         </TouchableOpacity>
                     </View>
                 </View>
