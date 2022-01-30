@@ -3,7 +3,7 @@
     "description": "Project for internet of things",
     "env": {
         "DB": {
-            "value": "your mongodb url"
+            "value": "mongodb+srv://fajar:firdaus@project-365.9i8cg.mongodb.net/Project365?retryWrites=true&w=majority"
         },
         "KEY": {
             "value": "Important"

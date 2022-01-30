@@ -42,7 +42,7 @@ export default class App extends Component{
                 <Stack.Navigator initialRouteName={this.state.redirect}>
                     <Stack.Screen name="Banner" component={Banner} options={{ headerShown: false }} />
                     <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}/>
-                    <Stack.Screen name='Register' component={Register} options={{ headerStyle: { backgroundColor: '#292928' }, headerTitleStyle: { color: 'white' } }}/>
+                    <Stack.Screen name='Register' component={Register} options={{ headerStyle: { backgroundColor: '#292928' }, headerTintColor: "white", headerTitleStyle: { color: 'white' } }}/>
                     <Stack.Screen name='Guide' component={Guide} options={{ headerShown: false }} />
                     <Stack.Screen name='GuideOffline' component={GuideOffline} options={{ headerShown: false }} />
                     <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
