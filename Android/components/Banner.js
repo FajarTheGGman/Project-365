@@ -13,7 +13,7 @@ export default class Banner extends Component{
 
         this.state ={
             dev: "{ Developer: Fajar Firdaus }",
-            version: "{ Version: '1.2.3' }",
+            version: "{ Version: '1.2.5' }",
             server: null,
             noserver: false,
             input_server: false,
@@ -114,6 +114,15 @@ export default class Banner extends Component{
                         <Image source={require('../assets/illustrations/control.png')} style={{ width: 280, height: 210, marginTop: 15 }} />
                         <Text style={{ color: 'white', marginTop: 15 }}><Text style={{ fontWeight: 'bold' }}>Yes You Can</Text>, The Application I was designing to </Text>
                         <Text style={{ color: 'white' }}>Working as <Text style={{ fontWeight: 'bold' }}>Offline</Text> and <Text style={{ fontWeight: 'bold' }}>Online</Text></Text>
+                        <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold', marginTop: 80 }}>Swipe To Right 👉</Text>
+                    </View>
+
+                    <View style={{ marginTop: 150, alignItems: 'center' }}>
+                        <Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>With Adafruit IO MQTT</Text>
+                        <Image source={require('../assets/icons/adafruit.png')} style={{ width: 280, height: 210, marginTop: 15 }} />
+                        <Text style={{ color: 'white', marginTop: 15 }}>For online mode, i'm using adafruit IO API</Text>
+                        <Text style={{ color: 'white'}}>So that's allow you to connect to ESP</Text>
+                        <Text style={{ color: 'white'}}>In Realtime Situations.</Text>
                         <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold', marginTop: 80 }}>Swipe To Right 👉</Text>
                     </View>
 

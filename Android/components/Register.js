@@ -23,20 +23,21 @@ export default class Register extends Component{
         if(this.state.username.length == 0 || this.state.password.length == 0){
             alert('Username & password still empty !')
         }else{
-            (async() => {
-                this.setState({ loading: true })
-                await axios.post(konfigurasi.server + "auth/register", { username: this.state.username, password: this.state.password }).then(result => {
+            this.setState({ loading: true })
+            AsyncStorage.getItem('myserver').then(async server => {
+                await axios.post(server + "auth/register", { username: this.state.username, password: this.state.password }).then(result => {
                     if(result.status == 200){
                         this.setState({ success: true, username: "", password: "" })
                         this.props.navigation.dispatch(
-                            StackActions.replace('Guide')
+                            StackActions.replace('Login')
                         )
                     }else{
                     
                     }
                 })
                 this.setState({ loading: false })
-            })()
+            })
+
        }
     }
 
@@ -49,7 +50,7 @@ export default class Register extends Component{
                         <Image source={require('../assets/icons/icon.png')} style={{ width: 100, height: 100, }}  />
                     </View>
                     <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 10, color: 'white' }}>Project 365%</Text>
-                    <Text style={{ color: 'white' }}>Version: 1.0.0</Text>
+                    <Text style={{ color: 'white' }}>Version: 1.2.5</Text>
 
                 </View>
                 <View style={{ backgroundColor: 'white', padding: 15, elevation: 15, marginTop: 20, borderRadius: 10, alignItems: 'center', paddingLeft: 35, paddingRight: 35 }}>
