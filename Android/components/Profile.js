@@ -186,7 +186,7 @@ export default class ProfileOffline extends Component{
 
                 <View style={{ alignItems: 'center' }}>
                     <View style={{ flexDirection: 'column', marginTop: 25, backgroundColor: 'black', padding: 10, borderRadius: 15, elevation: 15 }}>
-                        <Image source={require('../assets/icons/profile.png')} style={{ width: 60, height: 60 }} />
+                        <Image source={{ uri: 'https://avatars.dicebear.com/api/male/' + this.state.username + '.png' }} style={{ width: 60, height: 60 }} />
                     </View>
                 </View>
 
