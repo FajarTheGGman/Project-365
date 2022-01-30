@@ -47,8 +47,8 @@ export default class App extends Component{
                     <Stack.Screen name='GuideOffline' component={GuideOffline} options={{ headerShown: false }} />
                     <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
                     <Stack.Screen name='Offline' component={Offline} options={{ headerShown: false }}/>
-                    <Stack.Screen name='Profile' component={Profile} options={{ headerStyle: { backgroundColor: '#292928', color: 'white' }, headerTitleStyle: { color: 'white' } }} />
-                    <Stack.Screen name='ProfileOffline' component={ProfileOffline} options={{ headerStyle: { backgroundColor: '#292928' }, headerTitleStyle: { color: 'white' }, headerTitle: 'Profile' }} />
+                    <Stack.Screen name='Profile' component={Profile} options={{ headerStyle: { backgroundColor: '#292928', color: 'white' }, headerTintColor: 'white', headerTitleStyle: { color: 'white' } }} />
+                    <Stack.Screen name='ProfileOffline' component={ProfileOffline} options={{ headerStyle: { backgroundColor: '#292928' }, headerTintColor: 'white', headerTitleStyle: { color: 'white' }, headerTitle: 'Profile' }} />
                 </Stack.Navigator>
             </NavigationContainer>
         )

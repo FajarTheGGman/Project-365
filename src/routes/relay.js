@@ -76,13 +76,14 @@ route.post('/update', (req,res) => {
                         if(err){
                             res.json({ error: '[!] Something wrong in server' }).status(501)
                         }else{
-                            firebase.database().ref('/relay/' + token.username + '/' + relay[0].id).update({
+                            res.json({ success: '[+] Successfully updated status' })
+                            /*firebase.database().ref('/relay/' + token.username + '/' + relay[0].id).update({
                                 status: req.body.status
                             }).then(() => {
                                 res.json({ success: '[+] Successfully updated status' })
                             }).catch(err => {
                                 res.json({ error: '[!] Something wrong in server' }).status(501)
-                            })
+                            })*/
                         }
                     })
                 }

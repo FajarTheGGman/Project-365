@@ -26,7 +26,8 @@ export default class ProfileOffline extends Component{
             machineDetailsName: null,
             machineDetailsIP: null,
             machineDetailsStatus: null,
-            machineIndex: null
+            machineIndex: null,
+            machineStatus: null
         }
 
         this.data = [
@@ -38,15 +39,21 @@ export default class ProfileOffline extends Component{
         this.state.machine.splice(this.state.machineIndex, 1)
         AsyncStorage.setItem('machine', JSON.stringify(this.state.machine))
         this.setState({ machineDetails: false })
-        this.refresh()
     }
 
     async addmachine(){
         await AsyncStorage.removeItem('machine')
-        const data = {
+        await axios.get('http://' + this.state.addmachineIP).then(response => {
+            this.setState({ machineStatus: 'ONLINE' })
+        }).catch(err => {
+            console.log(err)
+            this.setState({ machineStatus: 'OFFLINE' })
+            alert('[!] Error Connecting To Machine')
+        })
+        let data = {
             name: this.state.addmachineName,
             ip: this.state.addmachineIP,
-            status: 'ONLINE'
+            status: this.state.machineStatus
         }
 
         await this.setState({ machine: this.state.machine.concat(data) })
@@ -59,6 +66,16 @@ export default class ProfileOffline extends Component{
             this.setState({ username: data })
         })
 
+        AsyncStorage.getItem('myserver').then(server => {
+            AsyncStorage.getItem('token').then(token => {
+                axios.post(server + 'auth/getall', { token: token, secret: konfigurasi.key }).then(res => {
+                    this.setState({
+                        username: res.data.result.username,
+                        since: res.data.result.since
+                    })
+                })
+            })
+        })
 
         AsyncStorage.getItem('machine').then(data => {
             const parse = JSON.parse(data)
@@ -67,13 +84,10 @@ export default class ProfileOffline extends Component{
                 this.setState({ machine: [] })
             }else{
                 this.setState({ machine: this.state.machine.concat(parse) })
+                this.setState({ totalMachine: this.state.machine.length })
             }
         })
 
-
-        const totalMachine = this.state.machine.length
-
-        this.setState({ totalMachine: totalMachine })
     }
 
     refresh(){
@@ -98,12 +112,13 @@ export default class ProfileOffline extends Component{
         this.setState({ totalMachine: totalMachine })
     }
 
-    machineDetails(name, ip, index){
+    machineDetails(name, ip, index, status){
         this.setState({
             machineDetailsName: name,
             machineDetailsIP: ip,
             machineDetails: true,
-            machineIndex: index
+            machineIndex: index,
+            machineStatus: status
         })
     }
 
@@ -156,7 +171,7 @@ export default class ProfileOffline extends Component{
                                 <Image source={require('../assets/icons/machine.png')} style={{ width: 100, height: 100, marginTop: 10 }} />
                                 <Text style={{ marginTop: 10, fontWeight: 'bold' }}>{this.state.machineDetailsName}</Text>
                                 <Text style={{ marginTop: 10 }}>IP : <Text style={{ fontWeight: 'bold' }}>{this.state.machineDetailsIP}</Text></Text>
-                                <Text style={{ marginTop: 10 }}>Status : <Text style={{ color: 'green' }}>ONLINE</Text></Text>
+                                <Text style={{ marginTop: 10 }}>Status : {this.state.machineStatus == "ONLINE" ? <Text style={{ color: 'green' }}>{this.state.machineStatus}</Text> : <Text style={{ color: 'red' }}>{this.state.machineStatus}</Text> }</Text>
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'red', padding: 5, borderRadius: 5 }} onPress={() => this.machinedelete()}>
                                     <Text style={{ fontWeight: 'bold' }}>Delete</Text>
                                 </TouchableOpacity>
@@ -187,6 +202,7 @@ export default class ProfileOffline extends Component{
 
                         <View style={{ flexDirection: 'column', marginLeft: 25, alignItens: 'center' }}>
                             <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 17 }}>Board</Text>
+                            <Text style={{ marginTop: 10, textAlign: 'center', fontSize: 17, color: 'white' }}>ESP8266</Text>
                         </View>
                     </View>
                 </View>
@@ -204,13 +220,13 @@ export default class ProfileOffline extends Component{
                             <Text style={{ color: 'white' }}>There is no machine</Text>
                             <Text style={{ color: 'white' }}>Plz add the machine!</Text>
                                 </View> : this.state.machine.map((x,y) => {
-                        return <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', width: 150, marginTop: 10 }} onPress={() => this.machineDetails(x.name, x.ip, y)}>
+                        return <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', width: 150, marginTop: 10 }} onPress={() => this.machineDetails(x.name, x.ip, y, x.status)}>
                             <View>
                                 <Text style={{ color: 'white' }}>{x.name}</Text>
                             </View>
 
                             <View>
-                                <Text style={{ color: 'white', color: 'green' }}>{x.status}</Text>
+                                {x.status == 'ONLINE' ? <Text style={{ color: 'white', color: 'green' }}>{x.status}</Text> : <Text style={{ color: 'white', color: 'red' }}>{x.status}</Text> }
                             </View>
                         </TouchableOpacity>
                         })}
