@@ -1,6 +1,6 @@
  // React Components
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
+import { View, TouchableOpacity, CameraRoll, Text, Switch, Image, TextInput, FlatList, AsyncStorage, ScrollView, RefreshControl, Button, Picker, AppRegistry, ImageBackground } from 'react-native'
 
 import { StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -11,6 +11,7 @@ import * as Notif from 'expo-notifications'
 import { Gyroscope } from 'expo-sensors'
 import * as Network from 'expo-network'
 import * as Battery from 'expo-battery'
+import * as Updates from 'expo-updates'
 
 // Random Package
 import axios from 'axios'
@@ -18,12 +19,14 @@ import Modal from 'react-native-modal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Loading from 'react-native-loading-spinner-overlay'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import GridList from 'react-native-grid-list'
 import { BarCodeScanner } from 'expo-barcode-scanner'
 import Radio from 'react-native-simple-radio-button'
 import { LinearGradient } from 'expo-linear-gradient'
 import SwipeUpDown from 'react-native-swipe-modal-up-down'
 import * as Animasi from 'react-native-animatable'
+import base64 from 'react-native-base64'
+import QRCode from 'react-native-qrcode-svg'
+import * as Speech from 'expo-speech'
 
 // Configurations
 import konfigurasi from '../config'
@@ -43,23 +46,54 @@ export default class Home extends Component{
 
         this.state = {
             wellcome: false,
-            low: false
+            low: false,
+            update: false,
+            nomachine_alert: false
         }
     }
 
     async componentDidMount(){
-            await this.battery()
-            AsyncStorage.setItem('mode', 'offline');
-            try{
-                if(this.props.route.params.type == 'offline'){
-                    AsyncStorage.setItem('offline', true)
-                    this.setState({ wellcome: true })
-                }
-            }catch(e){
-            
+        await this.battery()
+       // const update = await Updates.checkForUpdateAsync()
+        AsyncStorage.setItem('mode', 'offline');
+
+        AsyncStorage.getItem(konfigurasi.version).then(data => {
+            if(data == null || data == undefined){
+                this.setState({ update: true })
+            }else{
+                this.setState({ update: false })
             }
+        })
 
+        AsyncStorage.getItem('machine').then(data =>  {
+            if(data.length == 2){
+                this.setState({ nomachine_alert: true })
+            }
+        })
 
+        try{
+            if(this.props.route.params.type == 'offline'){
+                AsyncStorage.setItem('offline', true)
+                this.setState({ wellcome: true })
+            }
+        }catch(e){
+
+        }
+    }
+
+    closeupdate(){
+        AsyncStorage.setItem(konfigurasi.version, 'yes')
+        this.setState({ update: false })
+    }
+
+    async notif(title, body){
+        await Notif.scheduleNotificationAsync({
+            content: {
+                title: title,
+                body: body
+            },
+            trigger: { seconds: 1 }
+        })
     }
 
     async battery(){
@@ -76,6 +110,52 @@ export default class Home extends Component{
         const Tabs = createBottomTabNavigator();
         return(
             <View style={{ flex: 1, backgroundColor: '#292928' }}>
+                <Modal isVisible={this.state.update}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 10, }}>
+                            <TouchableOpacity style={{ flexDirection: 'row', alignSelf: 'flex-end', marginRight: -5, marginTop: -5 }} onPress={() => this.closeupdate()}>
+                                <Icon name='close-outline' size={30}/>
+                            </TouchableOpacity>
+
+                            <View style={{ alignItems: 'center', marginTop: 5 }}>
+                                <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 16 }}>Updates Available!</Text>
+
+                                <Image source={require('../assets/illustrations/update.png')} style={{ width: 120, height: 120, marginTop: 10 }} />
+
+                                <View style={{ alignItems: 'center' }}>
+                                    <Text>App has updated to version 1.2.5</Text>
+                                    <Text>So, Whats new ?</Text>
+
+                                    <View style={{ marginTop: 10, alignItems: 'center' }}>
+                                        <Text style={{ fontWeight: 'bold' }}>- Bug Fix</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Update Sensor Mode</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>- Fix Machine Mode</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.nomachine_alert}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center', paddingLeft: 12, paddingRight: 12 }}>
+                            <TouchableOpacity style={{ alignSelf: 'flex-end' }} onPress={() => this.setState({ nomachine_alert: false })}>
+                                <Icon name="close-outline" size={30} />
+                            </TouchableOpacity>
+                            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>There's no machine!</Text>
+                            <Image source={require('../assets/illustrations/offline.png')} style={{ width: 130, height: 120, marginTop: 10 }} />
+                            <Text>Hi dude, There's no machine left,</Text>
+                            <Text>Plz adding the machine </Text>
+                            <Text>by clicking this button</Text>
+
+                            <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 5, backgroundColor: 'black', elevation: 15 }} onPress={() => this.props.navigation.navigate('ProfileOffline')}>
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Add Machine</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
                 <Modal isVisible={this.state.low}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 15, alignItems: 'center' }}>
@@ -114,8 +194,6 @@ export default class Home extends Component{
                         icons = 'home-outline'
                     }else if(route.name == 'Barcode'){
                         icons = 'qr-code-outline'
-                    }else if(route.name == 'Code'){
-                        icons = 'code-slash-outline'
                     }else if(route.name == 'Settings'){
                         icons = 'settings-outline'
                     }
@@ -125,7 +203,6 @@ export default class Home extends Component{
             })}>
                 <Tabs.Screen name='Home' component={HomePage} />
                 <Tabs.Screen name='Barcode' component={Barcode} />
-                <Tabs.Screen name="Code" component={Code }/>
                 <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
             </View>
@@ -209,17 +286,18 @@ class Settings extends Component{
             ip: null,
             localip: null,
             type: null,
-            offline: false
+            offline: false,
+            authors: false
         }
     }
 
     logout(){
         AsyncStorage.removeItem('mode')
-        AsyncStorage.removeItem('token').then(respon => {
-            this.props.navigation.dispatch(
-                StackActions.replace('Home')
-            )
-        })
+        AsyncStorage.removeItem('localip')
+        AsyncStorage.removeItem('name')
+        this.props.navigation.dispatch(
+            StackActions.replace('Banner')
+        )
     }
 
     async componentDidMount(){
@@ -276,8 +354,9 @@ class Settings extends Component{
     }
 
     Online(){
+        AsyncStorage.setItem('mode', 'online')
         this.props.navigation.dispatch(
-            StackActions.replace('Banner', { type: 'online' })
+            StackActions.replace('Home', { type: 'online' })
         )
     }
 
@@ -303,6 +382,28 @@ class Settings extends Component{
                                 <Text>📶 Connection : {this.state.connection ? <Text>✅</Text> : <Text>🚫</Text>}</Text>
                                 <Text style={{ marginTop: 10 }}>📡Internet : {this.state.connection_internet ? <Text>✅</Text> : <Text>🚫</Text>}</Text>
                                 <Text style={{ marginTop: 10 }}>🌐Type Connection: {this.state.connection_type == 'NetworkStateType.CELLULAR' ? <Text>Cellular</Text> : <Text>WIFI</Text>}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.authors}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 5, alignItems: 'center', }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Authors</Text>
+                            
+                            <Image source={require('../assets/icons/author.jpeg')} style={{ width: 100, height: 100, borderRadius: 10, marginTop: 10 }} />
+
+                            <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 5 }}>
+                                <Text style={{ marginTop: 3, fontWeight: 'bold' }}>My Social Media</Text>
+                                <Text style={{ marginTop: 5 }}>Github: FajarTheGGman</Text>
+                                <Text>IG: @FajarTheGGman</Text>
+                                <Text>Twitter: @kernel024</Text>
+                                <Text>Web: fajarfirdaus.now.sh</Text>
+
+                                <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ authors: false })}>
+                                    <Text style={{ color: 'white' }}>Close</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </View>
@@ -367,28 +468,32 @@ class Settings extends Component{
                 </View>
 
                 <ScrollView style={{ marginTop: 35 }}>
-                    <View style={{ flexDirection: 'column' }}>
-                        {this.state.offline ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
-                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
-                        </TouchableOpacity>}
+                    <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <View>
+                            {this.state.offline ? <View></View> : <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Online()}>
+                                <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'green' }}> ONLINE</Text></Text>
+                            </TouchableOpacity>}
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
-                            <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
+                                <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ settings_network: true })}>
-                            <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ settings_network: true })}>
+                                <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
-                            <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ authors: true })}>
+                                <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>😐 Authors</Text>
+                            </TouchableOpacity>
+                        </View>
 
-                        {this.state.offline ? <TouchableOpacity style={{ marginTop: 200, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
-                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Exit</Text>
-                        </TouchableOpacity> : <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
-                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
-                        </TouchableOpacity> }
+                        <View style={{ marginTop: 250 }}>
+                            {this.state.offline ? <TouchableOpacity style={{ backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Exit</Text>
+                            </TouchableOpacity> : <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
+                            </TouchableOpacity> }
+                        </View>
                     </View>
                 </ScrollView>
             </View>
@@ -403,7 +508,8 @@ class Barcode extends Component{
 
         this.state = {
             camera: false,
-            scan: false
+            scan: false,
+            error: false
         }
     }
 
@@ -417,35 +523,90 @@ class Barcode extends Component{
     }
 
     scan(x){
-        AsyncStorage.getItem('localip').then(localip => {
             (async() => {
+                const decrypt = base64.decode(x)
+                const parse = JSON.parse(decrypt)
                 this.setState({ loading: true })
-                await axios.get('http://' + localip + '/' + x).then(data => {
-                    if(data.status == 200){
-                        this.setState({ loading: false })
-                        alert('Done!')
-                    }
-                })
+                if(parse.type_sensor == 'lock.png'){
+                    axios.get('http://' + parse.machine + parse.url).then(data => {
+                        if(data.status == 200){
+                            alert(parse.name + ' is opening')
+                        }else{
+                            this.setState({ error: true })
+                        }
+                    })
+                    setInterval(() => {
+                        axios.get('http://' + parse.machine + parse.url + 'die').then(data => {
+                            if(data.status == 200){
+                                this.setState({ loading: false })
+                                alert(parse.name + ' is closing')
+                            }else{
+                                this.setState({ error: true })
+                            }
+                        }).catch(err => {
+                            this.setState({ error: true })
+                        })
+                    }, 5000)
+                }else{
+                    axios.get('http://' + parse.machine + parse.url).then(data => {
+                        if(data.status == 200){
+                            this.setState({ loading: false })
+                            if(parse.type){
+                                alert(parse.name + ' is on')
+                            }else{
+                                alert(parse.name + ' is off')
+                            }
+                        }else{
+                            this.setState({ error: true })
+                        }
+                    }).catch(err => {
+                        this.setState({ error: true })
+                    })
+                }
             })()
-        })
     }
 
     render(){
         return(
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#292928' }}>
-                <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white', fontWeight: 'bold' }}/>
-                <Text style={{ textAlign: 'center', color: 'white', fontWeight: 'bold', fontSize: 19 }}>Barcode Scanner</Text>
-                <View style={{ paddingLeft: 8, marginTop: 10, paddingRight: 8, paddingTop: 20, paddingBottom: 20, borderRadius: 15, backgroundColor: 'black', elevation: 15 }}>
-                    <BarCodeScanner onBarCodeScanned={ this.state.scan ? undefined : ({ type, data }) => {
+            <BarCodeScanner onBarCodeScanned={ this.state.scan ? undefined : ({ type, data }) => {
                         this.scan(data)
                         this.setState({ scan: true })
-                    } } style={{ width: 300, height: 300, justifyContent: 'center', marginTop: 5 }}/>
-                </View>
+            } } style={{ flex: 1, backgroundColor: '#292928', justifyContent: 'center', marginTop: 5 }}>
+                <Modal isVisible={this.state.error}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ padding: 10, borderRadius: 10, backgroundColor: 'white', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17, color: 'red' }}>QR Code Denied !</Text>
+                            <Image source={require('../assets/illustrations/denied.png')} style={{ width: 160, height: 150, marginTop: 10 }} />
+                            <Text style={{ marginTop: 7 }}>QR Code was denied by application</Text>
+                            <Text>Try creating again using</Text>
+                            <Text>qr code generator in Home Menu</Text>
 
-                { this.state.scan ? <TouchableOpacity style={{ backgroundColor: 'black', elevation: 15, borderRadius: 15, padding: 10, marginTop: 10 }} onPress={() => this.setState({ scan: false })}>
-                    <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>Scan Again</Text>
-                </TouchableOpacity> : <Text></Text> }
-            </View>
+                            <TouchableOpacity style={{ marginTop: 10, padding: 5, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ error: false })}>
+                                <Text style={{ color: 'white' }}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 200 }}>
+                        <View style={{ padding: 15, backgroundColor: 'none', borderLeftWidth: 5, borderTopWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+
+                        <View style={{ padding: 15, backgroundColor: 'none', borderRightWidth: 5, borderTopWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+                    </View>
+
+                    <View style={{ justifyContent: 'center', marginTop: 50, marginBottom: 50 }}>
+                        { this.state.scan ? <TouchableOpacity style={{ backgroundColor: 'white', padding: 10, borderRadius: 5 }} onPress={() => this.setState({ scan: false })}><Text>Retry</Text></TouchableOpacity> : 
+                        <Text style={{ fontSize: 17, fontWeight: "bold" }}>Scan Here!</Text> }
+                    </View>
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 200 }}>
+                        <View style={{ padding: 15, backgroundColor: 'none', borderLeftWidth: 5, borderBottomWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+
+                        <View style={{ padding: 15, backgroundColor: 'none', borderRightWidth: 5, borderBottomWidth: 5, borderRadius: 5, borderColor: 'white' }}></View>
+                    </View>
+                </View>
+            </BarCodeScanner>
         )
     }
 }
@@ -466,6 +627,8 @@ class HomePage extends Component{
             serial_url: null,
             serial_details: false,
             serial_data: null,
+            serial_index: null,
+            serial_type: true,
             loading: false,
             refresh: false,
             name: null,
@@ -512,7 +675,18 @@ class HomePage extends Component{
             moduleUrlOff: null,
             moduleIndex: null,
             uri_on: null,
-            uri_off: null
+            uri_off: null,
+            newRelay: null,
+            qr_generator: null,
+            qr_generator_popup: false,
+            qr_result: false,
+            qr_type: true,
+            author: false,
+            machine: [],
+            machineIP: null,
+            machineDetailsIP: null,
+            not_available: false,
+            door_open: false,
         }
     }
 
@@ -550,8 +724,9 @@ class HomePage extends Component{
             relay_status: false,
             relay_pin: this.state.relay_pin,
             type_button: this.state.relay_button_type,
-            uri_on: this.state.uri_on,
-            uri_off: this.state.uri_off
+            machineIP: this.state.machine.length == 1 ? this.state.machine[0].ip : this.state.machineIP,
+            uri_on: '/' + this.state.uri_on,
+            uri_off: '/' + this.state.uri_on + 'die'
         }
 
         this.setState({ data_offline: this.state.data_offline.concat(actual_data) })
@@ -563,7 +738,9 @@ class HomePage extends Component{
     addSerial(){
         const actual_data = {
             name: this.state.serial_name,
-            url: this.state.serial_url
+            url: this.state.serial_url,
+            machineIP: this.state.machineIP,
+            type: this.state.serial_type
         }
 
         this.setState({ data_serial: this.state.data_serial.concat(actual_data) })
@@ -595,6 +772,16 @@ class HomePage extends Component{
             }
         })
 
+        AsyncStorage.getItem('machine').then(data => {
+            let parsing = JSON.parse(data)
+            if(parsing == null){
+                this.setState({ machine: [] })
+            }else{
+                this.setState({ machine: [] })
+                this.setState({ machine: this.state.machine.concat(parsing) })
+                this.setState({ machineIP: this.state.machine[0].ip })
+            }
+        })
 
 
         AsyncStorage.getItem('serial_offline').then(data => {
@@ -634,7 +821,9 @@ class HomePage extends Component{
         let waktu = new Date();
         let jam = waktu.getHours();
 
-        if(jam == 1){
+        if(jam == 0){
+            this.setState({ waktu: 'Good Night' })
+        }else if(jam == 1){
             this.setState({ waktu: 'Good Night' })
         }else if(jam == 2){
             this.setState({ waktu: 'Good Night' })
@@ -691,11 +880,23 @@ class HomePage extends Component{
             this.setState({ name: data })
         })
 
+        AsyncStorage.getItem('machine').then(data => {
+            let parsing = JSON.parse(data)
+            if(parsing == null){
+                this.setState({ machine: [] })
+            }else{
+                this.setState({ machine: [] })
+                this.setState({ machine: this.state.machine.concat(parsing) })
+                this.setState({ machineIP: this.state.machine[0].ip })
+            }
+        })
+
         AsyncStorage.getItem('relay_offline').then(data => {
             let parsing = JSON.parse(data)
             if(parsing == null){
                 this.setState({ data_offline: [] })
             }else{
+                this.setState({ data_offline: [] })
                 this.setState({ data_offline: this.state.data_offline.concat(parsing) })
             }
         })
@@ -740,51 +941,51 @@ class HomePage extends Component{
         let jam = waktu.getHours();
 
         if(jam == 1){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 2){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 3){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 4){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 5){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 6){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 7){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 8){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 9){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 10){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Pagi' })
         }else if(jam == 11){
-            this.setState({ waktu: "Good Morning" })
+            this.setState({ waktu: "Selamat Siang" })
         }else if(jam == 12){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Siang' })
         }else if(jam == 13){
-            this.setState({ waktu: 'Good Morning' })
+            this.setState({ waktu: 'Selamat Siang' })
         }else if(jam == 14){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 15){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 16){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 17){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 18){
-            this.setState({ waktu: 'Good Afternoon' })
+            this.setState({ waktu: 'Selamat Sore' })
         }else if(jam == 19){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 20){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 21){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 22){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }else if(jam == 23){
-            this.setState({ waktu: 'Good Night' })
+            this.setState({ waktu: 'Selamat Malam' })
         }
         this.setState({ loading: false })
     }
@@ -794,14 +995,20 @@ class HomePage extends Component{
         this.setState({ date: true })
     }
 
-    moduleDetail(ThisName, url_on, url_off, index){
-        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index })
+    module_delete(){
+        this.state.data_offline.splice(this.state.moduleIndex, 1)
+        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
+        this.setState({ moduleDetail: false })
+        this.refresh_relay()
+    }
+
+    moduleDetail(ThisName, url_on, url_off, index, machineIP){
+        this.setState({ moduleDetail: true, moduleName: ThisName, moduleUrlOn: url_on, moduleUrlOff: url_off, moduleIndex: index, machineDetailsIP: machineIP })
     }
 
     moduleUpdate(index){
         this.state.data_offline[this.state.moduleIndex].name = this.state.moduleName;
-        this.state.data_offline[this.state.moduleIndex].uri_on = this.state.moduleUrlOn;
-        this.state.data_offline[this.state.moduleIndex].uri_off = this.state.moduleUrlOff;
+        this.state.data_offline[this.state.moduleIndex].uri_on = this.state.newRelay;
         AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
         alert('Data Updated!')
     }
@@ -830,12 +1037,12 @@ class HomePage extends Component{
     }
 
     refresh_relay(){
-        this.setState({ data_offline: [] })
         AsyncStorage.getItem('relay_offline').then(data => {
             let parse = JSON.parse(data)
             if(parse == null){
                 this.setState({ data_offline: [] })
             }else{
+                this.setState({ data_offline: [] })
                 this.setState({ data_offline: this.state.data_offline.concat(parse) })
             }
         })
@@ -856,26 +1063,40 @@ class HomePage extends Component{
         })
     }
 
-    serial_details(name, url){
-        AsyncStorage.getItem('localip').then(localip => {
-            (async() => {
-                this.setState({ loading: true })
-                await axios.get('http://' + localip + url).then(data => {
-                    if(data.status == 200){
-                        this.setState({ serial_data: data })
-                        this.setstate({ loading: false })
-                        this.setState({ serial_details: true })
-                    }else{
-                        alert('[!] Url Sensor not found')
-                        this.setstate({ loading: false })
-                    }
-                })
-            })()
-       })
+    async serial_details(name, url, index, machineIP, type){
+        const actual_data = this.state.data_serial[index]
+
+        if(actual_data.type == true){
+            this.setState({ loading: true })
+            await axios.post('http://' + actual_data.machineIP + url).then(data => {
+                this.setState({ serial_data: data.data, serial_index: index })
+                this.setState({ serial_details: true, loading: false })
+            }).catch(err => {
+                this.setState({ loading: false })
+                this.setState({ serial_data: 'error server' })
+                this.setState({ serial_details: true })
+            })
+        }else{
+            this.setState({ loading: true })
+            await axios.get('http://' + actual_data.machineIP + url).then(data => {
+                this.setState({ serial_data: data.data, serial_index: index })
+                this.setState({ serial_details: true, loading: false })
+            }).catch(err => {
+                this.setState({ loading: false })
+                this.setState({ serial_data: 'error server' })
+                this.setState({ serial_details: true })
+            })
+        }
+
     }
 
-    switch(index, status, url, pin, uri_on, uri_off){
-        AsyncStorage.getItem('localip').then(localip => {
+    serial_delete(index){
+        this.state.data_serial.splice(index, 1)
+        AsyncStorage.setItem('serial_offline', this.state.data_serial)
+        this.setState({ serial_details: false })
+    }
+
+    switch(index, status, url, pin, uri_on, uri_off, machineIP){
             let get_status = this.state.data_offline[index].relay_status
             let get_name = this.state.data_offline[index].name
             this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
@@ -883,11 +1104,12 @@ class HomePage extends Component{
             if(get_status){
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_off).then(x => {
+                    await axios.post('http://' + machineIP + uri_on + 'die').then(x => {
                         if(x.status != 200){
-                            alert('Error')
+                            this.setState({ error_server: true })
                         }
-                        this.notif('Turning OFF', get_name + ' is now OFF')
+                        this.notif('Turning OFF', 'Hei ' + this.state.name + ', '+ get_name + ' is now OFF')
+                        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -899,11 +1121,12 @@ class HomePage extends Component{
             }else{
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_on).then(x => {
+                    await axios.post('http://' + machineIP + uri_on).then(x => {
                         if(x.status != 200){
-                            alert('Error')
+                            this.setState({ error_server: false })
                         }
-                        this.notif('Turning ON', get_name + ' is now ON')
+                        this.notif('Turning ON', 'Hei ' + this.state.name + ', ' + get_name + ' is now ON')
+                        AsyncStorage.setItem('relay_offline', JSON.stringify(this.state.data_offline))
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -912,11 +1135,29 @@ class HomePage extends Component{
                     this.setState({ loading: false }) 
                 })()
             }
-        })
     }
 
-    clicker(index, status, url, pin, uri_on, uri_off){
-        AsyncStorage.getItem('localip').then(localip => {
+    unlock(index){
+        let data = this.state.data_offline[index]
+
+            this.setState({ loading: true })
+            axios.post('http://' + data.machineIP + data.uri_on).then(response => {
+                this.setState({ door_open: true })
+            }).catch(err => {
+                this.setState({ loading: false, error_server: true })
+            })
+
+            setTimeout(() => {
+                axios.post('http://' + data.machineIP + data.uri_off).then(response => {
+                    this.setState({ door_open: false })
+                }).catch(err => {
+                    this.setState({ loading: false, error_server: true })
+                })
+            }, 10000)
+            this.setState({ loading: false })
+    }
+
+    clicker(index, status, url, pin, uri_on, uri_off, machineIP){
             let get_status = this.state.data_offline[index].status
             let get_name = this.state.data_offline[index].name
             this.state.data_offline[index].relay_status = !this.state.data_offline[index].relay_status
@@ -925,10 +1166,11 @@ class HomePage extends Component{
             if(get_status){
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_on).then(x => {
-                        if(x.status == 200){
-                            alert('Done')
+                    await axios.get('http://' + machineIP + uri_on).then(x => {
+                        if(x.status != 200){
+
                         }
+                        this.notif('Turning ON', 'Hei ' + this.state.name + ', ' + get_name + ' is turning on')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -937,13 +1179,13 @@ class HomePage extends Component{
                     this.setState({ loading: false }) 
                 })()
            }else{
-
                 (async() => {
                     this.setState({ loading: true })
-                    await axios.get('http://' + localip + uri_off).then(x => {
-                        if(x.status == 200){
-                            alert('Done')
+                    await axios.get('http://' + machineIP + uri_on + 'die').then(x => {
+                        if(x.status != 200){
+
                         }
+                        this.notif('Turning OFF', 'Hei ' + this.state.name + ', ' + get_name + ' is turning off')
                     }).catch(err => {
                         if(err){
                             this.setState({ loading: false, error_server: true })
@@ -952,7 +1194,6 @@ class HomePage extends Component{
                     this.setState({ loading: false }) 
                 })()
            }
-        })
     }
 
     list(){
@@ -962,6 +1203,71 @@ class HomePage extends Component{
     }
 
 
+    save_qr(){
+        this.svg.toDataURL(async (data) => {
+
+        })
+    }
+
+    result_qr(index, type){
+        if(index == null){
+            if(type == true){
+                const raw_data = this.state.data_offline[0]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    machine: raw_data.machineIP,
+                    url: raw_data.uri_on,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
+            }else{
+                const raw_data = this.state.data_offline[0]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    machine: raw_data.machineIP,
+                    url: raw_data.uri_off,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
+            }
+        }else{
+            if(type == true){
+                const raw_data = this.state.data_offline[index]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    machine: raw_data.machineIP,
+                    url: raw_data.uri_on,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
+            }else{
+                const raw_data = this.state.data_offline[index]
+                const data = {
+                    name: raw_data.name,
+                    type_sensor: raw_data.type,
+                    type: type,
+                    machine: raw_data.machineIP,
+                    url: raw_data.uri_off,
+                    message: "Hey dude, what you gonna do with this data ?"
+                }
+                const parse = JSON.stringify(data)
+                const encode = base64.encode(parse)
+                this.setState({ qr_code: encode, qr_result: true, qr_generator_popup: false })
+            }
+        }
+    }
 
     render(){
         return(
@@ -969,6 +1275,102 @@ class HomePage extends Component{
                 <Loading visible={this.state.loading} textContent={"Please Wait..."} textStyle={{ color: 'white' }} />
 
                 <Loading visible={this.state.getcontent} textContent={"Downloading Content..."} textStyle={{ color: "white" }} />
+
+                <Modal isVisible={this.state.not_available}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ padding: 10, borderRadius: 10, backgroundColor: 'white', borderRadius: 5, alignItems: 'center', paddingLeft: 15, paddingRight: 15 }}>
+                            <TouchableOpacity style={{ alignSelf: 'flex-end', marginRight: -5 }} onPress={() => this.setState({ not_available: false })}>
+                                <Icon name='close-outline' size={30} />
+                            </TouchableOpacity>
+
+                            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Not Available Yet</Text>
+                            <Image source={require('../assets/illustrations/bug.png')} style={{ width: 150, marginTop: 10, height: 100 }} />
+                            <Text>This Feature still in development,</Text>
+                            <Text>Could be updated soon !</Text>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.author}>
+                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 5, alignItems: 'center', }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Authors</Text>
+                            
+                            <Image source={require('../assets/icons/author.jpeg')} style={{ width: 100, height: 100, borderRadius: 10, marginTop: 10 }} />
+
+                            <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 5 }}>
+                                <Text style={{ marginTop: 3, fontWeight: 'bold' }}>My Social Media</Text>
+                                <Text style={{ marginTop: 5 }}>Github: FajarTheGGman</Text>
+                                <Text>IG: @FajarTheGGman</Text>
+                                <Text>Twitter: @kernel024</Text>
+                                <Text>Web: fajarfirdaus.now.sh</Text>
+
+                                <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 5, backgroundColor: 'grey' }} onPress={() => this.setState({ author: false })}>
+                                    <Text style={{ color: 'white' }}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.door_open}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold' }}>Opening The Door</Text>
+                            <Image source={require('../assets/illustrations/login.png')}  style={{ width: 140, height: 100, marginTop: 10 }}/>
+                            <Text style={{ marginTop: 5 }}>Door Is Opening</Text>
+                            <Text>In 10 Seconds</Text>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.qr_result}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: -5, marginLeft: 5 }}>
+                                <TouchableOpacity onPress={() => this.setState({ qr_result: false })}>
+                                    <Icon name='close-outline' size={30} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={{ fontWeight: 'bold', marginTop: 10, fontSize: 16 }}>Result QR Code</Text>
+                            
+                            <View style={{ marginTop: 25 }}>
+                                <QRCode value={this.state.qr_code} logo={require('../assets/icon.png')} size={120} getRef={(x) => (this.svg = x)} />
+                            </View>
+
+                            <TouchableOpacity style={{ marginTop: 25, padding: 5, backgroundColor: 'black', borderRadius: 5 }} onPress={() => this.save_qr()}>
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Save</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal isVisible={this.state.qr_generator_popup}>
+                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center',justifyContent: 'center' }}>
+                        <View style={{ padding: 15, backgroundColor: 'white', borderRadius: 5, alignItems: 'center' }}>
+                            <TouchableOpacity style={{ alignSelf: 'flex-end', marginTop: -3 }} onPress={() => this.setState({ qr_generator_popup: false })}>
+                                <Icon name='close-outline' size={30} />
+                            </TouchableOpacity>
+
+                            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>QR Code Generator</Text>
+                            <Image source={require('../assets/icons/qr.png')} style={{ width: 80, height: 80, marginTop: 10 }} />
+
+                            <Text style={{ marginTop: 20 }}>Select Devices</Text>
+                            <Picker selectedValue={this.state.qr_generator} onValueChange={(val) => this.setState({ qr_generator: val })} style={{ width: 100, height: 50 }} style={{ width: 110 }}>
+                                {this.state.data_offline.map((x,y) => {
+                                    return <Picker.Item label={x.name} value={y} />
+                                })}
+                            </Picker>
+
+                            <Radio radio_props={[{ label: 'ON', value: true }, { label: "OFF", value: false }]}  buttonColor="black" formHorizontal={true} animation={true} onPress={(value) => this.setState({ qr_type: value }) } style={{ marginTop: 10, color: 'black' }} labelStyle={{ padding: 10, marginTop: -5 }} />
+
+                            <TouchableOpacity style={{ marginTop: 20, borderRadius: 5, backgroundColor: 'black', padding: 5 }} onPress={() => this.result_qr(this.state.qr_generator, this.state.qr_type)}>
+                                <Text style={{ fontWeight: 'bold', color: 'white' }}>Generate!</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
 
                 <Modal isVisible={this.state.error}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -1041,6 +1443,10 @@ class HomePage extends Component{
                                 <View style={{ backgroundColor: 'black', borderRadius: 5, padding: 13 }}>
                                     <Text style={{ color: 'white', fontWeight: 'bold' }}>{this.state.serial_data}</Text>
                                 </View>
+
+                                <TouchableOpacity style={{ marginTop: 10, backgroundColor: 'red', padding: 5, borderRadius: 5 }} onPress={() => this.serial_delete(this.state.serial_index)}>
+                                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Delete</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </View>
@@ -1059,6 +1465,7 @@ class HomePage extends Component{
                                         {this.state.scheduleButton ? <TouchableOpacity style={{ marginTop: 15, padding: 5, borderRadius: 10, backgroundColor: 'green' }} onPress={() => this.schedule(this.state.moduleName)}>
                                             <Text>Schedule</Text>
                                         </TouchableOpacity>:<View></View>}
+
                                     </View>
                                 </View>
 
@@ -1071,11 +1478,19 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <Text>Your Module : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleName}</Text></Text>
-                                <Text style={{ marginTop: 5 }}>URL on : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
-                                <Text style={{ marginTop: 5 }}>URL off : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOff}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>Relay : <Text style={{ fontWeight: 'bold' }}>{this.state.moduleUrlOn}</Text></Text>
+                                <Text style={{ marginTop: 5 }}>Machine IP : <Text style={{ fontWeight: 'bold' }}>{this.state.machineDetailsIP}</Text></Text>
+                                <TouchableOpacity style={{ marginTop: 15, padding: 5, backgroundColor: 'red', borderRadius: 10, elevation: 15 }} onPress={() => this.module_delete()}>
+                                    <Text>Delete</Text>
+                                </TouchableOpacity>
+
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Change Name ?" onChangeText={(val) => this.setState({ moduleName: val })} />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL on ?" onChangeText={(val) => this.setState({ moduleUrlOn: val })} />
-                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change URL off ?" onChangeText={(val) => this.setState({ moduleUrlOff: val })} />
+                                <TextInput style={{ marginTop: 5, textAlign: 'center' }} placeholder="Change Relay ?" onChangeText={(val) => this.setState({ newRelay: val })} />
+                                <Picker selectedValue={this.state.machineDetailsIP} onValueChange={(val) => this.setState({ machineDetailsIP: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
+                                    {this.state.machine.map((x, y) => {
+                                    return <Picker.Item label={x.name} value={x.ip} />
+                                    })}
+                                </Picker>
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.moduleUpdate(this.state.moduleIndex)}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Change IT!</Text>
                                 </TouchableOpacity>
@@ -1103,7 +1518,7 @@ class HomePage extends Component{
                                         </View>
                                     </View>
                                     { this.state.menu_mode ? this.state.data_serial.map((x, y) => {
-                                        return <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url)}>
+                                        return <TouchableOpacity style={{ flexDirection: 'row', backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.serial_details(x.name, x.url, y, x.machineIP, x.type)}>
                                             <View>
                                                 <Text style={{ color: 'white', fontWeight: 'bold' }}>{x.name}</Text>
                                             </View>
@@ -1113,13 +1528,15 @@ class HomePage extends Component{
                                             </View>
                                         </TouchableOpacity>
                                     }) : this.state.data_offline.map((x, y) => {
-                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y)}>
+                                    return <TouchableOpacity style={{ flexDirection: "row", backgroundColor: 'black', justifyContent: 'space-between', padding: 20, width: 280, marginTop: 19, borderRadius: 10 }} onPress={() => this.moduleDetail(x.name, x.uri_on, x.uri_off, y, x.machineIP)}>
                                         <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                                             {x.type == "lights.png" ? <Image source={require('../assets/category/lights.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} /> : <Image source={require('../assets/category/lock.png')} style={{ width: 50, height: 50, backgroundColor: 'white', padding: 5, borderRadius: 15 }} />}
-                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name}</Text>
+                                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginLeft: 10 }}>{x.name.length > 6 ? x.name.slice(0, 5)+'...' : x.name}</Text>
                                         </View>
                                         <View style={{ marginLeft: 50, marginTop: 12 }}>
-                                        {x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
+                                        {x.type == 'lock.png' ? <TouchableOpacity style={{ marginRight: 10 }} onPress={() => this.unlock(y)}>
+                                            <Icon name='lock-open-outline' size={25} color='white' />
+                                        </TouchableOpacity>: x.type_button ? <Switch trackColor={{ false: 'red', true: 'green' }} onValueChange={() => this.switch(y, x.relay_status, x.url, x.relay_pin, x.uri_on, x.uri_off, x.machineIP)} value={x.relay_status} /> : <View style={{ marginRight: 5 }}>
                                                 {x.relay_status ? <TouchableOpacity style={{ backgroundColor: 'red', borderRadius: 10, padding: 5 }} onPress={() => this.clicker(y, x.status, x.url, x.relay_pin, x.uri_on, x.uri_off, y)}>
                                                     <Text>Turn OFF</Text>
                                                 </TouchableOpacity> : <TouchableOpacity style={{ backgroundColor: 'green', padding: 5, borderRadius: 10 }} onPress={() => this.clicker(x.name, x.status)}>
@@ -1151,15 +1568,15 @@ class HomePage extends Component{
 
                             <View style={{ flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 10 }}>
-                                    <TouchableOpacity onPress={() => this.setState({ schedule: true, menu: false })}>
-                                        <Image source={require('../assets/icons/timer.png')} style={{ width: 70, height: 70 }} />
-                                        <Text style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>Schedule</Text>
+                                    <TouchableOpacity onPress={() => this.setState({ qr_generator_popup: true, menu: false })}>
+                                        <Image source={require('../assets/icons/qr.png')} style={{ width: 70, height: 70 }} />
+                                        <Text style={{ textAlign: 'center', color: 'blue', fontWeight: 'bold' }}>QR Generator</Text>
                                     </TouchableOpacity>
                                 </View>
 
                                 <View style={{ marginLeft: 20 }}>
                                     <View style={{ alignItems: 'center' }}>
-                                        <TouchableOpacity onPress={() => this.setState({ serial_information: true, menu: false })}>
+                                        <TouchableOpacity onPress={() => this.setState({ serial_information: true, not_available: false, menu: false })}>
                                             <Image source={require('../assets/icons/resistor.png')} style={{ width: 70, height: 70 }} />
                                             <Text style={{ fontWeight: 'bold', color: 'orange', textAlign: 'center' }}>Sensor Info</Text>
                                         </TouchableOpacity>
@@ -1197,7 +1614,14 @@ class HomePage extends Component{
                             
                             <View style={{ marginTop: 15, alignItems: 'center' }}>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Name" onChangeText={(val) => this.setState({ serial_name: val })} />
+                                    <Picker selectedValue={this.state.machineIP} onValueChange={(val) => this.setState({ machineIP: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
+                                        {this.state.machine.map((x, y) => {
+                                        return <Picker.Item label={x.name} value={x.ip} />
+                                        })}
+                                    </Picker>
                                 <TextInput style={{ marginTop: 10, textAlign: 'center' }} placeholder="Input URL" onChangeText={(val) => this.setState({ serial_url: val })} />
+                                <Radio radio_props={[{ label: 'POST', value: true }, { label: "GET", value: false }]}  buttonColor="black" formHorizontal={true} animation={true} onPress={(value) => this.setState({ serial_type: value }) } style={{ marginTop: 10, color: 'black' }} style={{ padding: 5 }} />
+
                                 <TouchableOpacity style={{ marginTop: 15, backgroundColor: 'black', borderRadius: 10, elevation: 15, padding: 7 }} onPress={() => this.addSerial()}>
                                     <Text style={{ fontWeight: 'bold', color: 'white' }}>Add</Text>
                                 </TouchableOpacity>
@@ -1264,8 +1688,14 @@ class HomePage extends Component{
                                         <Picker.Item label="Lights" value="lights.png" />
                                         <Picker.Item label="Lock" value="lock.png" />
                                     </Picker>
-                                    <TextInput placeholder="URI on" onChangeText={(val) => this.setState({ uri_on: val })} />
-                                    <TextInput placeholder="URI off" onChangeText={(val) => this.setState({ uri_off: val })} />
+
+                                    <Picker selectedValue={this.state.machineIP} onValueChange={(val) => this.setState({ machineIP: val })} style={{ marginLeft: -8, width: 110, height: 50 }}>
+                                        {this.state.machine.map((x, y) => {
+                                        return <Picker.Item label={x.name} value={x.ip} />
+                                        })}
+                                    </Picker>
+
+                                    <TextInput placeholder="Relay" onChangeText={(val) => this.setState({ uri_on: val })} />
                                 </View>
 
                                 <View style={{ flexDirection: 'column', marginLeft: 15, marginRight: -10 }}>
@@ -1354,7 +1784,7 @@ class HomePage extends Component{
                     </View>
 
                     <View style={{ marginLeft: 130, backgroundColor: 'black', elevation: 15, padding: 5, borderRadius: 10 }}>
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { status: 'offline' })}>
+                        <TouchableOpacity onPress={() => this.props.navigation.navigate('ProfileOffline') }>
                             <Image source={require('../assets/icons/profile.png')} style={{ width: 50, height: 50 }} />
                         </TouchableOpacity>
                     </View>
@@ -1382,7 +1812,9 @@ class HomePage extends Component{
                        </TouchableOpacity>
                    </View>
                 </View>
-                <Text style={{ color: 'orange', marginTop: 5 }}>You're in offline mode</Text>
+                <View style={{ marginTop: 10 }}>
+                    <Text style={{ color: 'orange' }}>Wellcome to offline mode</Text>
+                </View>
             </ScrollView>
         )
     }

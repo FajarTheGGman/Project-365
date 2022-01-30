@@ -8,6 +8,7 @@ import Login from './components/Login'
 import Register from './components/Register'
 import Home from './components/Home'
 import Profile from './components/Profile'
+import ProfileOffline from './components/Profile_Offline'
 import Banner from './components/Banner'
 import Guide from './components/Guide'
 import GuideOffline from './components/Guide_Offline'
@@ -18,7 +19,7 @@ export default class App extends Component{
         super(props)
 
         this.state = {
-            redirect: null
+            redirect: 'Banner'
         }
     }
 
@@ -38,7 +39,7 @@ export default class App extends Component{
         let Stack = createStackNavigator();
         return(
             <NavigationContainer>
-                <Stack.Navigator initialRouteName={/*this.state.redirect*/"Banner"}>
+                <Stack.Navigator initialRouteName={this.state.redirect}>
                     <Stack.Screen name="Banner" component={Banner} options={{ headerShown: false }} />
                     <Stack.Screen name='Login' component={Login} options={{ headerShown: false }}/>
                     <Stack.Screen name='Register' component={Register} options={{ headerStyle: { backgroundColor: '#292928' }, headerTitleStyle: { color: 'white' } }}/>
@@ -46,7 +47,8 @@ export default class App extends Component{
                     <Stack.Screen name='GuideOffline' component={GuideOffline} options={{ headerShown: false }} />
                     <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
                     <Stack.Screen name='Offline' component={Offline} options={{ headerShown: false }}/>
-                    <Stack.Screen name='Profile' component={Profile} options={{ headerStyle: { backgroundColor: '#292928', color: 'white' }, headerTitleStyle: { color: 'white' } }} />
+                    <Stack.Screen name='Profile' component={Profile} options={{ headerStyle: { backgroundColor: '#292928', color: 'white' }, headerTintColor: 'white', headerTitleStyle: { color: 'white' } }} />
+                    <Stack.Screen name='ProfileOffline' component={ProfileOffline} options={{ headerStyle: { backgroundColor: '#292928' }, headerTintColor: 'white', headerTitleStyle: { color: 'white' }, headerTitle: 'Profile' }} />
                 </Stack.Navigator>
             </NavigationContainer>
         )

@@ -12,6 +12,7 @@ const routeSettings = require('./routes/settings');
 const routeBoard = require('./routes/board');
 const routeSensor = require('./routes/sensor')
 const routeRelaySchedule = require('./routes/relay_schedule');
+const routeRealtime = require('./routes/relay_realtime');
 
 require('dotenv').config();
 
@@ -29,7 +30,7 @@ try{
 }
 
 app.use(file())
-//app.use(morgan())
+app.use(morgan())
 app.use(cors());
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }))
@@ -37,10 +38,10 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/board', routeBoard);
 app.use('/auth', routeAuth)
 app.use('/relay', routeRelay)
-//app.use('/ai', routeTensorflow)
 app.use('/settings', routeSettings)
 app.use('/schedule', routeRelaySchedule)
 app.use('/sensor', routeSensor)
+app.use('/relay-realtime', routeRealtime)
 
 app.get('/', (req, res) => {
   res.json({

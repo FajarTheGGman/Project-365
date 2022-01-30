@@ -4,10 +4,7 @@ let jwt = require('jsonwebtoken')
 let bcrypt = require('bcrypt')
 let modelUsers = require('../models/Users')
 let modelRelay = require('../models/Relay')
-
-route.get('/', (req,res) => {
-    res.json({ section: 'relay' })
-})
+let firebase = require('../../firebase_config.js')
 
 route.get('/get', (req,res) => {
     jwt.verify(req.query.token, req.query.secret, (err, token) => {
@@ -52,7 +49,6 @@ route.post('/updateMany', (req,res) => {
             name: req.body.name
         }, {
             name: req.body.newName,
-            url_offline: req.body.url
         }, (err, done) => {
             if(err){
                 res.json({ error: '[!] Something Wrong in Server' }).status(301)
@@ -76,7 +72,20 @@ route.post('/update', (req,res) => {
                     res.status(301)
                     res.json({ error: '[!] Something Wrong in server :(' })
                 }else{
-                    res.json({ success: '[+] Successfully updated status' })
+                    modelRelay.find({ username: token.username, name: req.body.name }, (err, relay) => {
+                        if(err){
+                            res.json({ error: '[!] Something wrong in server' }).status(501)
+                        }else{
+                            res.json({ success: '[+] Successfully updated status' })
+                            /*firebase.database().ref('/relay/' + token.username + '/' + relay[0].id).update({
+                                status: req.body.status
+                            }).then(() => {
+                                res.json({ success: '[+] Successfully updated status' })
+                            }).catch(err => {
+                                res.json({ error: '[!] Something wrong in server' }).status(501)
+                            })*/
+                        }
+                    })
                 }
             })
         }else if(req.query.type == 'name'){
@@ -123,12 +132,16 @@ route.post('/add', (req,res) => {
                 res.json({ warning: '[!] Username or password is wrong' })
             }
 
-            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, url_offline: req.body.url, timeout: req.body.timeout, type: req.body.relay_category, type_button: req.body.type_button, pin: req.body.pin }, (err, done) => {
+            modelRelay.insertMany({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, timeout: req.body.timeout, type: req.body.relay_category, type_button: req.body.type_button, pin: req.body.pin, id: req.body.id }, (err, done) => {
                 if(err){
                     res.status(301)
                     res.json({ error: '[!] Something Wrong in server :(' })
                 }else{
-                    res.json({ success: "[+] Relay successfully added" })
+                    firebase.database().ref('/relay/' + token.username + '/' + req.body.id).set({ username: token.username, name: req.body.name, timeout_time: req.body.timeout_time, timeout: req.body.timeout, type: req.body.relay_category, type_button: req.body.type_button, pin: req.body.pin }).then(() => {
+                        res.json({ success: "[+] Relay successfully added" })
+                    }).catch(err => {
+                        res.json({ error: '[!] Something Wrong in server' }).status(501)
+                    })
                 }
             })
         })
@@ -147,10 +160,13 @@ route.post('/delete', (req,res) => {
                 if(err){
                     res.status(501)
                     res.json({ error: '[!] Something Wrong in server' })
+                }else{
+                    firebase.database().ref('/relay/' + token.username + "/" + req.body.id).remove().then(() => {
+                        res.json({ success: '[+] Successfully deleting the relay' })
+                    }).catch(err => {
+                        res.json({ error: '[!] Something Wrong in server' }).status(501)
+                    })
                 }
-
-                res.status(200)
-                res.json({ success: '[+] Successfully deleting the relay' })
             })
         })
     })

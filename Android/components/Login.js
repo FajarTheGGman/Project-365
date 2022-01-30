@@ -72,8 +72,8 @@ export default class Login extends Component{
 
                 <View style={{ backgroundColor: 'white', padding: 15, marginTop: 25, elevation: 15, borderRadius: 10, alignItems: 'center', paddingLeft: 35, paddingRight: 35 }}>
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Login</Text>
-                    <TextInput placeholder="Username" style={{ marginTop: 15 }} onChangeText={(value) => this.setState({ username: value })} />
-                    <TextInput placeholder="Password" style={{ marginTop: 5 }} onChangeText={(value) => this.setState({ password: value })} secureTextEntry={true} />
+                    <TextInput placeholder="Username" style={{ marginTop: 15, padding: 10, backgroundColor: '#ededed', width: 120, borderRadius: 10  }} onChangeText={(value) => this.setState({ username: value })} />
+                    <TextInput placeholder="Password" style={{ marginTop: 10, padding: 10, backgroundColor: '#ededed', width: 120, borderRadius: 10 }} onChangeText={(value) => this.setState({ password: value })} secureTextEntry={true} />
                     <TouchableOpacity style={{ marginTop: 15 }} onPress={() => this.login()}>
                         <Text style={{ color: 'white', backgroundColor: 'black', elevation: 15, borderRadius: 5, padding: 5 }}>Login</Text>
                     </TouchableOpacity>
