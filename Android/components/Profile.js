@@ -26,7 +26,9 @@ export default class ProfileOffline extends Component{
             machineDetailsIP: null,
             machineDetailsStatus: null,
             machineIndex: null,
-            machineStatus: null
+            machineStatus: null,
+            io_username: null,
+            io_key: '',
         }
 
         this.data = [
@@ -83,6 +85,13 @@ export default class ProfileOffline extends Component{
             }
         })
 
+        AsyncStorage.getItem('io_key').then(data => {
+            this.setState({ io_key: data })
+        })
+
+        AsyncStorage.getItem('io_username').then(data => {
+            this.setState({ io_username: data })
+        })
     }
 
     refresh(){
@@ -202,29 +211,29 @@ export default class ProfileOffline extends Component{
                     </View>
                 </View>
 
-                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 17, marginTop: 37 }}>Your Machine</Text>
-
-                <TouchableOpacity style={{ marginTop: 10, backgroundColor: 'black', padding: 10, borderRadius: 5 }} onPress={() => this.setState({ addmachine: true })}>
-                    <Text style={{ fontWeight: 'bold', color: 'white' }}>Add Machine</Text>
-                </TouchableOpacity>
-
-                <View style={{ marginTop: 10, padding: 15, borderRadius: 15, elevation: 15, backgroundColor: 'black', flexDirection: 'column', alignItems: 'center' }}>
-                    <Text style={{ color: 'white', fontWeight: 'bold' }}>List Machine</Text>
-                    <View style={{ marginTop: 10, flexDirection: 'column' }}>
-                        {this.state.machine.length == 0 ? <View>
-                            <Text style={{ color: 'white' }}>There is no machine</Text>
-                            <Text style={{ color: 'white' }}>Plz add the machine!</Text>
-                                </View> : this.state.machine.map((x,y) => {
-                        return <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', width: 150, marginTop: 10 }} onPress={() => this.machineDetails(x.name, x.ip, y, x.status)}>
+                <View style={{ marginTop: 40, padding: 15, borderRadius: 15, elevation: 15, backgroundColor: 'black', flexDirection: 'column', alignItems: 'center' }}>
+                    <Icon name='flower-outline' size={30} color="white" />
+                    <Text style={{ color: 'white', fontWeight: 'bold' }}>Adafruit Configuration</Text>
+                    <View style={{ marginTop: 20, flexDirection: 'column' }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <View>
-                                <Text style={{ color: 'white' }}>{x.name}</Text>
+                                <Text style={{ fontWeight: 'bold', color: 'white' }}>IO_Username</Text>
                             </View>
 
                             <View>
-                                {x.status == 'ONLINE' ? <Text style={{ color: 'white', color: 'green' }}>{x.status}</Text> : <Text style={{ color: 'white', color: 'red' }}>{x.status}</Text> }
+                                <Text style={{ fontWeight: 'bold', color: 'green', marginLeft: 50 }}>{this.state.io_username}</Text>
                             </View>
-                        </TouchableOpacity>
-                        })}
+                        </View>
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
+                            <View>
+                                <Text style={{ fontWeight: 'bold', color: 'white' }}>IO_Key</Text>
+                            </View>
+
+                            <View>
+                                <Text style={{ fontWeight: 'bold', color: 'green', marginLeft: 50 }}>{this.state.io_key.length > 15 ? this.state.io_key.slice(0, 15)+'...' : this.state.io_key}</Text>
+                            </View>
+                        </View>
                     </View>
                 </View>
             </ScrollView>

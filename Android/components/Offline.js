@@ -354,8 +354,9 @@ class Settings extends Component{
     }
 
     Online(){
+        AsyncStorage.setItem('mode', 'online')
         this.props.navigation.dispatch(
-            StackActions.replace('Banner', { type: 'online' })
+            StackActions.replace('Home', { type: 'online' })
         )
     }
 

@@ -66,6 +66,16 @@ export default class ProfileOffline extends Component{
             this.setState({ username: data })
         })
 
+        AsyncStorage.getItem('myserver').then(server => {
+            AsyncStorage.getItem('token').then(token => {
+                axios.post(server + 'auth/getall', { token: token, secret: konfigurasi.key }).then(res => {
+                    this.setState({
+                        username: res.data.result.username,
+                        since: res.data.result.since
+                    })
+                })
+            })
+        })
 
         AsyncStorage.getItem('machine').then(data => {
             const parse = JSON.parse(data)
@@ -192,6 +202,7 @@ export default class ProfileOffline extends Component{
 
                         <View style={{ flexDirection: 'column', marginLeft: 25, alignItens: 'center' }}>
                             <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 17 }}>Board</Text>
+                            <Text style={{ marginTop: 10, textAlign: 'center', fontSize: 17, color: 'white' }}>ESP8266</Text>
                         </View>
                     </View>
                 </View>

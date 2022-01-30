@@ -148,7 +148,7 @@ export default class Banner extends Component{
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>You should write down your server</Text>
                         </View>
                         :
-                        <TouchableOpacity style={{ backgroundColor: 'green', padding: 12, paddingLeft: 120, marginTop: 65, paddingRight: 120, borderRadius: 15, elevation: 15 }} onPress={() => this.props.navigation.navigate('Guide')}>
+                        <TouchableOpacity style={{ backgroundColor: 'green', padding: 12, paddingLeft: 110, marginTop: 65, paddingRight: 110, borderRadius: 15, elevation: 15 }} onPress={() => this.props.navigation.navigate('Guide')}>
                             <Text style={{ color: "white", fontWeight: 'bold', fontSize: 17 }}>Online</Text>
                         </TouchableOpacity>
                         }
