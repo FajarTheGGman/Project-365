@@ -1,5 +1,5 @@
 const konfigurasi = {
-    server: "http://192.168.1.12:5000/",
+    server: "https://project-365x.herokuapp.com/",
     key: 'Important',
     version: 'v1.2.5'
 }
