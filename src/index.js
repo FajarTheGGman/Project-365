@@ -1,5 +1,4 @@
 const app = require('./app');
-const chalk = require('chalk');
 const jsome = require('jsome');
 const color = require('colors');
 const say = require('yosay')
@@ -9,8 +8,8 @@ console.log(say('Project 365%'))
 
 jsome({
     'Coder': 'Fajar Firdaus',
-    'IG': '@fajar.psd',
-    'Twitter': '@kernel024',
+    'IG': '@FajarTheGGman',
+    'Twitter': '@fajardotpsd',
     'Github': 'FajarTheGGman',
 })
 

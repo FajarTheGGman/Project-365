@@ -34,17 +34,14 @@ export default class Banner extends Component{
                 this.props.navigation.dispatch(
                     StackActions.replace('Offline', { type: 'outside' })
                 )
-            }else if(data == 'outside'){
-                this.props.navigation.dispatch(
-                    StackActions.replace('Offline', { type: 'outside' })
-                )
-            }
-        })
-        AsyncStorage.getItem('token').then(res => {
-            if(res != null){
-                this.props.navigation.dispatch(
-                    StackActions.replace('Home')
-                )
+            }else if(data == 'online'){
+                AsyncStorage.getItem('token').then(res => {
+                    if(res != null){
+                        this.props.navigation.dispatch(
+                            StackActions.replace('Home')
+                        )
+                    }
+                })
             }
         })
     }

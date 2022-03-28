@@ -22,12 +22,22 @@ export default class Login extends Component{
             this.setState({ server: data })
         })
 
-        AsyncStorage.getItem('token').then(data => {
-            if(!data){
 
-            }else{
+        // make asyncstorage get item 'mode'
+        await AsyncStorage.getItem('mode').then(data => {
+            if(data == 'online'){
+                AsyncStorage.getItem('token').then(data => {
+                    if(!data){
+
+                    }else{
+                        this.props.navigation.dispatch(
+                            StackActions.replace('Home')
+                        )
+                    }
+                })
+            }else if(data == 'offline'){
                 this.props.navigation.dispatch(
-                    StackActions.replace('Home')
+                    StackActions.replace('Offline')
                 )
             }
         })
