@@ -390,7 +390,7 @@ class Settings extends Component{
                 <Modal isVisible={this.state.authors}>
                     <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                         <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 5, alignItems: 'center', }}>
-                            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Authors</Text>
+                            <Text style={{ fontWeight: 'bold', fontSize: 17 }}>Coders</Text>
                             
                             <Image source={require('../assets/icons/author.jpeg')} style={{ width: 100, height: 100, borderRadius: 10, marginTop: 10 }} />
 
@@ -796,7 +796,7 @@ class HomePage extends Component{
             axios.get('http://wttr.in/?format=j1').then(res => {
                 this.setState({ weatherStatus: res.data.current_condition[0].weatherDesc[0].value, weatherTemp: res.data.current_condition[0].temp_C + "°" })
                 
-                this.setState({ weatherCondition: 'No Internet', weatherPallete: 'black', weatherFont: 'white' })
+                this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy Normal', weatherPallete: 'white', weatherFont: 'black' })
 
                 if(this.state.weatherStatus.match(/Thunder/i)){
                     this.setState({ weather: require('../assets/weather/thunder.png'), weatherCondition: "Thunder", weatherPallete: 'black', weatherFont: 'white' })
@@ -816,6 +816,8 @@ class HomePage extends Component{
                         weatherFont: 'black'
                     })
                 }
+            }).catch(err => {
+                this.setState({ weather: require('../assets/weather/cloudy.png'), weatherCondition: 'Cloudy Normal', weatherPallete: 'white', weatherFont: 'black' })
             })
 
         let waktu = new Date();

@@ -412,26 +412,26 @@ class Settings extends Component{
                 </View>
 
                 <ScrollView style={{ marginTop: 35 }}>
-                    <View style={{ flexDirection: 'column' }}>
-                        <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Offline()}>
-                            <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'red' }}> OFFLINE</Text></Text>
-                        </TouchableOpacity>
+                    <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <View>
+                            <TouchableOpacity style={{ marginLeft: -2, borderTopWidth: 2, borderBottomWidth: 2, borderColor: 'black', backgroundColor: 'black', }} onPress={() => this.Offline()}>
+                                <Text style={{ color: 'white', paddingTop: 15, paddingBottom: 15, marginLeft: 15, fontWeight: 'bold', elevation: 15 }}>📡 Switch To <Text style={{ color: 'red' }}> OFFLINE</Text></Text>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
-                            <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ phone_status: true })}>
+                                <Text style={{ paddingTop: 15, paddingBottom: 15, color: 'white', fontWeight: 'bold', marginLeft: 12, elevation: 15 }}>📱My Phone Status</Text>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ settings_network: true })}>
-                            <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ settings_network: true })}>
+                                <Text style={{ color: 'white', fontWeight: 'bold', elevation: 15, paddingTop: 15, paddingBottom: 15, marginLeft: 15 }}>📶  Check Connection Status</Text>
+                            </TouchableOpacity>
+                        </View>
 
-                        <TouchableOpacity style={{ backgroundColor: 'black', marginTop: 15 }} onPress={() => this.setState({ iot_board: true })}>
-                            <Text style={{ marginLeft: 15, paddingBottom: 15, paddingTop: 15, color: 'white', fontWeight: 'bold' }}>⚒️ IOT Board IP</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={{ marginTop: 160, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
-                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
-                        </TouchableOpacity>
+                        <View>
+                            <TouchableOpacity style={{ marginTop: 270, backgroundColor: 'red', elevation: 15 }} onPress={() => this.logout()}>
+                                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 17, paddingTop: 15, marginLeft: 15, paddingBottom: 15 }}>Logout</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </ScrollView>
             </View>
@@ -512,7 +512,7 @@ class HomePage extends Component{
             relay_url: null,
             internet: false,
             error_server: false,
-            username: null,
+            username: '',
             waktu: null,
             dev: "{ Coder: Fajar Firdaus }",
             swipeRelay: false,
@@ -1583,7 +1583,7 @@ class HomePage extends Component{
                         <TouchableOpacity onPress={() => this.refresh()}>
                             <Text style={{ color: '#EDEDED', fontWeight: 'bold', fontSize: 25 }}>Project 365%</Text>
                         </TouchableOpacity>
-                        <Text style={{ color: '#ededed' }}>{this.state.waktu} {this.state.username}</Text>
+                        <Text style={{ color: '#ededed' }}>{this.state.waktu} {this.state.username.length > 5 ? this.state.username.slice(0, 5) : this.state.username}</Text>
 
                     </View>
 
