@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const db = require('mongoose');
-const chalk = require('chalk');
+const colors = require('colors');
 const file = require('express-fileupload')
 
 const routeAuth = require('./routes/auth');
@@ -26,7 +26,7 @@ try{
           useUnifiedTopology: true,
     })
 }catch(err){
-    console.log(chalk.bgRed("[!] Error Connecting to database"))
+    console.log(colors.red("[!] Error Connecting to database"))
 }
 
 app.use(file())
