@@ -26,7 +26,7 @@
     "dotenv": "*",
     "express": "*",
     "express-fileupload": "*",
-    "firebase": "7.24.0",
+    "firebase": "10.9.0",
     "helmet": "*",
     "jsome": "*",
     "jsonwebtoken": "*",
